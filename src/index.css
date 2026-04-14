@@ -1,0 +1,70 @@
+:root {
+  --text: #333;
+  --text-h: #111;
+  --bg: #fff;
+  --border: #e0e0e0;
+  --accent: #646cff;
+  --accent-light: rgba(100, 108, 255, 0.1);
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 16px/1.6 var(--sans);
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #b0b0b0;
+    --text-h: #f0f0f0;
+    --bg: #1a1a2e;
+    --border: #333;
+    --accent: #818cf8;
+    --accent-light: rgba(129, 140, 248, 0.15);
+  }
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+h1, h2, h3 {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0 0 8px;
+}
+
+a {
+  color: var(--accent);
+}
+
+button {
+  font-family: var(--sans);
+  font-size: 1rem;
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--accent-light);
+  color: var(--text-h);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
