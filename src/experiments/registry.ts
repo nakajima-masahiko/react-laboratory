@@ -14,4 +14,10 @@ export const experiments: ExperimentEntry[] = [
     description: 'useStateの基本的な使い方を確認するシンプルなカウンター',
     component: lazy(() => import('./counter')),
   },
+  {
+    id: 'dialog-laboratory',
+    title: 'Dialog Laboratory',
+    description: '各種ダイアログの開閉・確認パターンを試す実験室',
+    component: lazy(() => import('./dialog-laboratory')),
+  },
 ];
