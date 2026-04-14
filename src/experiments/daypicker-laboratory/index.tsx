@@ -18,8 +18,15 @@ type DayPickerModule = {
   DayPicker: ComponentType<DayPickerProps>;
 };
 
+type ImportedDayPickerModule = {
+  DayPicker?: ComponentType<DayPickerProps>;
+  default?: ComponentType<DayPickerProps> | { DayPicker?: ComponentType<DayPickerProps> };
+};
+
 const DAY_PICKER_JS_URL = 'https://esm.sh/react-day-picker@9.11.1?bundle';
 const DAY_PICKER_CSS_URL = 'https://esm.sh/react-day-picker@9.11.1/style.css';
+
+let dayPickerModulePromise: Promise<DayPickerModule> | null = null;
 
 function loadDayPickerCss() {
   if (document.querySelector('link[data-daypicker="true"]')) {
@@ -31,6 +38,29 @@ function loadDayPickerCss() {
   link.href = DAY_PICKER_CSS_URL;
   link.dataset.daypicker = 'true';
   document.head.appendChild(link);
+}
+
+function resolveDayPicker(mod: ImportedDayPickerModule): DayPickerModule {
+  const dayPickerFromNamed = mod.DayPicker;
+  const dayPickerFromDefaultObject =
+    typeof mod.default === 'object' && mod.default !== null ? (mod.default as { DayPicker?: ComponentType<DayPickerProps> }).DayPicker : undefined;
+  const dayPickerFromDefault = typeof mod.default === 'function' ? (mod.default as ComponentType<DayPickerProps>) : undefined;
+
+  const DayPickerComponent = dayPickerFromNamed ?? dayPickerFromDefaultObject ?? dayPickerFromDefault;
+
+  if (!DayPickerComponent) {
+    throw new Error('DayPicker コンポーネントが見つかりませんでした。');
+  }
+
+  return { DayPicker: DayPickerComponent };
+}
+
+function getDayPickerModule() {
+  if (!dayPickerModulePromise) {
+    dayPickerModulePromise = import(/* @vite-ignore */ DAY_PICKER_JS_URL).then((mod) => resolveDayPicker(mod as ImportedDayPickerModule));
+  }
+
+  return dayPickerModulePromise;
 }
 
 function formatDate(value?: Date) {
@@ -55,15 +85,26 @@ function DayPickerLaboratory() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   useEffect(() => {
+    let cancelled = false;
+
     loadDayPickerCss();
 
-    void import(/* @vite-ignore */ DAY_PICKER_JS_URL)
-      .then((mod) => {
-        setModule({ DayPicker: mod.DayPicker as ComponentType<DayPickerProps> });
+    void getDayPickerModule()
+      .then((loadedModule) => {
+        if (!cancelled) {
+          setModule(loadedModule);
+          setError(null);
+        }
       })
       .catch((importError: unknown) => {
-        setError(importError instanceof Error ? importError.message : '読み込みに失敗しました');
+        if (!cancelled) {
+          setError(importError instanceof Error ? importError.message : '読み込みに失敗しました');
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const selectedCount = useMemo(() => multipleDates?.length ?? 0, [multipleDates]);
