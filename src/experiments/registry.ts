@@ -15,6 +15,12 @@ export const experiments: ExperimentEntry[] = [
     component: lazy(() => import('./counter')),
   },
   {
+    id: 'daypicker-laboratory',
+    title: 'DayPicker Laboratory',
+    description: 'React DayPicker で単一・複数・期間の日付取得を試す実験室',
+    component: lazy(() => import('./daypicker-laboratory')),
+  },
+  {
     id: 'dialog-laboratory',
     title: 'Dialog Laboratory',
     description: '各種ダイアログの開閉・確認パターンを試す実験室',

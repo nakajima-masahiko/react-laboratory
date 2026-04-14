@@ -1,0 +1,21 @@
+.daypicker-lab {
+  display: grid;
+  gap: 24px;
+}
+
+.picker-section {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 20%);
+}
+
+.picker-section p {
+  margin-bottom: 0;
+}
+
+.rdp-root {
+  --rdp-accent-color: var(--accent);
+  --rdp-day-width: 38px;
+  --rdp-day-height: 38px;
+}
