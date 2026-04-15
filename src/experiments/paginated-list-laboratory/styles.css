@@ -1,0 +1,268 @@
+/* ============================================================
+   Paginated List Laboratory – スタイル
+   ============================================================ */
+
+.pag-lab {
+  max-width: 860px;
+  font-size: 0.95rem;
+}
+
+.pag-intro {
+  color: #555;
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+
+/* ──────────────────────────────────────────────
+   セクション
+   ────────────────────────────────────────────── */
+
+.pag-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  background: #fff;
+}
+
+.pag-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.pag-description {
+  color: #666;
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+
+/* ──────────────────────────────────────────────
+   ツールバー
+   ────────────────────────────────────────────── */
+
+.pag-toolbar {
+  margin-bottom: 0.75rem;
+}
+
+.pag-toolbar--row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-size-label {
+  font-size: 0.875rem;
+  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.page-size-select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.search-input:focus,
+.page-size-select:focus {
+  outline: 2px solid #4f8ef7;
+  outline-offset: 1px;
+}
+
+/* ──────────────────────────────────────────────
+   テーブル
+   ────────────────────────────────────────────── */
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.pag-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.pag-table thead {
+  background: #f5f7fa;
+}
+
+.pag-table th {
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.pag-table td {
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+}
+
+.pag-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pag-table tbody tr:hover {
+  background: #f9fbff;
+}
+
+/* ソート可能列 */
+.pag-table--sortable .col-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.pag-table--sortable .col-sortable:hover {
+  background: #edf1f7;
+}
+
+.sort-icon {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.75rem;
+}
+
+.sort-icon--none {
+  color: #bbb;
+}
+
+.sort-icon--active {
+  color: #4f8ef7;
+}
+
+/* 列幅 */
+.col-id {
+  width: 3rem;
+  text-align: right;
+  color: #999;
+}
+
+.col-email {
+  color: #666;
+  font-size: 0.825rem;
+}
+
+.col-price {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ──────────────────────────────────────────────
+   バッジ
+   ────────────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge--active {
+  background: #e6f4ea;
+  color: #2e7d32;
+}
+
+.badge--inactive {
+  background: #fce8e8;
+  color: #c62828;
+}
+
+/* ──────────────────────────────────────────────
+   ページネーション
+   ────────────────────────────────────────────── */
+
+.paginator {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.paginator-summary {
+  font-size: 0.825rem;
+  color: #777;
+}
+
+.paginator-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.paginator-btn {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.4rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.paginator-btn:hover:not(:disabled) {
+  background: #f0f4ff;
+  border-color: #4f8ef7;
+  color: #1a5fd4;
+}
+
+.paginator-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.paginator-btn--active {
+  background: #4f8ef7;
+  border-color: #4f8ef7;
+  color: #fff;
+  font-weight: 600;
+}
+
+.paginator-btn--active:hover {
+  background: #3a7de0 !important;
+  border-color: #3a7de0 !important;
+  color: #fff !important;
+}
+
+.paginator-ellipsis {
+  color: #aaa;
+  padding: 0 0.2rem;
+  line-height: 2rem;
+}
+
+/* 空状態 */
+.pag-empty {
+  text-align: center;
+  color: #999;
+  padding: 2rem 0;
+  font-size: 0.9rem;
+}
