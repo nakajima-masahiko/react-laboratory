@@ -16,8 +16,8 @@ export const experiments: ExperimentEntry[] = [
   },
   {
     id: 'daypicker-laboratory',
-    title: 'DayPicker Laboratory',
-    description: 'React DayPicker で単一・複数・期間の日付取得を試す実験室',
+    title: 'Date Picker Laboratory',
+    description: 'ネイティブ date input で単一・複数・期間の日付取得を試す実験室',
     component: lazy(() => import('./daypicker-laboratory')),
   },
   {
