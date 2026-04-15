@@ -14,8 +14,29 @@
   margin-bottom: 0;
 }
 
-.rdp-root {
-  --rdp-accent-color: var(--accent);
-  --rdp-day-width: 38px;
-  --rdp-day-height: 38px;
+.multiple-input-row {
+  display: grid;
+  gap: 8px;
+}
+
+.helper-text {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.selected-list {
+  margin-top: 8px;
+  padding-left: 20px;
+}
+
+.range-inputs {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 12px;
+}
+
+.range-inputs label {
+  display: grid;
+  gap: 6px;
 }
