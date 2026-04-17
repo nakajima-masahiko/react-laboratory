@@ -1,6 +1,8 @@
+import { useEffect, useMemo, useState } from 'react';
 import {
   ComposedChart,
   Bar,
+  Cell,
   Line,
   XAxis,
   YAxis,
@@ -8,8 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { fxData, type OhlcBar } from './data';
-import CandlestickBar from './CandlestickBar';
+import { createNextFxBar, fxData, type OhlcBar } from './data';
 import type { ChartTheme } from './themes';
 import type { ChartType } from './index';
 
@@ -17,12 +18,6 @@ interface ChartRow extends OhlcBar {
   openClose: [number, number];
   lowHigh: [number, number];
 }
-
-const chartData: ChartRow[] = fxData.map((d) => ({
-  ...d,
-  openClose: [d.open, d.close],
-  lowHigh: [d.low, d.high],
-}));
 
 interface TooltipEntry {
   payload?: ChartRow;
@@ -72,8 +67,33 @@ interface Props {
 }
 
 function FxChart({ chartType, theme }: Props) {
-  const domainMin = Math.min(...fxData.map((d) => d.low)) - 0.5;
-  const domainMax = Math.max(...fxData.map((d) => d.high)) + 0.5;
+  const [data, setData] = useState<OhlcBar[]>(fxData);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setData((prev) => {
+        const lastBar = prev.at(-1);
+        const basePrice = lastBar?.close ?? 150;
+        const nextBar = createNextFxBar(basePrice, new Date());
+        return [...prev.slice(-59), nextBar];
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const chartData: ChartRow[] = useMemo(
+    () =>
+      data.map((d) => ({
+        ...d,
+        openClose: [d.open, d.close],
+        lowHigh: [d.low, d.high],
+      })),
+    [data],
+  );
+
+  const domainMin = Math.min(...data.map((d) => d.low)) - 0.08;
+  const domainMax = Math.max(...data.map((d) => d.high)) + 0.08;
 
   return (
     <div
@@ -114,17 +134,17 @@ function FxChart({ chartType, theme }: Props) {
           />
 
           {chartType === 'candlestick' ? (
-            <Bar
-              dataKey="openClose"
-              shape={(props: object) => (
-                <CandlestickBar
-                  {...(props as Parameters<typeof CandlestickBar>[0])}
-                  bullColor={theme.bullColor}
-                  bearColor={theme.bearColor}
-                />
-              )}
-              isAnimationActive={false}
-            />
+            <>
+              <Bar dataKey="lowHigh" barSize={2} fill={theme.axisColor} isAnimationActive={false} />
+              <Bar dataKey="openClose" barSize={9} isAnimationActive={false}>
+                {chartData.map((entry) => (
+                  <Cell
+                    key={`${entry.time}-${entry.open}`}
+                    fill={entry.close >= entry.open ? theme.bullColor : theme.bearColor}
+                  />
+                ))}
+              </Bar>
+            </>
           ) : (
             <Line
               type="monotone"
