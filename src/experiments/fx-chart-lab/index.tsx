@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ChartControls from './ChartControls';
 import FxChart from './FxChart';
+import PromptPanel from './PromptPanel';
 import { THEMES, type ThemeId } from './themes';
 import './styles.css';
 
@@ -25,6 +26,8 @@ function FxChartLab() {
       />
 
       <FxChart chartType={chartType} theme={theme} />
+
+      <PromptPanel chartType={chartType} theme={theme} />
     </div>
   );
 }
