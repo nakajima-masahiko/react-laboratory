@@ -38,4 +38,10 @@ export const experiments: ExperimentEntry[] = [
     description: 'Radix UI Toggle Group で丸・三角・四角を選んでキャンバスに描画する実験',
     component: lazy(() => import('./toggle-shape-drawing')),
   },
+  {
+    id: 'timer-progress-toast',
+    title: 'Timer Progress Toast',
+    description: 'Radix UI Progress でプログレスバー付きタイマーを表示し、終了を Toast で通知する実験',
+    component: lazy(() => import('./timer-progress-toast')),
+  },
 ];
