@@ -27,7 +27,7 @@ function FxChartLab() {
 
       <FxChart chartType={chartType} theme={theme} />
 
-      <PromptPanel chartType={chartType} theme={theme} />
+      <PromptPanel />
     </div>
   );
 }
