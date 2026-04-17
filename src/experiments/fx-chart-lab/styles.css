@@ -96,3 +96,54 @@
   padding: 12px 4px 8px;
   transition: background 0.3s, border-color 0.3s;
 }
+
+/* Prompt panel */
+.fxc-prompt {
+  margin-top: 20px;
+  border: 1px solid var(--border, #333);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg, transparent);
+}
+
+.fxc-prompt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border, #333);
+  background: rgba(127, 127, 127, 0.08);
+}
+
+.fxc-copy-btn {
+  padding: 5px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border, #333);
+  border-radius: 6px;
+  background: var(--accent, #4fc3f7);
+  color: #000;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.fxc-copy-btn:hover {
+  opacity: 0.85;
+}
+
+.fxc-copy-btn:active {
+  transform: translateY(1px);
+}
+
+.fxc-prompt-body {
+  margin: 0;
+  padding: 12px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--text, #ccc);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 320px;
+  overflow: auto;
+}
