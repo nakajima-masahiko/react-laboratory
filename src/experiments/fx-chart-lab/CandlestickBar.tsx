@@ -5,29 +5,37 @@ interface Props {
   y?: number;
   width?: number;
   height?: number;
-  low?: number;
-  high?: number;
   openClose?: [number, number];
+  payload?: {
+    low: number;
+    high: number;
+  };
+  yAxis?: {
+    scale?: (value: number) => number;
+  };
   bullColor: string;
   bearColor: string;
 }
 
 function CandlestickBar(props: Props) {
-  const { x = 0, width = 0, low = 0, high = 0, openClose, bullColor, bearColor } = props;
+  const { x = 0, y = 0, width = 0, height = 0, openClose, payload, yAxis, bullColor, bearColor } = props;
 
   if (!openClose) return null;
 
   const [open, close] = openClose;
   const isBull = close >= open;
   const color = isBull ? bullColor : bearColor;
-  const bodyY = Math.min(open, close);
-  const bodyHeight = Math.abs(open - close) || 1;
+  const bodyY = y;
+  const bodyHeight = Math.max(height, 1);
   const cx = x + width / 2;
+  const scale = yAxis?.scale;
+  const highY = payload && scale ? scale(payload.high) : y;
+  const lowY = payload && scale ? scale(payload.low) : y + height;
 
   return (
     <g>
       {/* wick */}
-      <line x1={cx} y1={high} x2={cx} y2={low} stroke={color} strokeWidth={1} />
+      <line x1={cx} y1={highY} x2={cx} y2={lowY} stroke={color} strokeWidth={1} />
       {/* body */}
       <Rectangle x={x + 1} y={bodyY} width={width - 2} height={bodyHeight} fill={color} />
     </g>
