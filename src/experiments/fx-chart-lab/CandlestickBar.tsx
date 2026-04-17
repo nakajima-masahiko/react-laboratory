@@ -2,29 +2,31 @@ import type { OhlcBar } from './data';
 
 interface Props {
   x?: number;
+  y?: number;
   width?: number;
+  height?: number;
   payload?: OhlcBar;
-  yAxis?: {
-    scale?: (value: number) => number;
-  };
   bullColor: string;
   bearColor: string;
 }
 
 function CandlestickBar(props: Props) {
-  const { x = 0, width = 0, payload, yAxis, bullColor, bearColor } = props;
-  const scale = yAxis?.scale;
+  const { x = 0, y = 0, width = 0, height = 0, payload, bullColor, bearColor } = props;
 
-  if (!payload || !scale) return null;
+  if (!payload) return null;
 
   const { open, high, low, close } = payload;
   const isBull = close >= open;
   const color = isBull ? bullColor : bearColor;
 
-  const highY = scale(high);
-  const lowY = scale(low);
-  const openY = scale(open);
-  const closeY = scale(close);
+  const range = high - low;
+  const toY = (value: number) =>
+    range === 0 ? y : y + ((high - value) / range) * height;
+
+  const highY = y;
+  const lowY = y + height;
+  const openY = toY(open);
+  const closeY = toY(close);
 
   const cx = x + width / 2;
   const bodyTop = Math.min(openY, closeY);
