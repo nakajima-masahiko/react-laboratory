@@ -6,30 +6,45 @@ export interface OhlcBar {
   close: number;
 }
 
+function formatTimeLabel(date: Date): string {
+  return date.toLocaleTimeString('ja-JP', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
+export function createNextFxBar(prevClose: number, time: Date): OhlcBar {
+  const change = (Math.random() - 0.48) * 0.18;
+  const open = parseFloat(prevClose.toFixed(3));
+  const close = parseFloat((open + change).toFixed(3));
+  const high = parseFloat((Math.max(open, close) + Math.random() * 0.08).toFixed(3));
+  const low = parseFloat((Math.min(open, close) - Math.random() * 0.08).toFixed(3));
+
+  return {
+    time: formatTimeLabel(time),
+    open,
+    high,
+    low,
+    close,
+  };
+}
+
 function generateFxData(): OhlcBar[] {
   const bars: OhlcBar[] = [];
   let price = 150.0;
-  const start = new Date('2024-01-02');
-  for (let i = 0; i < 60; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    const day = d.getDay();
-    if (day === 0 || day === 6) continue;
+  const now = new Date();
+  now.setMilliseconds(0);
 
-    const change = (Math.random() - 0.48) * 1.2;
-    const open = parseFloat(price.toFixed(3));
-    const close = parseFloat((open + change).toFixed(3));
-    const high = parseFloat((Math.max(open, close) + Math.random() * 0.4).toFixed(3));
-    const low = parseFloat((Math.min(open, close) - Math.random() * 0.4).toFixed(3));
-    bars.push({
-      time: `${d.getMonth() + 1}/${d.getDate()}`,
-      open,
-      high,
-      low,
-      close,
-    });
-    price = close;
+  for (let i = 59; i >= 0; i--) {
+    const d = new Date(now);
+    d.setSeconds(now.getSeconds() - i);
+    const nextBar = createNextFxBar(price, d);
+    bars.push(nextBar);
+    price = nextBar.close;
   }
+
   return bars;
 }
 
