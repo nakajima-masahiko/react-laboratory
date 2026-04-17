@@ -39,6 +39,12 @@ export const experiments: ExperimentEntry[] = [
     component: lazy(() => import('./toggle-shape-drawing')),
   },
   {
+    id: 'fx-chart-lab',
+    title: 'FX Chart Lab',
+    description: 'Recharts で FX ダミーデータをローソク足 / ライン切り替え、3カラーテーマ対応で描画する実験',
+    component: lazy(() => import('./fx-chart-lab')),
+  },
+  {
     id: 'timer-progress-toast',
     title: 'Timer Progress Toast',
     description: 'Radix UI Progress でプログレスバー付きタイマーを表示し、終了を Toast で通知する実験',
