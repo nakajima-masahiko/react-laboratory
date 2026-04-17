@@ -1,15 +1,9 @@
-import { Rectangle } from 'recharts';
+import type { OhlcBar } from './data';
 
 interface Props {
   x?: number;
-  y?: number;
   width?: number;
-  height?: number;
-  openClose?: [number, number];
-  payload?: {
-    low: number;
-    high: number;
-  };
+  payload?: OhlcBar;
   yAxis?: {
     scale?: (value: number) => number;
   };
@@ -18,26 +12,30 @@ interface Props {
 }
 
 function CandlestickBar(props: Props) {
-  const { x = 0, y = 0, width = 0, height = 0, openClose, payload, yAxis, bullColor, bearColor } = props;
+  const { x = 0, width = 0, payload, yAxis, bullColor, bearColor } = props;
+  const scale = yAxis?.scale;
 
-  if (!openClose) return null;
+  if (!payload || !scale) return null;
 
-  const [open, close] = openClose;
+  const { open, high, low, close } = payload;
   const isBull = close >= open;
   const color = isBull ? bullColor : bearColor;
-  const bodyY = y;
-  const bodyHeight = Math.max(height, 1);
+
+  const highY = scale(high);
+  const lowY = scale(low);
+  const openY = scale(open);
+  const closeY = scale(close);
+
   const cx = x + width / 2;
-  const scale = yAxis?.scale;
-  const highY = payload && scale ? scale(payload.high) : y;
-  const lowY = payload && scale ? scale(payload.low) : y + height;
+  const bodyTop = Math.min(openY, closeY);
+  const bodyHeight = Math.max(Math.abs(closeY - openY), 1);
+  const bodyX = x + 1;
+  const bodyWidth = Math.max(width - 2, 1);
 
   return (
     <g>
-      {/* wick */}
       <line x1={cx} y1={highY} x2={cx} y2={lowY} stroke={color} strokeWidth={1} />
-      {/* body */}
-      <Rectangle x={x + 1} y={bodyY} width={width - 2} height={bodyHeight} fill={color} />
+      <rect x={bodyX} y={bodyTop} width={bodyWidth} height={bodyHeight} fill={color} />
     </g>
   );
 }

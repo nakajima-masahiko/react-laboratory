@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ComposedChart,
   Bar,
-  Cell,
   Line,
   XAxis,
   YAxis,
@@ -15,12 +14,8 @@ import type { ChartTheme } from './themes';
 import type { ChartType } from './index';
 import CandlestickBar from './CandlestickBar';
 
-interface ChartRow extends OhlcBar {
-  openClose: [number, number];
-}
-
 interface TooltipEntry {
-  payload?: ChartRow;
+  payload?: OhlcBar;
 }
 
 interface TooltipInnerProps {
@@ -82,15 +77,6 @@ function FxChart({ chartType, theme }: Props) {
     return () => window.clearInterval(timer);
   }, []);
 
-  const chartData: ChartRow[] = useMemo(
-    () =>
-      data.map((d) => ({
-        ...d,
-        openClose: [d.open, d.close],
-      })),
-    [data],
-  );
-
   const domainMin = Math.min(...data.map((d) => d.low)) - 0.08;
   const domainMax = Math.max(...data.map((d) => d.high)) + 0.08;
 
@@ -100,7 +86,7 @@ function FxChart({ chartType, theme }: Props) {
       style={{ background: theme.bg, borderColor: theme.axisColor }}
     >
       <ResponsiveContainer width="100%" height={380}>
-        <ComposedChart data={chartData} margin={{ top: 10, right: 16, bottom: 0, left: 10 }}>
+        <ComposedChart data={data} margin={{ top: 10, right: 16, bottom: 0, left: 10 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={theme.gridColor} />
           <XAxis
             dataKey="time"
@@ -134,18 +120,11 @@ function FxChart({ chartType, theme }: Props) {
 
           {chartType === 'candlestick' ? (
             <Bar
-              dataKey="openClose"
+              dataKey="high"
               barSize={9}
               isAnimationActive={false}
               shape={<CandlestickBar bullColor={theme.bullColor} bearColor={theme.bearColor} />}
-            >
-              {chartData.map((entry) => (
-                <Cell
-                  key={`${entry.time}-${entry.open}`}
-                  fill={entry.close >= entry.open ? theme.bullColor : theme.bearColor}
-                />
-              ))}
-            </Bar>
+            />
           ) : (
             <Line
               type="monotone"
