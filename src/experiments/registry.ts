@@ -32,4 +32,10 @@ export const experiments: ExperimentEntry[] = [
     description: '固定サイズ・ページサイズ切り替え・検索＆ソート付きのページング一覧表を試す実験室',
     component: lazy(() => import('./paginated-list-laboratory')),
   },
+  {
+    id: 'toggle-shape-drawing',
+    title: 'Toggle Shape Drawing',
+    description: 'Radix UI Toggle Group で丸・三角・四角を選んでキャンバスに描画する実験',
+    component: lazy(() => import('./toggle-shape-drawing')),
+  },
 ];
