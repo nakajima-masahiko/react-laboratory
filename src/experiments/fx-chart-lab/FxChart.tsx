@@ -7,6 +7,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
 import { createNextFxBar, fxData, type OhlcBar } from './data';
@@ -88,6 +89,10 @@ function FxChart({ chartType, theme }: Props) {
 
   const domainMin = Math.min(...data.map((d) => d.low)) - 0.08;
   const domainMax = Math.max(...data.map((d) => d.high)) + 0.08;
+  const latestClose = data.at(-1)?.close;
+
+  const Y_AXIS_WIDTH = 62;
+  const HIGHLIGHT_COLOR = '#ff9800';
 
   return (
     <div
@@ -95,7 +100,7 @@ function FxChart({ chartType, theme }: Props) {
       style={{ background: theme.bg, borderColor: theme.axisColor }}
     >
       <ResponsiveContainer width="100%" height={380}>
-        <ComposedChart data={chartData} margin={{ top: 10, right: 16, bottom: 0, left: 10 }}>
+        <ComposedChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 10 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={theme.gridColor} />
           <XAxis
             dataKey="time"
@@ -105,12 +110,13 @@ function FxChart({ chartType, theme }: Props) {
             interval={4}
           />
           <YAxis
+            orientation="right"
             domain={[domainMin, domainMax]}
             tick={{ fill: theme.tickColor, fontSize: 11 }}
             axisLine={{ stroke: theme.axisColor }}
             tickLine={{ stroke: theme.axisColor }}
             tickFormatter={(v: number) => v.toFixed(2)}
-            width={62}
+            width={Y_AXIS_WIDTH}
           />
           <Tooltip
             content={(props) => {
@@ -126,6 +132,45 @@ function FxChart({ chartType, theme }: Props) {
               );
             }}
           />
+
+          {latestClose !== undefined && (
+            <ReferenceLine
+              y={latestClose}
+              stroke={HIGHLIGHT_COLOR}
+              strokeDasharray="4 4"
+              strokeWidth={1}
+              ifOverflow="extendDomain"
+              label={(labelProps: { viewBox?: { x?: number; y?: number; width?: number } }) => {
+                const vb = labelProps.viewBox;
+                if (!vb) return <g />;
+                const lineX = (vb.x ?? 0) + (vb.width ?? 0);
+                const lineY = vb.y ?? 0;
+                const boxHeight = 18;
+                return (
+                  <g>
+                    <rect
+                      x={lineX}
+                      y={lineY - boxHeight / 2}
+                      width={Y_AXIS_WIDTH}
+                      height={boxHeight}
+                      fill={HIGHLIGHT_COLOR}
+                    />
+                    <text
+                      x={lineX + Y_AXIS_WIDTH / 2}
+                      y={lineY}
+                      fill="#ffffff"
+                      fontSize={11}
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                    >
+                      {latestClose.toFixed(3)}
+                    </text>
+                  </g>
+                );
+              }}
+            />
+          )}
 
           {chartType === 'candlestick' ? (
             <Bar
