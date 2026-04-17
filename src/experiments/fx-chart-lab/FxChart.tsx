@@ -13,10 +13,10 @@ import {
 import { createNextFxBar, fxData, type OhlcBar } from './data';
 import type { ChartTheme } from './themes';
 import type { ChartType } from './index';
+import CandlestickBar from './CandlestickBar';
 
 interface ChartRow extends OhlcBar {
   openClose: [number, number];
-  lowHigh: [number, number];
 }
 
 interface TooltipEntry {
@@ -87,7 +87,6 @@ function FxChart({ chartType, theme }: Props) {
       data.map((d) => ({
         ...d,
         openClose: [d.open, d.close],
-        lowHigh: [d.low, d.high],
       })),
     [data],
   );
@@ -134,17 +133,19 @@ function FxChart({ chartType, theme }: Props) {
           />
 
           {chartType === 'candlestick' ? (
-            <>
-              <Bar dataKey="lowHigh" barSize={2} fill={theme.axisColor} isAnimationActive={false} />
-              <Bar dataKey="openClose" barSize={9} isAnimationActive={false}>
-                {chartData.map((entry) => (
-                  <Cell
-                    key={`${entry.time}-${entry.open}`}
-                    fill={entry.close >= entry.open ? theme.bullColor : theme.bearColor}
-                  />
-                ))}
-              </Bar>
-            </>
+            <Bar
+              dataKey="openClose"
+              barSize={9}
+              isAnimationActive={false}
+              shape={<CandlestickBar bullColor={theme.bullColor} bearColor={theme.bearColor} />}
+            >
+              {chartData.map((entry) => (
+                <Cell
+                  key={`${entry.time}-${entry.open}`}
+                  fill={entry.close >= entry.open ? theme.bullColor : theme.bearColor}
+                />
+              ))}
+            </Bar>
           ) : (
             <Line
               type="monotone"
