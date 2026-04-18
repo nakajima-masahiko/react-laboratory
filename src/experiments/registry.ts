@@ -50,4 +50,10 @@ export const experiments: ExperimentEntry[] = [
     description: 'Radix UI Progress でプログレスバー付きタイマーを表示し、終了を Toast で通知する実験',
     component: lazy(() => import('./timer-progress-toast')),
   },
+  {
+    id: 'toast-notifications',
+    title: 'Toast Notifications',
+    description: '登録フォームの成功・入力エラー・通信エラーに加え、お知らせや警告など代表的なトースト通知を試す実験',
+    component: lazy(() => import('./toast-notifications')),
+  },
 ];
