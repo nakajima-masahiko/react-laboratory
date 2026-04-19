@@ -56,4 +56,10 @@ export const experiments: ExperimentEntry[] = [
     description: '登録フォームの成功・入力エラー・通信エラーに加え、お知らせや警告など代表的なトースト通知を試す実験',
     component: lazy(() => import('./toast-notifications')),
   },
+  {
+    id: 'theme-switching',
+    title: 'Theme Switching',
+    description: 'CSS カスタムプロパティで Light / Dark / Ocean / Forest / Sunset の5テーマをリアルタイム切り替えする実験',
+    component: lazy(() => import('./theme-switching')),
+  },
 ];
