@@ -1,0 +1,258 @@
+/* notification-switch-laboratory */
+
+.nsw-root {
+  max-width: 600px;
+}
+
+.nsw-lead {
+  line-height: 1.7;
+}
+
+.nsw-section {
+  margin-top: 2rem;
+}
+
+.nsw-section h3 {
+  margin-bottom: 0.75rem;
+}
+
+/* ----- Mode toggle ----- */
+
+.nsw-mode-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nsw-mode-radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.nsw-mode-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.nsw-mode-label:hover {
+  border-color: var(--accent);
+}
+
+.nsw-mode-label--active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* ラジオボタンの見た目を再現するインジケーター */
+.nsw-mode-label::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s;
+  box-sizing: border-box;
+}
+
+.nsw-mode-label--active::before {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--bg);
+}
+
+/* ----- Current mode / fire button ----- */
+
+.nsw-current-mode {
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.nsw-mode-badge {
+  color: var(--accent);
+  margin-left: 0.25rem;
+}
+
+.nsw-btn-primary {
+  padding: 0.6rem 1.4rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.nsw-btn-primary:hover {
+  opacity: 0.85;
+}
+
+/* ----- ResultDialog ----- */
+
+.nsw-dialog {
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.nsw-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.nsw-dialog-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.nsw-dialog-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.nsw-dialog-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.nsw-dialog-message {
+  margin: 0;
+  opacity: 0.75;
+  font-size: 0.95rem;
+}
+
+.nsw-dialog-actions {
+  margin-top: 1.25rem;
+}
+
+/* ----- SuccessToast ----- */
+
+.nsw-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg);
+  border: 1.5px solid #22c55e;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  min-width: 240px;
+  max-width: 340px;
+}
+
+.nsw-toast[data-state='open'] {
+  animation: nsw-slide-in 0.2s ease;
+}
+
+.nsw-toast[data-state='closed'] {
+  animation: nsw-slide-out 0.15s ease forwards;
+}
+
+@keyframes nsw-slide-in {
+  from {
+    transform: translateX(calc(100% + 1.5rem));
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes nsw-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(calc(100% + 1.5rem));
+    opacity: 0;
+  }
+}
+
+.nsw-toast-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nsw-toast-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.nsw-toast-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+  color: var(--text-h);
+}
+
+.nsw-toast-desc {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.nsw-toast-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0;
+  color: var(--text);
+  opacity: 0.45;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.nsw-toast-close:hover {
+  opacity: 1;
+}
+
+.nsw-toast-viewport {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 9999;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

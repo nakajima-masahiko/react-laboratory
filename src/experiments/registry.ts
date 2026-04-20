@@ -62,4 +62,10 @@ export const experiments: ExperimentEntry[] = [
     description: 'CSS カスタムプロパティで Light / Dark / Ocean / Forest / Sunset の5テーマをリアルタイム切り替えする実験',
     component: lazy(() => import('./theme-switching')),
   },
+  {
+    id: 'notification-switch-laboratory',
+    title: 'Notification Switch Laboratory',
+    description: '通知方式を Toast / Dialog で切り替え、notifySuccess() という抽象APIを通じて保存完了通知を発火する実験',
+    component: lazy(() => import('./notification-switch-laboratory')),
+  },
 ];
