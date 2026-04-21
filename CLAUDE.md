@@ -50,3 +50,7 @@ Experiments must not import from other experiments. Shared utilities belong in `
 ## Deployment
 
 GitHub Actions (`.github/workflows/deploy.yml`) builds and deploys to GitHub Pages on every push to `main`. The Vite `base` is set to `/react-laboratory/`.
+
+## ドキュメント化ルール
+
+- 期待通りに動作しないなどの理由でライブラリ調査を行った場合は、同様の調査を後で繰り返して時間を浪費しないよう、調査内容を適切なドキュメントファイルに必ず記録してください。
