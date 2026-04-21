@@ -216,7 +216,7 @@ function CurrencyChartWindowLab() {
               endIndex={endIndex}
               height={34}
               stroke="var(--accent)"
-              travellerWidth={10}
+              travellerWidth={0}
               onChange={(range) => {
                 if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
                   return;

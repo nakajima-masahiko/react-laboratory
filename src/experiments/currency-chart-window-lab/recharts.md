@@ -58,7 +58,7 @@ ResponsiveContainer
 - `dataKey="key"` でユニークキーを基に表示範囲を制御。
 - `startIndex` / `endIndex` はトグルグループで選択した月数 (`visibleMonths`) を反映する形で `state` から算出。
 - `onChange` は「どの端が動いたか」を現在のインデックスと比較して判定し、常に幅が `visibleMonths` に保たれる `startIndex` を計算する。これは `Brush` の内部状態がハンドル操作で変化しても、**プロパティ値が前回と同じであれば再同期しない**ためで、`startIndex` もしくは `endIndex` のいずれかを必ず変化させることで視覚的なリサイズをキャンセルしている（詳細は [`docs/library-notes.md`](../../../docs/library-notes.md#brush-の幅を固定する) を参照）。
-- `travellerWidth={10}` / `height={34}` で操作しやすい UI サイズに調整。
+- `travellerWidth={0}` とし、左右ハンドルのドラッグによるリサイズを無効化。`height={34}` はブラシ本体のドラッグ操作しやすさを維持するために確保。
 
 ## 関連ドキュメント
 
