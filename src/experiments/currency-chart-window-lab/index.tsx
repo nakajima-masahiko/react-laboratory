@@ -133,6 +133,7 @@ function CurrencyChartWindowLab() {
   const maxStartIndex = Math.max(0, data.length - visibleMonths);
   const safeStartIndex = Math.min(startIndex, maxStartIndex);
   const endIndex = Math.min(safeStartIndex + visibleMonths - 1, data.length - 1);
+  const visibleTickKeys = data.slice(safeStartIndex, endIndex + 1).map((row) => row.key);
 
   const handleRangeChange = (value: string) => {
     if (!value) {
@@ -182,6 +183,7 @@ function CurrencyChartWindowLab() {
             <XAxis
               dataKey="key"
               interval={0}
+              ticks={visibleTickKeys}
               tick={{ fill: 'var(--text)', fontSize: 13 }}
               tickFormatter={(value: string) => monthLabelByKey.get(value) ?? ''}
             />
