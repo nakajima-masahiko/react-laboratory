@@ -135,6 +135,7 @@ function CurrencyChartWindowLab() {
   const safeStartIndex = Math.min(startIndex, maxStartIndex);
   const endIndex = Math.min(safeStartIndex + visibleMonths - 1, data.length - 1);
   const visibleTickKeys = data.slice(safeStartIndex, endIndex + 1).map((row) => row.key);
+  const currentMonthLabel = data[safeStartIndex]?.label ?? '';
 
   const handleRangeChange = (value: string) => {
     if (!value) {
@@ -178,6 +179,42 @@ function CurrencyChartWindowLab() {
       </div>
 
       <div className="ccw-wrapper">
+        {isSingleMonthView ? (
+          <div className="ccw-single-month-controls" role="group" aria-label="表示月の移動">
+            <button
+              type="button"
+              className="ccw-nav-button"
+              onClick={() => setStartIndex((prev) => Math.max(0, prev - 1))}
+              disabled={safeStartIndex <= 0}
+            >
+              ← 前月
+            </button>
+
+            <label className="ccw-slider-wrap">
+              <span className="ccw-slider-label">{currentMonthLabel}</span>
+              <input
+                type="range"
+                min={0}
+                max={maxStartIndex}
+                step={1}
+                value={safeStartIndex}
+                onChange={(event) => setStartIndex(Number(event.target.value))}
+                className="ccw-slider"
+                aria-label="表示する月"
+              />
+            </label>
+
+            <button
+              type="button"
+              className="ccw-nav-button"
+              onClick={() => setStartIndex((prev) => Math.min(maxStartIndex, prev + 1))}
+              disabled={safeStartIndex >= maxStartIndex}
+            >
+              次月 →
+            </button>
+          </div>
+        ) : null}
+
         <ResponsiveContainer key={chartNonce} width="100%" height={460}>
           <BarChart data={data} margin={{ top: 8, right: 24, left: 0, bottom: 24 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -211,28 +248,30 @@ function CurrencyChartWindowLab() {
                 animationEasing="ease-out"
               />
             ))}
-            <Brush
-              className="ccw-brush"
-              dataKey="key"
-              startIndex={safeStartIndex}
-              endIndex={endIndex}
-              height={40}
-              stroke="var(--accent)"
-              fill="var(--bg)"
-              fillOpacity={1}
-              travellerWidth={isSingleMonthView ? 10 : 0}
-              onChange={(range) => {
-                if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
-                  return;
-                }
-                const rightEdgeMoved =
-                  range.startIndex === safeStartIndex && range.endIndex !== endIndex;
-                const nextStart = rightEdgeMoved
-                  ? range.endIndex - visibleMonths + 1
-                  : range.startIndex;
-                setStartIndex(Math.max(0, Math.min(nextStart, maxStartIndex)));
-              }}
-            />
+            {!isSingleMonthView ? (
+              <Brush
+                className="ccw-brush"
+                dataKey="key"
+                startIndex={safeStartIndex}
+                endIndex={endIndex}
+                height={40}
+                stroke="var(--accent)"
+                fill="var(--bg)"
+                fillOpacity={1}
+                travellerWidth={0}
+                onChange={(range) => {
+                  if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
+                    return;
+                  }
+                  const rightEdgeMoved =
+                    range.startIndex === safeStartIndex && range.endIndex !== endIndex;
+                  const nextStart = rightEdgeMoved
+                    ? range.endIndex - visibleMonths + 1
+                    : range.startIndex;
+                  setStartIndex(Math.max(0, Math.min(nextStart, maxStartIndex)));
+                }}
+              />
+            ) : null}
           </BarChart>
         </ResponsiveContainer>
       </div>

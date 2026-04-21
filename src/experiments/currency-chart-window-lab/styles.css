@@ -60,6 +60,50 @@
   padding: 16px 8px 8px;
 }
 
+.ccw-single-month-controls {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 0 8px 14px;
+}
+
+.ccw-nav-button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  padding: 8px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ccw-nav-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ccw-slider-wrap {
+  display: grid;
+  gap: 6px;
+}
+
+.ccw-slider-label {
+  font-size: 0.9rem;
+  color: var(--text);
+  text-align: center;
+}
+
+.ccw-slider {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .ccw-single-month-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ccw-brush .recharts-brush-background {
   fill: color-mix(in oklab, var(--bg), var(--accent) 8%);
 }
