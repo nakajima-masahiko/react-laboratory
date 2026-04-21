@@ -59,3 +59,21 @@
   border-radius: 8px;
   padding: 16px 8px 8px;
 }
+
+.ccw-brush .recharts-brush-background {
+  fill: color-mix(in oklab, var(--bg), var(--accent) 8%);
+}
+
+.ccw-brush .recharts-brush-slide {
+  fill: color-mix(in oklab, var(--accent), #000 8%);
+  fill-opacity: 0.55;
+  stroke: color-mix(in oklab, var(--accent), #000 12%);
+  stroke-width: 2px;
+}
+
+.ccw-brush .recharts-brush-traveller {
+  fill: color-mix(in oklab, var(--accent), #000 18%);
+  fill-opacity: 0.78;
+  stroke: color-mix(in oklab, var(--accent), #000 24%);
+  rx: 3px;
+}

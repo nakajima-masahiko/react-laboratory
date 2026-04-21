@@ -130,6 +130,7 @@ function CurrencyChartWindowLab() {
   }, []);
 
   const visibleMonths = RANGE_OPTIONS.find((option) => option.value === selectedRange)?.months ?? 6;
+  const isSingleMonthView = visibleMonths === 1;
   const maxStartIndex = Math.max(0, data.length - visibleMonths);
   const safeStartIndex = Math.min(startIndex, maxStartIndex);
   const endIndex = Math.min(safeStartIndex + visibleMonths - 1, data.length - 1);
@@ -211,14 +212,15 @@ function CurrencyChartWindowLab() {
               />
             ))}
             <Brush
+              className="ccw-brush"
               dataKey="key"
               startIndex={safeStartIndex}
               endIndex={endIndex}
-              height={34}
-              stroke="#1f4f8f"
-              fill="#2d6fb7"
-              fillOpacity={0.4}
-              travellerWidth={0}
+              height={40}
+              stroke="var(--accent)"
+              fill="var(--bg)"
+              fillOpacity={1}
+              travellerWidth={isSingleMonthView ? 10 : 0}
               onChange={(range) => {
                 if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
                   return;
