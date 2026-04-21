@@ -215,7 +215,9 @@ function CurrencyChartWindowLab() {
               startIndex={safeStartIndex}
               endIndex={endIndex}
               height={34}
-              stroke="var(--accent)"
+              stroke="#1f4f8f"
+              fill="#2d6fb7"
+              fillOpacity={0.4}
               travellerWidth={0}
               onChange={(range) => {
                 if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
