@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from 'react';
 import {
   BarChart,
   Bar,
@@ -37,14 +38,36 @@ const data = MONTHS.map((month, i) => ({
 }));
 
 function CurrencyChart() {
+  const [chartKey, setChartKey] = useState(0);
+
+  const refresh = useCallback(() => setChartKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(timer);
+      timer = setTimeout(refresh, 200);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, [refresh]);
+
   return (
     <div className="cc-root">
-      <h2>通貨別保有量チャート</h2>
-      <p>各月における通貨ごとの保有量推移（ダミーデータ）</p>
+      <div className="cc-header">
+        <div>
+          <h2>通貨別保有量チャート</h2>
+          <p>各月における通貨ごとの保有量推移（ダミーデータ）</p>
+        </div>
+        <button className="cc-refresh-btn" onClick={refresh}>更新</button>
+      </div>
 
       <div className="cc-wrapper">
         <ResponsiveContainer width="100%" height={420}>
-          <BarChart data={data} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
+          <BarChart key={chartKey} data={data} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis dataKey="month" tick={{ fill: 'var(--text)', fontSize: 13 }} />
             <YAxis tick={{ fill: 'var(--text)', fontSize: 13 }} />
