@@ -68,4 +68,10 @@ export const experiments: ExperimentEntry[] = [
     description: '通知方式を Toast / Dialog で切り替え、notifySuccess() という抽象APIを通じて保存完了通知を発火する実験',
     component: lazy(() => import('./notification-switch-laboratory')),
   },
+  {
+    id: 'currency-chart',
+    title: 'Currency Chart',
+    description: 'Recharts の積み上げ棒グラフで12カ月分の通貨別保有量を可視化する実験',
+    component: lazy(() => import('./currency-chart')),
+  },
 ];

@@ -1,0 +1,11 @@
+.cc-root {
+  padding: 16px 0;
+}
+
+.cc-wrapper {
+  margin-top: 24px;
+  background: var(--accent-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 8px 8px;
+}
