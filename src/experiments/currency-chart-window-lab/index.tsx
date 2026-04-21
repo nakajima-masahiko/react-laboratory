@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   BarChart,
-  Brush,
   CartesianGrid,
   Legend,
   ResponsiveContainer,
@@ -130,13 +129,13 @@ function CurrencyChartWindowLab() {
   }, []);
 
   const visibleMonths = RANGE_OPTIONS.find((option) => option.value === selectedRange)?.months ?? 6;
-  const isSingleMonthView = visibleMonths === 1;
   const maxStartIndex = Math.max(0, data.length - visibleMonths);
   const safeStartIndex = Math.min(startIndex, maxStartIndex);
   const endIndex = Math.min(safeStartIndex + visibleMonths - 1, data.length - 1);
-  const chartData = isSingleMonthView ? data.slice(safeStartIndex, endIndex + 1) : data;
-  const visibleTickKeys = chartData.map((row) => row.key);
-  const currentMonthLabel = data[safeStartIndex]?.label ?? '';
+  const chartData = data.slice(safeStartIndex, endIndex + 1);
+  const startLabel = data[safeStartIndex]?.label ?? '';
+  const endLabel = data[endIndex]?.label ?? '';
+  const rangeLabel = visibleMonths === 1 ? startLabel : `${startLabel} 〜 ${endLabel}`;
 
   const handleRangeChange = (value: string) => {
     if (!value) {
@@ -156,7 +155,7 @@ function CurrencyChartWindowLab() {
       <div className="ccw-header">
         <div>
           <h2>通貨別つみたて棒グラフ（36ヶ月データ）</h2>
-          <p>表示期間を切り替えながら、ブラシの左右ドラッグで表示位置を移動できます。</p>
+          <p>表示期間を切り替えながら、スライダーで表示位置を移動できます。</p>
         </div>
 
         <ToggleGroup.Root
@@ -186,7 +185,6 @@ function CurrencyChartWindowLab() {
             <XAxis
               dataKey="key"
               interval={0}
-              ticks={visibleTickKeys}
               tick={{ fill: 'var(--text)', fontSize: 13 }}
               tickFormatter={(value: string) => monthLabelByKey.get(value) ?? ''}
             />
@@ -213,68 +211,44 @@ function CurrencyChartWindowLab() {
                 animationEasing="ease-out"
               />
             ))}
-            {!isSingleMonthView ? (
-              <Brush
-                className="ccw-brush"
-                dataKey="key"
-                startIndex={safeStartIndex}
-                endIndex={endIndex}
-                height={40}
-                stroke="var(--accent)"
-                fill="var(--bg)"
-                fillOpacity={1}
-                travellerWidth={0}
-                onChange={(range) => {
-                  if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
-                    return;
-                  }
-                  const rightEdgeMoved =
-                    range.startIndex === safeStartIndex && range.endIndex !== endIndex;
-                  const nextStart = rightEdgeMoved
-                    ? range.endIndex - visibleMonths + 1
-                    : range.startIndex;
-                  setStartIndex(Math.max(0, Math.min(nextStart, maxStartIndex)));
-                }}
-              />
-            ) : null}
           </BarChart>
         </ResponsiveContainer>
 
-        {isSingleMonthView ? (
-          <div className="ccw-single-month-controls" role="group" aria-label="表示月の移動">
-            <button
-              type="button"
-              className="ccw-nav-button"
-              onClick={() => setStartIndex((prev) => Math.max(0, prev - 1))}
-              disabled={safeStartIndex <= 0}
-            >
-              ← 前月
-            </button>
+        <div className="ccw-controls" role="group" aria-label="表示月の移動">
+          <button
+            type="button"
+            className="ccw-nav-button"
+            onClick={() => setStartIndex((prev) => Math.max(0, prev - 1))}
+            disabled={safeStartIndex <= 0}
+            aria-label="前の月へ"
+          >
+            ‹
+          </button>
 
-            <label className="ccw-slider-wrap">
-              <span className="ccw-slider-label">{currentMonthLabel}</span>
-              <input
-                type="range"
-                min={0}
-                max={maxStartIndex}
-                step={1}
-                value={safeStartIndex}
-                onChange={(event) => setStartIndex(Number(event.target.value))}
-                className="ccw-slider"
-                aria-label="表示する月"
-              />
-            </label>
+          <label className="ccw-slider-wrap">
+            <span className="ccw-slider-label">{rangeLabel}</span>
+            <input
+              type="range"
+              min={0}
+              max={maxStartIndex}
+              step={1}
+              value={safeStartIndex}
+              onChange={(event) => setStartIndex(Number(event.target.value))}
+              className="ccw-slider"
+              aria-label="表示する月"
+            />
+          </label>
 
-            <button
-              type="button"
-              className="ccw-nav-button"
-              onClick={() => setStartIndex((prev) => Math.min(maxStartIndex, prev + 1))}
-              disabled={safeStartIndex >= maxStartIndex}
-            >
-              次月 →
-            </button>
-          </div>
-        ) : null}
+          <button
+            type="button"
+            className="ccw-nav-button"
+            onClick={() => setStartIndex((prev) => Math.min(maxStartIndex, prev + 1))}
+            disabled={safeStartIndex >= maxStartIndex}
+            aria-label="次の月へ"
+          >
+            ›
+          </button>
+        </div>
       </div>
     </div>
   );
