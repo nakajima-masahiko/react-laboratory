@@ -1,5 +1,5 @@
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -101,6 +101,29 @@ function CurrencyChartWindowLab() {
   const data = useMemo(() => buildData(), []);
   const [selectedRange, setSelectedRange] = useState<RangeValue>('6');
   const [startIndex, setStartIndex] = useState<number>(CURRENT_INDEX);
+  const [chartNonce, setChartNonce] = useState(0);
+
+  useEffect(() => {
+    let timerId: number | undefined;
+    const scheduleRefresh = () => {
+      if (timerId !== undefined) {
+        window.clearTimeout(timerId);
+      }
+      timerId = window.setTimeout(() => {
+        setChartNonce((prev) => prev + 1);
+      }, 200);
+    };
+
+    window.addEventListener('resize', scheduleRefresh);
+    window.addEventListener('orientationchange', scheduleRefresh);
+    return () => {
+      window.removeEventListener('resize', scheduleRefresh);
+      window.removeEventListener('orientationchange', scheduleRefresh);
+      if (timerId !== undefined) {
+        window.clearTimeout(timerId);
+      }
+    };
+  }, []);
 
   const visibleMonths = RANGE_OPTIONS.find((option) => option.value === selectedRange)?.months ?? 6;
   const maxStartIndex = Math.max(0, data.length - visibleMonths);
@@ -117,6 +140,7 @@ function CurrencyChartWindowLab() {
     const nextVisibleMonths = RANGE_OPTIONS.find((option) => option.value === nextRange)?.months ?? 6;
     const nextMaxStart = Math.max(0, data.length - nextVisibleMonths);
     setStartIndex(Math.min(CURRENT_INDEX, nextMaxStart));
+    setChartNonce((prev) => prev + 1);
   };
 
   return (
@@ -148,7 +172,7 @@ function CurrencyChartWindowLab() {
       </div>
 
       <div className="ccw-wrapper">
-        <ResponsiveContainer width="100%" height={460}>
+        <ResponsiveContainer key={chartNonce} width="100%" height={460}>
           <BarChart data={data} margin={{ top: 8, right: 24, left: 0, bottom: 24 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis
