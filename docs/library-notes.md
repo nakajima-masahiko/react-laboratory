@@ -25,3 +25,27 @@ const monthLabelByKey = useMemo(
 ```
 
 参考: `src/experiments/currency-chart-window-lab/index.tsx`
+
+### `Brush` の幅を固定する
+
+`Brush` の左右のハンドル（traveller）は標準でドラッグによるリサイズが可能。外部から `startIndex` / `endIndex` を渡して制御していても、`getDerivedStateFromProps` が同値検知でしか再同期しないため、`onChange` でプロパティ値を変えなければブラシ内部状態のリサイズ結果が視覚的に残る。
+
+**対策:** `onChange` で「どのハンドルが動いたか」を現在のインデックスと比較して判定し、常に幅（`visibleMonths`）が保たれる `startIndex` を計算して state を更新する。右ハンドルが動いたと判定したときは `nextStart = endIndex - visibleMonths + 1` とすることで、`startIndex` / `endIndex` プロパティがどちらも新しい値になり Brush が再同期する。
+
+```tsx
+onChange={(range) => {
+  if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
+    return;
+  }
+  const rightEdgeMoved =
+    range.startIndex === safeStartIndex && range.endIndex !== endIndex;
+  const nextStart = rightEdgeMoved
+    ? range.endIndex - visibleMonths + 1
+    : range.startIndex;
+  setStartIndex(Math.max(0, Math.min(nextStart, maxStartIndex)));
+}}
+```
+
+この方式では、両端のハンドルとボディのいずれをドラッグしてもウィンドウの幅は固定され、移動のみが反映される。
+
+参考: `src/experiments/currency-chart-window-lab/index.tsx`

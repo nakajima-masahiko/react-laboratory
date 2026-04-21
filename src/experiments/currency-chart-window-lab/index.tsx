@@ -216,10 +216,15 @@ function CurrencyChartWindowLab() {
               stroke="var(--accent)"
               travellerWidth={10}
               onChange={(range) => {
-                if (typeof range.startIndex !== 'number') {
+                if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
                   return;
                 }
-                setStartIndex(Math.max(0, Math.min(range.startIndex, maxStartIndex)));
+                const rightEdgeMoved =
+                  range.startIndex === safeStartIndex && range.endIndex !== endIndex;
+                const nextStart = rightEdgeMoved
+                  ? range.endIndex - visibleMonths + 1
+                  : range.startIndex;
+                setStartIndex(Math.max(0, Math.min(nextStart, maxStartIndex)));
               }}
             />
           </BarChart>
