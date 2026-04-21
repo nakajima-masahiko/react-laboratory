@@ -99,6 +99,10 @@ function buildData(now = new Date()): ChartRow[] {
 
 function CurrencyChartWindowLab() {
   const data = useMemo(() => buildData(), []);
+  const monthLabelByKey = useMemo(
+    () => new Map(data.map((row) => [row.key, row.monthLabel])),
+    [data],
+  );
   const [selectedRange, setSelectedRange] = useState<RangeValue>('6');
   const [startIndex, setStartIndex] = useState<number>(CURRENT_INDEX);
   const [chartNonce, setChartNonce] = useState(0);
@@ -179,7 +183,7 @@ function CurrencyChartWindowLab() {
               dataKey="key"
               interval={0}
               tick={{ fill: 'var(--text)', fontSize: 13 }}
-              tickFormatter={(_, index) => data[index]?.monthLabel ?? ''}
+              tickFormatter={(value: string) => monthLabelByKey.get(value) ?? ''}
             />
             <YAxis tick={{ fill: 'var(--text)', fontSize: 13 }} />
             <Tooltip
@@ -212,10 +216,15 @@ function CurrencyChartWindowLab() {
               stroke="var(--accent)"
               travellerWidth={10}
               onChange={(range) => {
-                if (typeof range.startIndex !== 'number') {
+                if (typeof range.startIndex !== 'number' || typeof range.endIndex !== 'number') {
                   return;
                 }
-                setStartIndex(Math.max(0, Math.min(range.startIndex, maxStartIndex)));
+                const rightEdgeMoved =
+                  range.startIndex === safeStartIndex && range.endIndex !== endIndex;
+                const nextStart = rightEdgeMoved
+                  ? range.endIndex - visibleMonths + 1
+                  : range.startIndex;
+                setStartIndex(Math.max(0, Math.min(nextStart, maxStartIndex)));
               }}
             />
           </BarChart>
