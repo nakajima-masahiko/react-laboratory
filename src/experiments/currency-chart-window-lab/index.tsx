@@ -99,6 +99,10 @@ function buildData(now = new Date()): ChartRow[] {
 
 function CurrencyChartWindowLab() {
   const data = useMemo(() => buildData(), []);
+  const monthLabelByKey = useMemo(
+    () => new Map(data.map((row) => [row.key, row.monthLabel])),
+    [data],
+  );
   const [selectedRange, setSelectedRange] = useState<RangeValue>('6');
   const [startIndex, setStartIndex] = useState<number>(CURRENT_INDEX);
   const [chartNonce, setChartNonce] = useState(0);
@@ -179,7 +183,7 @@ function CurrencyChartWindowLab() {
               dataKey="key"
               interval={0}
               tick={{ fill: 'var(--text)', fontSize: 13 }}
-              tickFormatter={(_, index) => data[index]?.monthLabel ?? ''}
+              tickFormatter={(value: string) => monthLabelByKey.get(value) ?? ''}
             />
             <YAxis tick={{ fill: 'var(--text)', fontSize: 13 }} />
             <Tooltip
