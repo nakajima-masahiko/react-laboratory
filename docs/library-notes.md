@@ -4,6 +4,10 @@
 
 ## Recharts
 
+各実験固有の Recharts 設定の詳細は、その実験フォルダ内の `recharts.md` にまとめている。
+
+- [currency-chart-window-lab](../src/experiments/currency-chart-window-lab/recharts.md)
+
 ### `XAxis` の `tickFormatter` と `Brush` の組み合わせ
 
 `XAxis` の `tickFormatter` は `(value, index) => string` の形で呼び出されるが、`Brush` で表示範囲を変更した場合の `index` はデータ配列全体における絶対インデックスではなく、表示中のスライス内での相対位置になる。
