@@ -65,7 +65,7 @@
   grid-template-columns: auto minmax(180px, 1fr) auto;
   gap: 12px;
   align-items: center;
-  padding: 0 8px 14px;
+  padding: 14px 8px 0;
 }
 
 .ccw-nav-button {
