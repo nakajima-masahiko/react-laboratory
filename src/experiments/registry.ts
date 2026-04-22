@@ -81,4 +81,10 @@ export const experiments: ExperimentEntry[] = [
     description: 'Recharts の積み上げ棒グラフで12カ月分の通貨別保有量を可視化する実験',
     component: lazy(() => import('./currency-chart')),
   },
+  {
+    id: 'react-tomcat-checklist',
+    title: 'React + Tomcat 構成確認チェックリスト',
+    description: 'Radix UI Checkbox を使った本番デプロイ前の確認チェックリスト 30 項目版',
+    component: lazy(() => import('./react-tomcat-checklist')),
+  },
 ];
