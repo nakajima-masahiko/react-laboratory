@@ -1,0 +1,175 @@
+.rtc-lab {
+  max-width: 720px;
+}
+
+.rtc-subtitle {
+  color: var(--text);
+  margin: 0 0 24px;
+}
+
+/* Summary bar */
+.rtc-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--accent-light);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 28px;
+}
+
+.rtc-progress-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.rtc-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.rtc-progress-label {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.rtc-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rtc-btn {
+  font-size: 0.85rem;
+  padding: 6px 14px;
+}
+
+.rtc-btn-reset {
+  background: transparent;
+}
+
+/* Category */
+.rtc-category {
+  margin-bottom: 28px;
+}
+
+.rtc-category-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--border);
+}
+
+.rtc-cat-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: 20px;
+  padding: 2px 10px;
+  border: 1px solid var(--accent);
+}
+
+/* List */
+.rtc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rtc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.rtc-item:hover {
+  background: var(--accent-light);
+}
+
+.rtc-item--checked .rtc-label {
+  color: var(--text);
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+/* Radix Checkbox */
+.rtc-checkbox {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.rtc-checkbox:hover {
+  border-color: var(--accent);
+}
+
+.rtc-checkbox[data-state='checked'] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.rtc-indicator {
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rtc-indicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+.rtc-label {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  cursor: pointer;
+  color: var(--text-h);
+  transition: color 0.15s, opacity 0.15s;
+}
+
+/* Completion banner */
+.rtc-complete {
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: #22c55e1a;
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+  color: #16a34a;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rtc-complete {
+    background: #15803d22;
+    border-color: #4ade80;
+    color: #4ade80;
+  }
+}
