@@ -40,6 +40,9 @@ function FinancialChart({
   const [containerRef, size] = useResizeObserver<HTMLDivElement>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
+  const [devicePixelRatio, setDevicePixelRatio] = useState(
+    () => window.devicePixelRatio || 1,
+  );
 
   const width = size.width;
   const tooltipLabels: TooltipLabels = useMemo(
@@ -82,11 +85,37 @@ function FinancialChart({
   }, [data.length, tooltipState]);
 
   useEffect(() => {
+    const updateDevicePixelRatio = () => {
+      setDevicePixelRatio(window.devicePixelRatio || 1);
+    };
+
+    let mediaQuery = window.matchMedia(
+      `(resolution: ${window.devicePixelRatio || 1}dppx)`,
+    );
+    const handleResolutionChange = () => {
+      updateDevicePixelRatio();
+      mediaQuery.removeEventListener('change', handleResolutionChange);
+      mediaQuery = window.matchMedia(
+        `(resolution: ${window.devicePixelRatio || 1}dppx)`,
+      );
+      mediaQuery.addEventListener('change', handleResolutionChange);
+    };
+
+    mediaQuery.addEventListener('change', handleResolutionChange);
+    window.addEventListener('resize', updateDevicePixelRatio);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleResolutionChange);
+      window.removeEventListener('resize', updateDevicePixelRatio);
+    };
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     if (width <= 0 || height <= 0) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = devicePixelRatio;
     const pixelWidth = Math.round(width * dpr);
     const pixelHeight = Math.round(height * dpr);
     if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
@@ -152,7 +181,7 @@ function FinancialChart({
       drawLatestPriceLine({ ctx, price: latest, yScale, plot, theme });
       drawLatestPriceLabel({ ctx, price: latest, yScale, plot, theme });
     }
-  }, [data, chartType, theme, timeframeMs, width, height, plot]);
+  }, [data, chartType, theme, timeframeMs, width, height, plot, devicePixelRatio]);
 
   const tooltipContent = useMemo(() => {
     if (!tooltipState || data.length === 0) return null;
@@ -232,15 +261,15 @@ function FinancialChart({
             left: `${Math.min(width - 180, tooltipState.x + 14)}px`,
             transform: 'translateY(-100%)',
             pointerEvents: 'none',
-            background: 'rgba(20, 20, 30, 0.92)',
-            color: '#fff',
+            background: theme.tooltipBackground,
+            color: theme.tooltipText,
             borderRadius: '6px',
             padding: '8px 10px',
             fontSize: '12px',
             lineHeight: 1.5,
             minWidth: '156px',
             fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25)',
+            boxShadow: theme.tooltipShadow,
             zIndex: 10,
           }}
         >

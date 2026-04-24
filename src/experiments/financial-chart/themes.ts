@@ -21,6 +21,9 @@ export const THEMES: Record<ThemeId, ChartTheme> = {
     latestPriceLabelBg: '#ffca28',
     latestPriceLabelText: '#1a1a2e',
     tooltipGuideLine: '#ffca28',
+    tooltipBackground: 'rgba(20, 20, 30, 0.92)',
+    tooltipText: '#ffffff',
+    tooltipShadow: '0 6px 20px rgba(0, 0, 0, 0.25)',
   },
   light: {
     background: '#fafafa',
@@ -34,6 +37,9 @@ export const THEMES: Record<ThemeId, ChartTheme> = {
     latestPriceLabelBg: '#f57c00',
     latestPriceLabelText: '#ffffff',
     tooltipGuideLine: '#1565c0',
+    tooltipBackground: 'rgba(255, 255, 255, 0.95)',
+    tooltipText: '#1f2937',
+    tooltipShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
   },
   ocean: {
     background: '#0d2137',
@@ -47,5 +53,8 @@ export const THEMES: Record<ThemeId, ChartTheme> = {
     latestPriceLabelBg: '#ffeb3b',
     latestPriceLabelText: '#0d2137',
     tooltipGuideLine: '#00e5ff',
+    tooltipBackground: 'rgba(8, 32, 51, 0.94)',
+    tooltipText: '#d8f4ff',
+    tooltipShadow: '0 8px 24px rgba(0, 0, 0, 0.35)',
   },
 };
