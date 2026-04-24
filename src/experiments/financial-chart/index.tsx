@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FinancialChart, type ChartType } from '../../features/financial-chart';
-import { generateCandleData } from './data';
+import { generateCandleData, generateNextCandle } from './data';
 import { THEME_LABELS, THEMES, type ThemeId } from './themes';
 import './styles.css';
 
@@ -9,9 +9,29 @@ function FinancialChartLab() {
   const [themeId, setThemeId] = useState<ThemeId>('dark');
   const [count, setCount] = useState<number>(60);
   const [height, setHeight] = useState<number>(400);
+  const [data, setData] = useState(() => generateCandleData(count));
 
-  const data = useMemo(() => generateCandleData(count), [count]);
   const theme = THEMES[themeId];
+
+  useEffect(() => {
+    setData(generateCandleData(count));
+  }, [count]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setData((prev) => {
+        if (prev.length === 0) {
+          return generateCandleData(count);
+        }
+        const next = generateNextCandle(prev[prev.length - 1]);
+        return [...prev, next].slice(-count);
+      });
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [count]);
 
   return (
     <div className="fc-lab">
@@ -66,13 +86,14 @@ function FinancialChartLab() {
           <label htmlFor="fc-height">高さ</label>
           <input
             id="fc-height"
-            type="number"
+            type="range"
             min={200}
-            max={800}
-            step={20}
+            max={1000}
+            step={100}
             value={height}
-            onChange={(e) => setHeight(Math.max(200, Number(e.target.value) || 200))}
+            onChange={(e) => setHeight(Number(e.target.value) || 200)}
           />
+          <span>{height}px</span>
         </div>
       </div>
 
