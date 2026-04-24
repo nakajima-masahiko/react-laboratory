@@ -142,7 +142,6 @@ function FinancialChart({
       yScale,
       xTicks,
       yTicks,
-      timeframeMs,
       theme,
     });
 

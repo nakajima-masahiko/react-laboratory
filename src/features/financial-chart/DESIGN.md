@@ -47,7 +47,7 @@ Props:
 | `data`      | `CandleData[]`     | Yes  | -      | 時系列 OHLC。空配列可              |
 | `chartType` | `ChartType`        | Yes  | -      | `"candlestick"` / `"line"`         |
 | `theme`     | `ChartTheme`       | Yes  | -      | 描画色一式                         |
-| `timeframeMs` | `number`         | No   | `86_400_000` | 足の時間幅 (ms)。X 軸ラベル表示 (日時/時分秒) の判定に使用 |
+| `timeframeMs` | `number`         | No   | `86_400_000` | 足の時間幅 (ms)。将来の時間足制御拡張用 |
 | `height`    | `number`           | No   | `400`  | CSS px 単位の描画高さ              |
 | `tooltip`   | `TooltipOptions`   | No   | 下記参照 | マウス位置に追従する OHLC Tooltip 設定 (縦点線ガイド付き) |
 
@@ -145,13 +145,8 @@ FinancialChart
 - range: `[plot.left, plot.right]`
 - データ 0 件 / 1 件も例外にならないようフォールバック domain を用意
 - ticks は `xScale.ticks(6)` で生成
-- 目盛りラベルは左→右の順に「初出の年月日時」を段階表示する
-  - 年が初出: `2026年5月2日9時`
-  - 同年で月が初出: `6月1日9時`
-  - 同年同月で日が初出: `3日9時`
-  - 同日で時が初出: `10時`
-- `timeframeMs < 86,400,000` (日足未満) の場合は時に加えて「分秒」も表示する
-  - 例: `10時30分00秒`, `45分00秒`
+- 目盛りラベルはすべて固定フォーマット `YYYY/MM/DD HH:mm:ss` で表示する
+  - 例: `2026/05/02 09:30:00`
 
 ### Y 軸
 
