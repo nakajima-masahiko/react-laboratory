@@ -9,6 +9,7 @@ export type DrawAxisParams = {
   yScale: YScale;
   xTicks: Date[];
   yTicks: number[];
+  timeframeMs: number;
   theme: ChartTheme;
 };
 
@@ -23,9 +24,10 @@ export function drawAxis({
   yScale,
   xTicks,
   yTicks,
+  timeframeMs,
   theme,
 }: DrawAxisParams): void {
-  const xLabels = formatXAxisLabels(xTicks);
+  const xLabels = formatXAxisLabels(xTicks, timeframeMs);
 
   ctx.save();
   ctx.strokeStyle = theme.axis;
@@ -81,28 +83,66 @@ export function drawAxis({
   ctx.restore();
 }
 
-function formatXAxisLabels(ticks: Date[]): string[] {
+function formatXAxisLabels(ticks: Date[], timeframeMs: number): string[] {
   if (ticks.length === 0) return [];
 
+  const dayMs = 24 * 60 * 60 * 1000;
+  const shouldShowMinuteSecond = timeframeMs < dayMs;
   let lastYear: number | null = null;
   let lastMonth: number | null = null;
+  let lastDay: number | null = null;
+  let lastHour: number | null = null;
+  let lastMinute: number | null = null;
+  let lastSecond: number | null = null;
+
+  const formatHour = (hour: number) => `${hour}時`;
+  const formatMinuteSecond = (minute: number, second: number) =>
+    `${String(minute).padStart(2, '0')}分${String(second).padStart(2, '0')}秒`;
+  const formatSecond = (second: number) => `${String(second).padStart(2, '0')}秒`;
 
   return ticks.map((tick) => {
     const year = tick.getFullYear();
     const month = tick.getMonth() + 1;
     const day = tick.getDate();
+    const hour = tick.getHours();
+    const minute = tick.getMinutes();
+    const second = tick.getSeconds();
 
     let label: string;
     if (lastYear !== year) {
-      label = `${year}年${month}月${day}日`;
+      label = `${year}年${month}月${day}日${formatHour(hour)}`;
+      if (shouldShowMinuteSecond) {
+        label += formatMinuteSecond(minute, second);
+      }
     } else if (lastMonth !== month) {
-      label = `${month}月${day}日`;
+      label = `${month}月${day}日${formatHour(hour)}`;
+      if (shouldShowMinuteSecond) {
+        label += formatMinuteSecond(minute, second);
+      }
+    } else if (lastDay !== day) {
+      label = `${day}日${formatHour(hour)}`;
+      if (shouldShowMinuteSecond) {
+        label += formatMinuteSecond(minute, second);
+      }
+    } else if (lastHour !== hour) {
+      label = formatHour(hour);
+      if (shouldShowMinuteSecond) {
+        label += formatMinuteSecond(minute, second);
+      }
+    } else if (shouldShowMinuteSecond && lastMinute !== minute) {
+      label = formatMinuteSecond(minute, second);
+    } else if (shouldShowMinuteSecond && lastSecond !== second) {
+      label = formatSecond(second);
     } else {
-      label = `${day}日`;
+      label = '';
     }
 
     lastYear = year;
     lastMonth = month;
+    lastDay = day;
+    lastHour = hour;
+    lastMinute = minute;
+    lastSecond = second;
     return label;
   });
 }

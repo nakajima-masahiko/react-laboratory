@@ -10,6 +10,7 @@ function FinancialChartLab() {
   const [count, setCount] = useState<number>(60);
   const [height, setHeight] = useState<number>(400);
   const [data, setData] = useState(() => generateCandleData(count));
+  const timeframeMs = 60 * 60 * 1000;
 
   const theme = THEMES[themeId];
 
@@ -102,6 +103,7 @@ function FinancialChartLab() {
           data={data}
           chartType={chartType}
           theme={theme}
+          timeframeMs={timeframeMs}
           height={height}
           tooltip={{
             labels: {

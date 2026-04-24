@@ -26,6 +26,7 @@ export type FinancialChartProps = {
   data: CandleData[];
   chartType: ChartType;
   theme: ChartTheme;
+  timeframeMs?: number;
   height?: number;
   tooltip?: TooltipOptions;
 };
