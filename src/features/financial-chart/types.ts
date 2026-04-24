@@ -26,7 +26,31 @@ export type FinancialChartProps = {
   chartType: ChartType;
   theme: ChartTheme;
   height?: number;
+  tooltip?: TooltipOptions;
 };
+
+export type TooltipLabels = {
+  date: string;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+};
+
+export type TooltipOptions = {
+  labels?: Partial<TooltipLabels>;
+  dateFormat?: string;
+};
+
+export const DEFAULT_TOOLTIP_LABELS: TooltipLabels = {
+  date: '日付',
+  open: '始値',
+  high: '高値',
+  low: '安値',
+  close: '終値',
+};
+
+export const DEFAULT_TOOLTIP_DATE_FORMAT = '%Y/%m/%d %H:%M';
 
 export type PlotRect = {
   left: number;
