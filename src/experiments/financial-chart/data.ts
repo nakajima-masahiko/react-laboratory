@@ -37,6 +37,23 @@ export function generateCandleData(count: number = 60, base: number = 150): Cand
   return data;
 }
 
+export function generateNextCandle(prev: CandleData): CandleData {
+  const drift = (Math.random() - 0.5) * 1.2;
+  const open = prev.close + drift * 0.3;
+  const close = open + (Math.random() - 0.5) * 1.6;
+  const high = Math.max(open, close) + Math.random() * 0.8;
+  const low = Math.min(open, close) - Math.random() * 0.8;
+  const nextTime = new Date(new Date(prev.time).getTime() + 60 * 60 * 1000).toISOString();
+
+  return {
+    time: nextTime,
+    open: round2(open),
+    high: round2(high),
+    low: round2(low),
+    close: round2(close),
+  };
+}
+
 function round2(v: number): number {
   return Math.round(v * 100) / 100;
 }
