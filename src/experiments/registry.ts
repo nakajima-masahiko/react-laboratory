@@ -82,6 +82,12 @@ export const experiments: ExperimentEntry[] = [
     component: lazy(() => import('./currency-chart')),
   },
   {
+    id: 'financial-chart',
+    title: 'Financial Chart',
+    description: 'Canvas + d3-scale で実装したローソク足 / ラインチャート。テーマ切替・リサイズ・最新価格ライン対応',
+    component: lazy(() => import('./financial-chart')),
+  },
+  {
     id: 'react-tomcat-checklist',
     title: 'React + Tomcat 構成確認チェックリスト',
     description: 'Radix UI Checkbox を使った本番デプロイ前の確認チェックリスト 30 項目版',
