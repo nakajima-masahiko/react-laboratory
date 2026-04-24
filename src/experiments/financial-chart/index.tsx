@@ -82,6 +82,16 @@ function FinancialChartLab() {
           chartType={chartType}
           theme={theme}
           height={height}
+          tooltip={{
+            labels: {
+              date: '日時',
+              open: '始値',
+              high: '高値',
+              low: '安値',
+              close: '終値',
+            },
+            dateFormat: '%Y/%m/%d %H:%M',
+          }}
         />
       </div>
     </div>

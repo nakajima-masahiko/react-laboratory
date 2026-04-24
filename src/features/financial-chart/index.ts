@@ -4,4 +4,6 @@ export type {
   ChartTheme,
   ChartType,
   FinancialChartProps,
+  TooltipLabels,
+  TooltipOptions,
 } from './types';

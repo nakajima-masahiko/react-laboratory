@@ -26,6 +26,16 @@
   chartType="candlestick" // "candlestick" | "line"
   theme={theme}         // ChartTheme
   height={400}          // 任意。既定 400
+  tooltip={{            // 任意。Tooltip 表示仕様
+    labels: {
+      date: '日付',
+      open: '始値',
+      high: '高値',
+      low: '安値',
+      close: '終値',
+    },
+    dateFormat: '%Y/%m/%d %H:%M',
+  }}
 />
 ```
 
@@ -37,8 +47,18 @@ Props:
 | `chartType` | `ChartType`        | Yes  | -      | `"candlestick"` / `"line"`         |
 | `theme`     | `ChartTheme`       | Yes  | -      | 描画色一式                         |
 | `height`    | `number`           | No   | `400`  | CSS px 単位の描画高さ              |
+| `tooltip`   | `TooltipOptions`   | No   | 下記参照 | マウス位置に追従する OHLC Tooltip 設定 |
 
 幅は常に親要素の `clientWidth` に追従する (props では受け取らない)。
+
+`tooltip` は JSON オブジェクトで受け取る。未指定時は以下が既定値:
+
+- `labels.date = "日付"`
+- `labels.open = "始値"`
+- `labels.high = "高値"`
+- `labels.low = "安値"`
+- `labels.close = "終値"`
+- `dateFormat = "%Y/%m/%d %H:%M"`
 
 ## 責務分割
 
