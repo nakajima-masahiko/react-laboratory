@@ -1,0 +1,48 @@
+.fc-lab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fc-lab__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--accent-light);
+}
+
+.fc-lab__control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fc-lab__control-group label {
+  font-size: 0.9rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.fc-lab__control-group select,
+.fc-lab__control-group input[type='number'] {
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.fc-lab__control-group input[type='number'] {
+  width: 90px;
+}
+
+.fc-lab__chart {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
