@@ -200,6 +200,19 @@ function FinancialChart({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       />
+      {tooltipState ? (
+        <div
+          style={{
+            position: 'absolute',
+            top: `${plot.top}px`,
+            left: `${tooltipState.x}px`,
+            height: `${plot.height}px`,
+            borderLeft: `1px dashed ${theme.tooltipGuideLine}`,
+            pointerEvents: 'none',
+            zIndex: 5,
+          }}
+        />
+      ) : null}
       {tooltipContent && tooltipState ? (
         <div
           style={{
