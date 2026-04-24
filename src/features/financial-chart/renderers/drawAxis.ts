@@ -10,6 +10,7 @@ export type DrawAxisParams = {
   xTicks: Date[];
   yTicks: number[];
   theme: ChartTheme;
+  timeframeMs: number;
 };
 
 const AXIS_FONT = '11px system-ui, sans-serif';
@@ -24,8 +25,9 @@ export function drawAxis({
   xTicks,
   yTicks,
   theme,
+  timeframeMs,
 }: DrawAxisParams): void {
-  const xLabels = formatXAxisLabels(xTicks);
+  const xLabels = formatXAxisLabels(xTicks, timeframeMs);
 
   ctx.save();
   ctx.strokeStyle = theme.axis;
@@ -81,6 +83,22 @@ export function drawAxis({
   ctx.restore();
 }
 
-function formatXAxisLabels(ticks: Date[]): string[] {
-  return ticks.map((tick) => formatTime(tick, '%Y/%m/%d %H:%M:%S'));
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+function formatXAxisLabels(ticks: Date[], timeframeMs: number): string[] {
+  const isIntraday = timeframeMs < DAY_IN_MS;
+  let previousDayKey = '';
+
+  return ticks.map((tick) => {
+    const dayKey = formatTime(tick, '%Y/%m/%d');
+    const isSameDay = dayKey === previousDayKey;
+    previousDayKey = dayKey;
+
+    if (isIntraday) {
+      const timeLabel = formatTime(tick, '%H:%M:%S');
+      return isSameDay ? timeLabel : `${dayKey} ${timeLabel}`;
+    }
+
+    return isSameDay ? '' : dayKey;
+  });
 }

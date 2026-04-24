@@ -143,6 +143,7 @@ function FinancialChart({
       xTicks,
       yTicks,
       theme,
+      timeframeMs,
     });
 
     // 6, 7. 最新価格
