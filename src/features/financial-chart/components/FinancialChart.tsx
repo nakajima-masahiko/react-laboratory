@@ -19,6 +19,7 @@ import {
 import { computeCandleWidth, createScales } from '../utils/createScales';
 
 const DEFAULT_HEIGHT = 400;
+const DEFAULT_TIMEFRAME_MS = 24 * 60 * 60 * 1000;
 const X_TICK_COUNT = 6;
 const Y_TICK_COUNT = 6;
 
@@ -32,6 +33,7 @@ function FinancialChart({
   data,
   chartType,
   theme,
+  timeframeMs = DEFAULT_TIMEFRAME_MS,
   height = DEFAULT_HEIGHT,
   tooltip,
 }: FinancialChartProps) {
@@ -133,7 +135,16 @@ function FinancialChart({
     }
 
     // 5. 軸
-    drawAxis({ ctx, plot, xScale, yScale, xTicks, yTicks, theme });
+    drawAxis({
+      ctx,
+      plot,
+      xScale,
+      yScale,
+      xTicks,
+      yTicks,
+      timeframeMs,
+      theme,
+    });
 
     // 6, 7. 最新価格
     if (data.length > 0) {
@@ -141,7 +152,7 @@ function FinancialChart({
       drawLatestPriceLine({ ctx, price: latest, yScale, plot, theme });
       drawLatestPriceLabel({ ctx, price: latest, yScale, plot, theme });
     }
-  }, [data, chartType, theme, width, height, plot]);
+  }, [data, chartType, theme, timeframeMs, width, height, plot]);
 
   const tooltipContent = useMemo(() => {
     if (!tooltipState || data.length === 0) return null;
