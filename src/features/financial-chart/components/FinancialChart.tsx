@@ -22,6 +22,9 @@ const DEFAULT_HEIGHT = 400;
 const DEFAULT_TIMEFRAME_MS = 24 * 60 * 60 * 1000;
 const X_TICK_COUNT = 6;
 const Y_TICK_COUNT = 6;
+const TOOLTIP_HORIZONTAL_PADDING = 8;
+const TOOLTIP_OFFSET_X = 14;
+const TOOLTIP_WIDTH = 180;
 
 type TooltipState = {
   x: number;
@@ -39,6 +42,9 @@ function FinancialChart({
 }: FinancialChartProps) {
   const [containerRef, size] = useResizeObserver<HTMLDivElement>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const pendingPointerRef = useRef<{ x: number; y: number; index: number } | null>(null);
+  const tooltipStateRef = useRef<TooltipState | null>(null);
   const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
   const [devicePixelRatio, setDevicePixelRatio] = useState(
     () => window.devicePixelRatio || 1,
@@ -50,6 +56,10 @@ function FinancialChart({
     [tooltip?.labels],
   );
   const tooltipDateFormat = tooltip?.dateFormat ?? DEFAULT_TOOLTIP_DATE_FORMAT;
+
+  useEffect(() => {
+    tooltipStateRef.current = tooltipState;
+  }, [tooltipState]);
 
   const plot = useMemo<PlotRect>(() => {
     const left = DEFAULT_MARGIN.left;
@@ -66,23 +76,23 @@ function FinancialChart({
     };
   }, [width, height]);
 
-  useEffect(() => {
-    if (data.length === 0) {
-      setTooltipState(null);
-      return;
-    }
+  const activeTooltipState = useMemo(() => {
+    if (!tooltipState || data.length === 0) return null;
 
-    const nextIndex = Math.min(tooltipState?.index ?? 0, data.length - 1);
-    if (tooltipState && nextIndex === tooltipState.index) return;
-    setTooltipState((current) =>
-      current
-        ? {
-            ...current,
-            index: nextIndex,
-          }
-        : null,
-    );
+    return {
+      ...tooltipState,
+      index: Math.min(tooltipState.index, data.length - 1),
+    };
   }, [data.length, tooltipState]);
+
+  useEffect(
+    () => () => {
+      if (rafIdRef.current !== null) {
+        window.cancelAnimationFrame(rafIdRef.current);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const updateDevicePixelRatio = () => {
@@ -184,8 +194,8 @@ function FinancialChart({
   }, [data, chartType, theme, timeframeMs, width, height, plot, devicePixelRatio]);
 
   const tooltipContent = useMemo(() => {
-    if (!tooltipState || data.length === 0) return null;
-    const candle = data[tooltipState.index];
+    if (!activeTooltipState || data.length === 0) return null;
+    const candle = data[activeTooltipState.index];
     if (!candle) return null;
 
     const date = new Date(candle.time);
@@ -196,7 +206,7 @@ function FinancialChart({
       { label: tooltipLabels.low, value: formatPrice(candle.low) },
       { label: tooltipLabels.close, value: formatPrice(candle.close) },
     ];
-  }, [data, tooltipDateFormat, tooltipLabels, tooltipState]);
+  }, [activeTooltipState, data, tooltipDateFormat, tooltipLabels]);
 
   const handleMouseMove = (event: MouseEvent<HTMLCanvasElement>) => {
     if (data.length === 0 || plot.width <= 0) return;
@@ -218,16 +228,64 @@ function FinancialChart({
     const nextIndex = Math.round(ratio * (data.length - 1));
     const clampedIndex = Math.max(0, Math.min(nextIndex, data.length - 1));
 
-    setTooltipState({
+    pendingPointerRef.current = {
       x: pointerX,
       y: pointerY,
       index: clampedIndex,
+    };
+
+    if (rafIdRef.current !== null) return;
+
+    rafIdRef.current = window.requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      const pendingPointer = pendingPointerRef.current;
+      if (!pendingPointer) return;
+
+      const current = tooltipStateRef.current;
+      if (current && current.index === pendingPointer.index) {
+        setTooltipState({
+          x: pendingPointer.x,
+          y: pendingPointer.y,
+          index: current.index,
+        });
+        return;
+      }
+
+      setTooltipState({
+        x: pendingPointer.x,
+        y: pendingPointer.y,
+        index: pendingPointer.index,
+      });
     });
   };
 
   const handleMouseLeave = () => {
+    if (rafIdRef.current !== null) {
+      window.cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+    pendingPointerRef.current = null;
     setTooltipState(null);
   };
+
+  const tooltipLeft =
+    activeTooltipState === null
+      ? 0
+      : Math.max(
+          TOOLTIP_HORIZONTAL_PADDING,
+          Math.min(
+            width - TOOLTIP_WIDTH - TOOLTIP_HORIZONTAL_PADDING,
+            activeTooltipState.x + TOOLTIP_OFFSET_X,
+          ),
+        );
+
+  const latest = data.length > 0 ? data[data.length - 1] : null;
+  const first = data.length > 0 ? data[0] : null;
+  const canvasAriaLabel = latest
+    ? `Financial chart from ${first?.time ?? latest.time} to ${latest.time}. Latest close ${formatPrice(
+        latest.close,
+      )}.`
+    : 'Financial chart. No data available.';
 
   return (
     <div
@@ -236,16 +294,18 @@ function FinancialChart({
     >
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label={canvasAriaLabel}
         style={{ display: 'block' }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       />
-      {tooltipState ? (
+      {activeTooltipState ? (
         <div
           style={{
             position: 'absolute',
             top: `${plot.top}px`,
-            left: `${tooltipState.x}px`,
+            left: `${activeTooltipState.x}px`,
             height: `${plot.height}px`,
             borderLeft: `1px dashed ${theme.tooltipGuideLine}`,
             pointerEvents: 'none',
@@ -253,12 +313,12 @@ function FinancialChart({
           }}
         />
       ) : null}
-      {tooltipContent && tooltipState ? (
+      {tooltipContent && activeTooltipState ? (
         <div
           style={{
             position: 'absolute',
-            top: `${Math.max(8, tooltipState.y - 12)}px`,
-            left: `${Math.min(width - 180, tooltipState.x + 14)}px`,
+            top: `${Math.max(8, activeTooltipState.y - 12)}px`,
+            left: `${tooltipLeft}px`,
             transform: 'translateY(-100%)',
             pointerEvents: 'none',
             background: theme.tooltipBackground,

@@ -1,6 +1,11 @@
 export type ChartType = 'candlestick' | 'line';
 
 export type CandleData = {
+  /**
+   * ISO 8601 date-time string.
+   *
+   * FinancialChart expects `data` to be sorted by `time` in ascending order.
+   */
   time: string;
   open: number;
   high: number;

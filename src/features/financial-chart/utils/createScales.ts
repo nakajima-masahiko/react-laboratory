@@ -18,12 +18,45 @@ export function createScales(
 ): ChartScales {
   const times = data.map((d) => new Date(d.time));
 
+  const hasUnsortedTime = times.some(
+    (time, index) => index > 0 && time.getTime() < times[index - 1].getTime(),
+  );
+
+  if (hasUnsortedTime && import.meta.env.DEV) {
+    console.warn(
+      '[FinancialChart] data は time 昇順で渡してください。昇順でないデータを検出したため、X 軸 domain は min/max で補正します。',
+    );
+  }
+
+  let minTime = Number.POSITIVE_INFINITY;
+  let maxTime = Number.NEGATIVE_INFINITY;
+  if (hasUnsortedTime) {
+    for (const time of times) {
+      const value = time.getTime();
+      if (value < minTime) minTime = value;
+      if (value > maxTime) maxTime = value;
+    }
+  }
+
+  const firstTime =
+    times.length === 0
+      ? null
+      : hasUnsortedTime
+        ? new Date(minTime)
+        : times[0];
+  const lastTime =
+    times.length === 0
+      ? null
+      : hasUnsortedTime
+        ? new Date(maxTime)
+        : times[times.length - 1];
+
   const xDomain: [Date, Date] =
     times.length === 0
       ? [new Date(0), new Date(1)]
       : times.length === 1
         ? [times[0], new Date(times[0].getTime() + 1)]
-        : [times[0], times[times.length - 1]];
+        : [firstTime as Date, lastTime as Date];
 
   const xScale = scaleTime().domain(xDomain).range([plot.left, plot.right]);
 
