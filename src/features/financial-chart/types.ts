@@ -19,6 +19,7 @@ export type ChartTheme = {
   latestPriceLine: string;
   latestPriceLabelBg: string;
   latestPriceLabelText: string;
+  tooltipGuideLine: string;
 };
 
 export type FinancialChartProps = {

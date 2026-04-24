@@ -1,6 +1,6 @@
 import type { ChartTheme, PlotRect } from '../types';
 import type { XScale, YScale } from '../utils/createScales';
-import { formatPrice, formatTime } from '../utils/formatters';
+import { formatPrice } from '../utils/formatters';
 
 export type DrawAxisParams = {
   ctx: CanvasRenderingContext2D;
@@ -25,6 +25,8 @@ export function drawAxis({
   yTicks,
   theme,
 }: DrawAxisParams): void {
+  const xLabels = formatXAxisLabels(xTicks);
+
   ctx.save();
   ctx.strokeStyle = theme.axis;
   ctx.fillStyle = theme.text;
@@ -53,9 +55,12 @@ export function drawAxis({
     ctx.lineTo(x, plot.bottom + TICK_LENGTH);
   }
   ctx.stroke();
-  for (const tick of xTicks) {
+  for (const [index, tick] of xTicks.entries()) {
     const x = xScale(tick);
-    ctx.fillText(formatTime(tick), x, plot.bottom + TICK_LENGTH + LABEL_GAP);
+    const label = xLabels[index];
+    if (label) {
+      ctx.fillText(label, x, plot.bottom + TICK_LENGTH + LABEL_GAP);
+    }
   }
 
   // Y tick labels (右軸)
@@ -74,4 +79,30 @@ export function drawAxis({
   }
 
   ctx.restore();
+}
+
+function formatXAxisLabels(ticks: Date[]): string[] {
+  if (ticks.length === 0) return [];
+
+  let lastYear: number | null = null;
+  let lastMonth: number | null = null;
+
+  return ticks.map((tick) => {
+    const year = tick.getFullYear();
+    const month = tick.getMonth() + 1;
+    const day = tick.getDate();
+
+    let label: string;
+    if (lastYear !== year) {
+      label = `${year}年${month}月${day}日`;
+    } else if (lastMonth !== month) {
+      label = `${month}月${day}日`;
+    } else {
+      label = `${day}日`;
+    }
+
+    lastYear = year;
+    lastMonth = month;
+    return label;
+  });
 }

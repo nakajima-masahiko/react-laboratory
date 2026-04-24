@@ -20,6 +20,7 @@ export const THEMES: Record<ThemeId, ChartTheme> = {
     latestPriceLine: '#ffca28',
     latestPriceLabelBg: '#ffca28',
     latestPriceLabelText: '#1a1a2e',
+    tooltipGuideLine: '#ffca28',
   },
   light: {
     background: '#fafafa',
@@ -32,6 +33,7 @@ export const THEMES: Record<ThemeId, ChartTheme> = {
     latestPriceLine: '#f57c00',
     latestPriceLabelBg: '#f57c00',
     latestPriceLabelText: '#ffffff',
+    tooltipGuideLine: '#1565c0',
   },
   ocean: {
     background: '#0d2137',
@@ -44,5 +46,6 @@ export const THEMES: Record<ThemeId, ChartTheme> = {
     latestPriceLine: '#ffeb3b',
     latestPriceLabelBg: '#ffeb3b',
     latestPriceLabelText: '#0d2137',
+    tooltipGuideLine: '#00e5ff',
   },
 };
