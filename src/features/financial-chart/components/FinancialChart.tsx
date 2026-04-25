@@ -1,13 +1,6 @@
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useResizeObserver } from '../hooks/useResizeObserver';
-import { drawAxis } from '../renderers/drawAxis';
-import { drawBackground } from '../renderers/drawBackground';
-import { drawCandlesticks } from '../renderers/drawCandlesticks';
-import { drawGrid } from '../renderers/drawGrid';
-import { drawLatestPriceLabel } from '../renderers/drawLatestPriceLabel';
-import { drawLatestPriceLine } from '../renderers/drawLatestPriceLine';
-import { drawLine } from '../renderers/drawLine';
-import { formatPrice, formatTime } from '../utils/formatters';
+import { renderFinancialChart } from '../renderers/renderFinancialChart';
 import {
   DEFAULT_MARGIN,
   DEFAULT_TOOLTIP_DATE_FORMAT,
@@ -15,22 +8,15 @@ import {
   type FinancialChartProps,
   type PlotRect,
   type TooltipLabels,
+  type TooltipState,
 } from '../types';
-import { computeCandleWidth, createScales } from '../utils/createScales';
+import { formatPrice, formatTime } from '../utils/formatters';
+import { getNearestDataIndexFromX } from '../utils/getNearestDataIndexFromX';
+import { setupHiDpiCanvas } from '../utils/setupHiDpiCanvas';
+import ChartTooltipOverlay from './ChartTooltipOverlay';
 
 const DEFAULT_HEIGHT = 400;
 const DEFAULT_TIMEFRAME_MS = 24 * 60 * 60 * 1000;
-const X_TICK_COUNT = 6;
-const Y_TICK_COUNT = 6;
-const TOOLTIP_HORIZONTAL_PADDING = 8;
-const TOOLTIP_OFFSET_X = 14;
-const TOOLTIP_WIDTH = 180;
-
-type TooltipState = {
-  x: number;
-  y: number;
-  index: number;
-};
 
 function FinancialChart({
   data,
@@ -43,7 +29,7 @@ function FinancialChart({
   const [containerRef, size] = useResizeObserver<HTMLDivElement>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafIdRef = useRef<number | null>(null);
-  const pendingPointerRef = useRef<{ x: number; y: number; index: number } | null>(null);
+  const pendingPointerRef = useRef<TooltipState | null>(null);
   const tooltipStateRef = useRef<TooltipState | null>(null);
   const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
   const [devicePixelRatio, setDevicePixelRatio] = useState(
@@ -125,72 +111,22 @@ function FinancialChart({
     if (!canvas) return;
     if (width <= 0 || height <= 0) return;
 
-    const dpr = devicePixelRatio;
-    const pixelWidth = Math.round(width * dpr);
-    const pixelHeight = Math.round(height * dpr);
-    if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
-    if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    setupHiDpiCanvas(canvas, width, height, devicePixelRatio);
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    // 1. クリア
-    ctx.clearRect(0, 0, width, height);
-
-    // 2. 背景
-    drawBackground({ ctx, width, height, theme });
-
-    if (plot.width <= 0 || plot.height <= 0) return;
-
-    const { xScale, yScale, times } = createScales(data, chartType, plot);
-    const xTicks =
-      data.length === 0 ? [] : (xScale.ticks(X_TICK_COUNT) as Date[]);
-    const yTicks = data.length === 0 ? [] : yScale.ticks(Y_TICK_COUNT);
-
-    // 3. グリッド
-    drawGrid({ ctx, plot, xScale, yScale, xTicks, yTicks, theme });
-
-    // 4. チャート本体
-    if (data.length > 0) {
-      if (chartType === 'candlestick') {
-        const candleWidth = computeCandleWidth(times, xScale);
-        drawCandlesticks({
-          ctx,
-          data,
-          times,
-          xScale,
-          yScale,
-          candleWidth,
-          plot,
-          theme,
-        });
-      } else {
-        drawLine({ ctx, data, times, xScale, yScale, plot, theme });
-      }
-    }
-
-    // 5. 軸
-    drawAxis({
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    renderFinancialChart({
       ctx,
-      plot,
-      xScale,
-      yScale,
-      xTicks,
-      yTicks,
+      width,
+      height,
+      data,
+      chartType,
       theme,
       timeframeMs,
+      plot,
     });
-
-    // 6, 7. 最新価格
-    if (data.length > 0) {
-      const latest = data[data.length - 1].close;
-      drawLatestPriceLine({ ctx, price: latest, yScale, plot, theme });
-      drawLatestPriceLabel({ ctx, price: latest, yScale, plot, theme });
-    }
   }, [data, chartType, theme, timeframeMs, width, height, plot, devicePixelRatio]);
 
   const tooltipContent = useMemo(() => {
@@ -224,14 +160,12 @@ function FinancialChart({
       return;
     }
 
-    const ratio = (pointerX - plot.left) / plot.width;
-    const nextIndex = Math.round(ratio * (data.length - 1));
-    const clampedIndex = Math.max(0, Math.min(nextIndex, data.length - 1));
+    const nextIndex = getNearestDataIndexFromX(pointerX, plot, data.length);
 
     pendingPointerRef.current = {
       x: pointerX,
       y: pointerY,
-      index: clampedIndex,
+      index: nextIndex,
     };
 
     if (rafIdRef.current !== null) return;
@@ -268,17 +202,6 @@ function FinancialChart({
     setTooltipState(null);
   };
 
-  const tooltipLeft =
-    activeTooltipState === null
-      ? 0
-      : Math.max(
-          TOOLTIP_HORIZONTAL_PADDING,
-          Math.min(
-            width - TOOLTIP_WIDTH - TOOLTIP_HORIZONTAL_PADDING,
-            activeTooltipState.x + TOOLTIP_OFFSET_X,
-          ),
-        );
-
   const latest = data.length > 0 ? data[data.length - 1] : null;
   const first = data.length > 0 ? data[0] : null;
   const canvasAriaLabel = latest
@@ -300,55 +223,13 @@ function FinancialChart({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       />
-      {activeTooltipState ? (
-        <div
-          style={{
-            position: 'absolute',
-            top: `${plot.top}px`,
-            left: `${activeTooltipState.x}px`,
-            height: `${plot.height}px`,
-            borderLeft: `1px dashed ${theme.tooltipGuideLine}`,
-            pointerEvents: 'none',
-            zIndex: 5,
-          }}
-        />
-      ) : null}
-      {tooltipContent && activeTooltipState ? (
-        <div
-          style={{
-            position: 'absolute',
-            top: `${Math.max(8, activeTooltipState.y - 12)}px`,
-            left: `${tooltipLeft}px`,
-            transform: 'translateY(-100%)',
-            pointerEvents: 'none',
-            background: theme.tooltipBackground,
-            color: theme.tooltipText,
-            borderRadius: '6px',
-            padding: '8px 10px',
-            fontSize: '12px',
-            lineHeight: 1.5,
-            minWidth: '156px',
-            fontFamily: 'ui-sans-serif, system-ui, sans-serif',
-            boxShadow: theme.tooltipShadow,
-            zIndex: 10,
-          }}
-        >
-          {tooltipContent.map((item) => (
-            <div
-              key={item.label}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: '8px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <span style={{ opacity: 0.8 }}>{item.label}</span>
-              <span style={{ fontWeight: 600 }}>{item.value}</span>
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <ChartTooltipOverlay
+        activeTooltipState={activeTooltipState}
+        tooltipContent={tooltipContent}
+        plot={plot}
+        width={width}
+        theme={theme}
+      />
     </div>
   );
 }
