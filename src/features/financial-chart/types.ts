@@ -39,6 +39,18 @@ export type FinancialChartProps = {
   tooltip?: TooltipOptions;
 };
 
+
+export type TooltipState = {
+  x: number;
+  y: number;
+  index: number;
+};
+
+export type TooltipContentItem = {
+  label: string;
+  value: string;
+};
+
 export type TooltipLabels = {
   date: string;
   open: string;
