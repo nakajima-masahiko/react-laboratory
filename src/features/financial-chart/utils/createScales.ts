@@ -28,35 +28,20 @@ export function createScales(
     );
   }
 
-  let minTime = Number.POSITIVE_INFINITY;
-  let maxTime = Number.NEGATIVE_INFINITY;
-  if (hasUnsortedTime) {
+  const xDomain: [Date, Date] = ((): [Date, Date] => {
+    if (times.length === 0) return [new Date(0), new Date(1)];
+    if (times.length === 1) return [times[0], new Date(times[0].getTime() + 1)];
+    if (!hasUnsortedTime) return [times[0], times[times.length - 1]];
+
+    let minTime = Number.POSITIVE_INFINITY;
+    let maxTime = Number.NEGATIVE_INFINITY;
     for (const time of times) {
       const value = time.getTime();
       if (value < minTime) minTime = value;
       if (value > maxTime) maxTime = value;
     }
-  }
-
-  const firstTime =
-    times.length === 0
-      ? null
-      : hasUnsortedTime
-        ? new Date(minTime)
-        : times[0];
-  const lastTime =
-    times.length === 0
-      ? null
-      : hasUnsortedTime
-        ? new Date(maxTime)
-        : times[times.length - 1];
-
-  const xDomain: [Date, Date] =
-    times.length === 0
-      ? [new Date(0), new Date(1)]
-      : times.length === 1
-        ? [times[0], new Date(times[0].getTime() + 1)]
-        : [firstTime as Date, lastTime as Date];
+    return [new Date(minTime), new Date(maxTime)];
+  })();
 
   const xScale = scaleTime().domain(xDomain).range([plot.left, plot.right]);
 

@@ -19,12 +19,8 @@ export function useTooltipInteraction({
 }: UseTooltipInteractionParams): UseTooltipInteractionResult {
   const rafIdRef = useRef<number | null>(null);
   const pendingPointerRef = useRef<TooltipState | null>(null);
-  const tooltipStateRef = useRef<TooltipState | null>(null);
   const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
 
-  useEffect(() => {
-    tooltipStateRef.current = tooltipState;
-  }, [tooltipState]);
   useEffect(
     () => () => {
       if (rafIdRef.current !== null && typeof window !== 'undefined') {
@@ -78,22 +74,7 @@ export function useTooltipInteraction({
       rafIdRef.current = null;
       const pendingPointer = pendingPointerRef.current;
       if (!pendingPointer) return;
-
-      const current = tooltipStateRef.current;
-      if (current && current.index === pendingPointer.index) {
-        setTooltipState({
-          x: pendingPointer.x,
-          y: pendingPointer.y,
-          index: current.index,
-        });
-        return;
-      }
-
-      setTooltipState({
-        x: pendingPointer.x,
-        y: pendingPointer.y,
-        index: pendingPointer.index,
-      });
+      setTooltipState(pendingPointer);
     });
   };
 

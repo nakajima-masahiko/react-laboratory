@@ -62,24 +62,18 @@ function FinancialChart({
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const updateDevicePixelRatio = () => {
-      setDevicePixelRatio(getDevicePixelRatio());
-    };
-
     let mediaQuery = window.matchMedia(`(resolution: ${getDevicePixelRatio()}dppx)`);
     const handleResolutionChange = () => {
-      updateDevicePixelRatio();
+      setDevicePixelRatio(getDevicePixelRatio());
       mediaQuery.removeEventListener('change', handleResolutionChange);
       mediaQuery = window.matchMedia(`(resolution: ${getDevicePixelRatio()}dppx)`);
       mediaQuery.addEventListener('change', handleResolutionChange);
     };
 
     mediaQuery.addEventListener('change', handleResolutionChange);
-    window.addEventListener('resize', updateDevicePixelRatio);
 
     return () => {
       mediaQuery.removeEventListener('change', handleResolutionChange);
-      window.removeEventListener('resize', updateDevicePixelRatio);
     };
   }, []);
 
