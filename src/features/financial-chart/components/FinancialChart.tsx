@@ -1,5 +1,6 @@
-import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useResizeObserver } from '../hooks/useResizeObserver';
+import { useTooltipInteraction } from '../hooks/useTooltipInteraction';
 import { renderFinancialChart } from '../renderers/renderFinancialChart';
 import {
   DEFAULT_MARGIN,
@@ -8,15 +9,16 @@ import {
   type FinancialChartProps,
   type PlotRect,
   type TooltipLabels,
-  type TooltipState,
 } from '../types';
 import { formatPrice, formatTime } from '../utils/formatters';
-import { getNearestDataIndexFromX } from '../utils/getNearestDataIndexFromX';
 import { setupHiDpiCanvas } from '../utils/setupHiDpiCanvas';
 import ChartTooltipOverlay from './ChartTooltipOverlay';
 
 const DEFAULT_HEIGHT = 400;
 const DEFAULT_TIMEFRAME_MS = 24 * 60 * 60 * 1000;
+
+const getDevicePixelRatio = () =>
+  typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1;
 
 function FinancialChart({
   data,
@@ -28,13 +30,7 @@ function FinancialChart({
 }: FinancialChartProps) {
   const [containerRef, size] = useResizeObserver<HTMLDivElement>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafIdRef = useRef<number | null>(null);
-  const pendingPointerRef = useRef<TooltipState | null>(null);
-  const tooltipStateRef = useRef<TooltipState | null>(null);
-  const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
-  const [devicePixelRatio, setDevicePixelRatio] = useState(
-    () => window.devicePixelRatio || 1,
-  );
+  const [devicePixelRatio, setDevicePixelRatio] = useState(() => getDevicePixelRatio());
 
   const width = size.width;
   const tooltipLabels: TooltipLabels = useMemo(
@@ -42,10 +38,6 @@ function FinancialChart({
     [tooltip?.labels],
   );
   const tooltipDateFormat = tooltip?.dateFormat ?? DEFAULT_TOOLTIP_DATE_FORMAT;
-
-  useEffect(() => {
-    tooltipStateRef.current = tooltipState;
-  }, [tooltipState]);
 
   const plot = useMemo<PlotRect>(() => {
     const left = DEFAULT_MARGIN.left;
@@ -62,38 +54,23 @@ function FinancialChart({
     };
   }, [width, height]);
 
-  const activeTooltipState = useMemo(() => {
-    if (!tooltipState || data.length === 0) return null;
-
-    return {
-      ...tooltipState,
-      index: Math.min(tooltipState.index, data.length - 1),
-    };
-  }, [data.length, tooltipState]);
-
-  useEffect(
-    () => () => {
-      if (rafIdRef.current !== null) {
-        window.cancelAnimationFrame(rafIdRef.current);
-      }
-    },
-    [],
-  );
+  const { activeTooltipState, handleMouseMove, handleMouseLeave } = useTooltipInteraction({
+    dataLength: data.length,
+    plot,
+  });
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const updateDevicePixelRatio = () => {
-      setDevicePixelRatio(window.devicePixelRatio || 1);
+      setDevicePixelRatio(getDevicePixelRatio());
     };
 
-    let mediaQuery = window.matchMedia(
-      `(resolution: ${window.devicePixelRatio || 1}dppx)`,
-    );
+    let mediaQuery = window.matchMedia(`(resolution: ${getDevicePixelRatio()}dppx)`);
     const handleResolutionChange = () => {
       updateDevicePixelRatio();
       mediaQuery.removeEventListener('change', handleResolutionChange);
-      mediaQuery = window.matchMedia(
-        `(resolution: ${window.devicePixelRatio || 1}dppx)`,
-      );
+      mediaQuery = window.matchMedia(`(resolution: ${getDevicePixelRatio()}dppx)`);
       mediaQuery.addEventListener('change', handleResolutionChange);
     };
 
@@ -143,64 +120,6 @@ function FinancialChart({
       { label: tooltipLabels.close, value: formatPrice(candle.close) },
     ];
   }, [activeTooltipState, data, tooltipDateFormat, tooltipLabels]);
-
-  const handleMouseMove = (event: MouseEvent<HTMLCanvasElement>) => {
-    if (data.length === 0 || plot.width <= 0) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const pointerX = event.clientX - rect.left;
-    const pointerY = event.clientY - rect.top;
-
-    if (
-      pointerX < plot.left ||
-      pointerX > plot.right ||
-      pointerY < plot.top ||
-      pointerY > plot.bottom
-    ) {
-      setTooltipState(null);
-      return;
-    }
-
-    const nextIndex = getNearestDataIndexFromX(pointerX, plot, data.length);
-
-    pendingPointerRef.current = {
-      x: pointerX,
-      y: pointerY,
-      index: nextIndex,
-    };
-
-    if (rafIdRef.current !== null) return;
-
-    rafIdRef.current = window.requestAnimationFrame(() => {
-      rafIdRef.current = null;
-      const pendingPointer = pendingPointerRef.current;
-      if (!pendingPointer) return;
-
-      const current = tooltipStateRef.current;
-      if (current && current.index === pendingPointer.index) {
-        setTooltipState({
-          x: pendingPointer.x,
-          y: pendingPointer.y,
-          index: current.index,
-        });
-        return;
-      }
-
-      setTooltipState({
-        x: pendingPointer.x,
-        y: pendingPointer.y,
-        index: pendingPointer.index,
-      });
-    });
-  };
-
-  const handleMouseLeave = () => {
-    if (rafIdRef.current !== null) {
-      window.cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
-    pendingPointerRef.current = null;
-    setTooltipState(null);
-  };
 
   const latest = data.length > 0 ? data[data.length - 1] : null;
   const first = data.length > 0 ? data[0] : null;
