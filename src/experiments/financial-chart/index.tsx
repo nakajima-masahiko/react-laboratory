@@ -4,19 +4,33 @@ import { generateCandleData, generateNextCandle } from './data';
 import { THEME_LABELS, THEMES, type ThemeId } from './themes';
 import './styles.css';
 
+const TIMEFRAME_MS = 60 * 60 * 1000;
+
+const TOOLTIP_OPTIONS = {
+  labels: {
+    date: '日時',
+    open: '始値',
+    high: '高値',
+    low: '安値',
+    close: '終値',
+  },
+  dateFormat: '%Y/%m/%d %H:%M',
+} as const;
+
 function FinancialChartLab() {
   const [chartType, setChartType] = useState<ChartType>('candlestick');
   const [themeId, setThemeId] = useState<ThemeId>('dark');
   const [count, setCount] = useState<number>(60);
   const [height, setHeight] = useState<number>(400);
   const [data, setData] = useState(() => generateCandleData(count));
-  const timeframeMs = 60 * 60 * 1000;
+  const [dataCount, setDataCount] = useState(count);
+
+  if (dataCount !== count) {
+    setDataCount(count);
+    setData(generateCandleData(count));
+  }
 
   const theme = THEMES[themeId];
-
-  useEffect(() => {
-    setData(generateCandleData(count));
-  }, [count]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -103,18 +117,9 @@ function FinancialChartLab() {
           data={data}
           chartType={chartType}
           theme={theme}
-          timeframeMs={timeframeMs}
+          timeframeMs={TIMEFRAME_MS}
           height={height}
-          tooltip={{
-            labels: {
-              date: '日時',
-              open: '始値',
-              high: '高値',
-              low: '安値',
-              close: '終値',
-            },
-            dateFormat: '%Y/%m/%d %H:%M',
-          }}
+          tooltip={TOOLTIP_OPTIONS}
         />
       </div>
     </div>
