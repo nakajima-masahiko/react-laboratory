@@ -1,0 +1,397 @@
+あなたは React + TypeScript に精通したシニアフロントエンドエンジニアです。
+以下の要件を満たす Canvas ベースの金融チャート機能を、完成度高く再現してください。
+
+# 目的
+
+React アプリ内で利用できる、軽量で拡張性の高い金融チャートコンポーネントを作成する。
+ローソク足チャートとラインチャートを切り替え可能にし、テーマ変更、リサイズ、DPR対応、Tooltip、最新価格ライン、Y軸ラベル表示まで対応する。
+
+SVG は使用せず、チャート本体は Canvas 2D のみで描画する。
+
+# 技術前提
+
+- React 19
+- TypeScript strict
+- Vite
+- Canvas 2D API
+- d3-scale / d3-format / d3-time-format は使用可
+- d3 による DOM 描画は禁止
+- CSS Modules は使わない
+- 色はすべて theme から注入する
+- renderer 内に固定色を書かない
+
+# ディレクトリ構成
+
+以下の構成で実装する。
+
+src/features/financial-chart/
+├─ components/
+│  ├─ FinancialChart.tsx
+│  └─ ChartTooltipOverlay.tsx
+├─ hooks/
+│  ├─ useResizeObserver.ts
+│  └─ useTooltipInteraction.ts
+├─ renderers/
+│  ├─ renderFinancialChart.ts
+│  ├─ drawBackground.ts
+│  ├─ drawGrid.ts
+│  ├─ drawAxis.ts
+│  ├─ drawCandlesticks.ts
+│  ├─ drawLine.ts
+│  ├─ drawLatestPriceLine.ts
+│  └─ drawLatestPriceLabel.ts
+├─ utils/
+│  ├─ createScales.ts
+│  ├─ getPriceRange.ts
+│  ├─ getNearestDataIndexFromX.ts
+│  ├─ setupHiDpiCanvas.ts
+│  └─ formatters.ts
+├─ types.ts
+└─ index.ts
+
+# 外部API
+
+FinancialChart は以下のように使えること。
+
+<FinancialChart
+  data={data}
+  chartType="candlestick"
+  theme={theme}
+  timeframeMs={60 * 60 * 1000}
+  height={400}
+  tooltip={{
+    labels: {
+      date: '日付',
+      open: '始値',
+      high: '高値',
+      low: '安値',
+      close: '終値',
+    },
+    dateFormat: '%Y/%m/%d %H:%M',
+  }}
+/>
+
+# 型定義
+
+types.ts に以下を定義する。
+
+- CandleData
+  - time: string | number | Date
+  - open: number
+  - high: number
+  - low: number
+  - close: number
+
+- ChartType
+  - "candlestick" | "line"
+
+- ChartTheme
+  - background
+  - grid
+  - axis
+  - text
+  - candleUp
+  - candleDown
+  - line
+  - latestPriceLine
+  - latestPriceLabelBg
+  - latestPriceLabelText
+  - tooltipGuideLine
+  - tooltipBackground
+  - tooltipText
+  - tooltipShadow
+
+- PlotRect
+  - left
+  - right
+  - top
+  - bottom
+  - width
+  - height
+
+- TooltipOptions
+- TooltipLabels
+- TooltipState
+- TooltipContentItem
+- FinancialChartProps
+
+DEFAULT_MARGIN も types.ts に定義する。
+
+例:
+left: 48
+right: 72
+top: 24
+bottom: 32
+
+# FinancialChart.tsx の責務
+
+FinancialChart.tsx は薄く保つ。
+
+責務は以下に限定する。
+
+- props受け取り
+- useResizeObserver による親幅取得
+- plot 計算
+- devicePixelRatio 購読
+- setupHiDpiCanvas 呼び出し
+- ctx.setTransform
+- renderFinancialChart 呼び出し
+- useTooltipInteraction 呼び出し
+- Tooltip表示内容生成
+- aria-label 生成
+- ChartTooltipOverlay 表示
+
+FinancialChart.tsx に以下を直接書かない。
+
+- 個別の drawXxx 呼び出し
+- candleWidth 計算
+- ticks 生成
+- Tooltipパネルの詳細style
+- マウスイベント制御の詳細
+
+# Canvas描画仕様
+
+renderFinancialChart.ts に Canvas 描画全体を集約する。
+
+描画順序は必ず以下。
+
+1. clearRect
+2. drawBackground
+3. createScales
+4. xTicks / yTicks 生成
+5. drawGrid
+6. chartType に応じて drawCandlesticks または drawLine
+7. drawAxis
+8. drawLatestPriceLine
+9. drawLatestPriceLabel
+
+# 背景
+
+drawBackground:
+- theme.background で全面塗りする。
+
+# グリッド
+
+drawGrid:
+- plot領域内に縦横グリッドを描画する。
+- xTicks / yTicks に基づいて線を引く。
+- theme.grid を使う。
+- 線は 0.5px 補正してぼやけを抑える。
+- plot領域からはみ出さないようにする。
+
+# 軸
+
+drawAxis:
+- X軸は下側。
+- Y軸は右側。
+- 軸線、目盛、ラベルを描画する。
+- theme.axis / theme.text を使う。
+- X軸ラベルは timeframeMs に応じて表示を切り替える。
+  - 1日未満: 時刻中心
+  - 1日以上: 日付中心
+- Y軸ラベルは価格フォーマットする。
+
+# ローソク足
+
+drawCandlesticks:
+- close >= open の場合は theme.candleUp
+- close < open の場合は theme.candleDown
+- ヒゲは line
+- 実体は rect
+- 実体の高さは最低 1px
+- candleWidth は computeCandleWidth で算出する。
+- plot領域外にはみ出さないよう clip を使う。
+
+# ラインチャート
+
+drawLine:
+- close を結ぶ line chart を描画する。
+- theme.line を使う。
+- plot領域内に clip する。
+
+# 最新価格ライン
+
+drawLatestPriceLine:
+- data の最後の close を最新価格とする。
+- yScale(latest.close) に水平点線を描く。
+- 点線は setLineDash([4, 4])。
+- 描画後は setLineDash([]) に戻す。
+- theme.latestPriceLine を使う。
+- plot領域外なら描画しない。
+
+# 最新価格ラベル
+
+drawLatestPriceLabel:
+- Y軸上、plot.right の右側に表示する。
+- 背景は theme.latestPriceLabelBg。
+- 文字は theme.latestPriceLabelText。
+- 角丸矩形を描画する。
+- ラベルは plot.top / plot.bottom 内に収める。
+- 最新価格ラインより後、軸より後に描き、最前面に出す。
+
+# スケール
+
+createScales.ts:
+
+- xScale は d3.scaleTime
+- yScale は d3.scaleLinear
+- x domain:
+  - 空データ: [new Date(0), new Date(1)]
+  - 1件: [time, time + 1ms]
+  - 複数件: time の先頭〜末尾
+- 未ソートデータの場合:
+  - DEV環境では console.warn
+  - domain は min/max で補正する
+- y domain:
+  - candlestick: low/high 全体
+  - line: close 全体
+  - 上下に 5% padding
+  - 空データ: [0, 1]
+  - 同値価格のみでも潰れないよう padding を入れる
+
+computeCandleWidth:
+- 隣接 time の xScale 差分の最小値を使う。
+- 70% をローソク幅にする。
+- 最低 1px。
+- 1件のみなら 8px。
+
+# HiDPI対応
+
+setupHiDpiCanvas.ts を作る。
+
+- canvas.width = width * devicePixelRatio
+- canvas.height = height * devicePixelRatio
+- canvas.style.width = width px
+- canvas.style.height = height px
+- サイズが変わらない場合は canvas.width / height を再代入しない。
+
+FinancialChart 側では:
+
+ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+を使い、描画座標は CSS px 基準にする。
+
+window が存在しない環境でも落ちないようにする。
+
+# リサイズ
+
+useResizeObserver.ts:
+
+- 親要素の clientWidth / contentRect.width を監視する。
+- 初回は getBoundingClientRect でサイズを取得する。
+- ResizeObserver がない環境でも落ちないようにする。
+
+# Tooltip
+
+Tooltip は Canvas に描かず、DOM overlay として canvas の上に重ねる。
+
+useTooltipInteraction.ts:
+- mouse move
+- mouse leave
+- requestAnimationFrame による更新間引き
+- plot外に出たら Tooltip を消す
+- dataLength 変化時は index を clamp する
+- getNearestDataIndexFromX を使う
+- 戻り値:
+  - activeTooltipState
+  - handleMouseMove
+  - handleMouseLeave
+
+getNearestDataIndexFromX:
+- pointerX を plot.left〜plot.right の比率に変換する。
+- dataLength に応じて index を求める。
+- 範囲外は clamp する。
+- dataLength <= 1 は 0 を返す。
+
+ChartTooltipOverlay.tsx:
+- 縦点線ガイドを表示する。
+- Tooltipパネルを表示する。
+- theme.tooltipGuideLine / tooltipBackground / tooltipText / tooltipShadow を使う。
+- pointerEvents: none
+- zIndex を設定する。
+- 左右にはみ出さないようにする。
+- Tooltip の見た目:
+  - 角丸 6px
+  - padding 8px 10px
+  - fontSize 12px
+  - lineHeight 1.5
+  - minWidth 156px
+  - label と value を左右配置
+  - value は fontWeight 600
+
+# アクセシビリティ
+
+canvas に以下を付与する。
+
+- role="img"
+- aria-label
+
+aria-label は以下のような内容にする。
+
+- データあり:
+  Financial chart from {first.time} to {latest.time}. Latest close {latest.close}.
+- データなし:
+  Financial chart. No data available.
+
+# テーマ
+
+theme は必ず外部注入。
+renderer 内で固定色を書かない。
+Tooltipも theme で制御する。
+
+# テスト
+
+可能なら Vitest で以下の utility テストを追加する。
+
+対象:
+- getNearestDataIndexFromX
+- setupHiDpiCanvas
+- createScales
+- getPriceRange
+- formatters
+
+確認ケース:
+- 空データ
+- 1件データ
+- 同値価格
+- 未ソートデータ
+- candlestick / line
+- plot.width = 0
+- pointerX 範囲外
+- DPR 2
+- 価格フォーマット
+- 時刻フォーマット
+
+# 禁止事項
+
+- SVG対応を追加しない。
+- WebGL対応を追加しない。
+- Recharts / ECharts などのチャートライブラリを使わない。
+- d3 で DOM を描画しない。
+- renderer 内に固定色を書かない。
+- FinancialChart.tsx を巨大化させない。
+- Canvas描画順序を崩さない。
+- 外部APIを不必要に変更しない。
+
+# 完成条件
+
+- ローソク足チャートが表示される。
+- ラインチャートに切り替えられる。
+- 親要素幅に追従する。
+- DPR対応でぼやけない。
+- theme変更で再描画される。
+- 最新価格点線が表示される。
+- 最新価格ラベルがY軸側に表示される。
+- X軸/Y軸/グリッドが表示される。
+- Tooltipが表示される。
+- Tooltipが左右にはみ出しにくい。
+- 空データでも例外が出ない。
+- 1件データでも例外が出ない。
+- 未ソートデータでも破綻しにくい。
+- TypeScript strict / lint / build が通る。
+
+# 最重要方針
+
+このチャートは「Canvas本体描画」と「DOM overlayによるTooltip」を分離する。
+Reactは状態管理とイベント制御、Canvasは高速描画、utilsは計算、renderersは描画責務に限定する。
+将来のズーム、パン、クロスヘア、移動平均線、出来高ペイン、9分割チャートに拡張しやすい構造にする。
