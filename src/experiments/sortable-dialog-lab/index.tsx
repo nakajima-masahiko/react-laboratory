@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   CheckIcon,
@@ -52,9 +58,13 @@ function SortableDialogLab() {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
   const dragPointerYRef = useRef<number | null>(null);
+  const dragPrevPointerYRef = useRef<number | null>(null);
   const dragRafRef = useRef<number | null>(null);
+  const flipRafRef = useRef<number | null>(null);
   const draggedIdRef = useRef<string | null>(null);
-  const lastOverIdRef = useRef<string | null>(null);
+  const itemNodesRef = useRef<Map<string, HTMLLIElement>>(new Map());
+  const beforeReorderRectsRef = useRef<Map<string, DOMRect>>(new Map());
+  const shouldRunFlipRef = useRef(false);
 
   const orderedLabels = useMemo(() => items.map((item) => item.label), [items]);
   const isDirty = useMemo(
@@ -62,18 +72,33 @@ function SortableDialogLab() {
     [items],
   );
 
-  const findItemIdAt = useCallback((clientY: number): string | null => {
+  const findSwapTargetByMidline = (
+    pointerY: number,
+    direction: -1 | 1,
+    draggedId: string,
+  ): string | null => {
     const list = listRef.current;
     if (!list) return null;
-    const elements = list.querySelectorAll<HTMLLIElement>('[data-item-id]');
-    for (const el of elements) {
-      const rect = el.getBoundingClientRect();
-      if (clientY >= rect.top && clientY <= rect.bottom) {
-        return el.dataset.itemId ?? null;
-      }
-    }
+
+    const elements = Array.from(list.querySelectorAll<HTMLLIElement>('[data-item-id]'));
+    const draggedIndex = elements.findIndex((el) => el.dataset.itemId === draggedId);
+    if (draggedIndex < 0) return null;
+
+    const neighborIndex = draggedIndex + direction;
+    const neighbor = elements[neighborIndex];
+    if (!neighbor) return null;
+
+    const neighborId = neighbor.dataset.itemId ?? null;
+    if (!neighborId) return null;
+
+    const rect = neighbor.getBoundingClientRect();
+    const midline = rect.top + rect.height / 2;
+
+    // 隣接要素の中央線を超えたときだけ並び替えることで、過敏な入れ替えを防ぐ。
+    if (direction > 0 && pointerY >= midline) return neighborId;
+    if (direction < 0 && pointerY <= midline) return neighborId;
     return null;
-  }, []);
+  };
 
   const handlePointerDown = (
     event: React.PointerEvent<HTMLButtonElement>,
@@ -83,26 +108,30 @@ function SortableDialogLab() {
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     draggedIdRef.current = id;
-    lastOverIdRef.current = id;
     setDraggingId(id);
+    dragPointerYRef.current = event.clientY;
+    dragPrevPointerYRef.current = event.clientY;
   };
 
-  const processDragFrame = useCallback(() => {
+  const processDragFrame = () => {
     dragRafRef.current = null;
     const draggedId = draggedIdRef.current;
     const pointerY = dragPointerYRef.current;
-    if (!draggedId || pointerY == null) return;
+    const prevPointerY = dragPrevPointerYRef.current;
+    if (!draggedId || pointerY == null || prevPointerY == null || pointerY === prevPointerY) return;
 
-    const overId = findItemIdAt(pointerY);
-    if (!overId || overId === draggedId || overId === lastOverIdRef.current) return;
+    const direction: -1 | 1 = pointerY > prevPointerY ? 1 : -1;
+    const targetId = findSwapTargetByMidline(pointerY, direction, draggedId);
+    dragPrevPointerYRef.current = pointerY;
+    if (!targetId) return;
 
-    setItems((current) => {
-      const next = moveItem(current, draggedId, overId);
-      if (next === current) return current;
-      lastOverIdRef.current = overId;
-      return next;
-    });
-  }, [findItemIdAt]);
+    beforeReorderRectsRef.current = new Map(
+      Array.from(itemNodesRef.current.entries()).map(([id, node]) => [id, node.getBoundingClientRect()]),
+    );
+    shouldRunFlipRef.current = true;
+
+    setItems((current) => moveItem(current, draggedId, targetId));
+  };
 
   const handlePointerMove = (
     event: React.PointerEvent<HTMLButtonElement>,
@@ -124,8 +153,8 @@ function SortableDialogLab() {
       dragRafRef.current = null;
     }
     dragPointerYRef.current = null;
+    dragPrevPointerYRef.current = null;
     draggedIdRef.current = null;
-    lastOverIdRef.current = null;
     setDraggingId(null);
   };
 
@@ -134,9 +163,65 @@ function SortableDialogLab() {
       if (dragRafRef.current != null) {
         cancelAnimationFrame(dragRafRef.current);
       }
+      if (flipRafRef.current != null) {
+        cancelAnimationFrame(flipRafRef.current);
+      }
     },
     [],
   );
+
+
+  const setItemNode = (id: string, node: HTMLLIElement | null) => {
+    if (node) {
+      itemNodesRef.current.set(id, node);
+      return;
+    }
+    itemNodesRef.current.delete(id);
+  };
+
+  useLayoutEffect(() => {
+    if (!shouldRunFlipRef.current) return;
+    shouldRunFlipRef.current = false;
+
+    const beforeRects = beforeReorderRectsRef.current;
+    const nodes = itemNodesRef.current;
+    const animatedNodes: HTMLLIElement[] = [];
+
+    nodes.forEach((node, id) => {
+      if (id === draggedIdRef.current) return;
+      const prev = beforeRects.get(id);
+      if (!prev) return;
+      const next = node.getBoundingClientRect();
+      const deltaY = prev.top - next.top;
+      if (Math.abs(deltaY) < 0.5) return;
+
+      node.style.transition = 'none';
+      node.style.setProperty('--sdl-flip-y', `${deltaY}px`);
+      // reflow to ensure inversion transform is applied before play phase
+      node.getBoundingClientRect();
+      animatedNodes.push(node);
+    });
+
+    if (animatedNodes.length === 0) return;
+    if (flipRafRef.current != null) {
+      cancelAnimationFrame(flipRafRef.current);
+    }
+    flipRafRef.current = requestAnimationFrame(() => {
+      animatedNodes.forEach((node) => {
+        node.style.transition = '';
+        node.style.setProperty('--sdl-flip-y', '0px');
+      });
+    });
+  }, [items]);
+
+  useEffect(() => {
+    if (!draggingId) return;
+    const previousUserSelect = document.body.style.userSelect;
+    document.body.style.userSelect = 'none';
+    return () => {
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [draggingId]);
 
   const handleHandleKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
@@ -186,7 +271,12 @@ function SortableDialogLab() {
               </Dialog.Close>
             </div>
 
-            <ul ref={listRef} className="sdl-list" aria-label="並び替え対象リスト">
+            <ul
+              ref={listRef}
+              className="sdl-list"
+              data-drag-active={draggingId ? 'true' : undefined}
+              aria-label="並び替え対象リスト"
+            >
               {items.map((item, index) => {
                 const isDragging = draggingId === item.id;
                 return (
@@ -196,6 +286,7 @@ function SortableDialogLab() {
                     data-dragging={isDragging || undefined}
                     data-drag-state={isDragging ? 'active' : draggingId ? 'idle' : undefined}
                     className="sdl-item"
+                    ref={(node) => setItemNode(item.id, node)}
                   >
                     <span className="sdl-index" aria-hidden>
                       {String(index + 1).padStart(2, '0')}
