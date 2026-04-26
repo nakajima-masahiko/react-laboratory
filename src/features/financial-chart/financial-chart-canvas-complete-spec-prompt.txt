@@ -1,6 +1,12 @@
 あなたは React + TypeScript に精通したシニアフロントエンドエンジニアです。
 以下の要件を満たす Canvas ベースの金融チャート機能を、完成度高く再現してください。
 
+# 出力規則（最優先）
+
+- 全ファイルをコードブロックで省略なく完全に出力すること。
+- `// ...`、`// TODO`、`// 省略`、`// 以下略` は一切書かない。
+- 全ファイルを出力し終えるまで要約・説明・感想を挟まない。
+
 # 目的
 
 React アプリ内で利用できる、軽量で拡張性の高い金融チャートコンポーネントを作成する。
@@ -11,14 +17,15 @@ SVG は使用せず、チャート本体は Canvas 2D のみで描画する。
 # 技術前提
 
 - React 19
-- TypeScript strict
+- TypeScript strict (`noUnusedLocals` / `noUnusedParameters` / `erasableSyntaxOnly`)
 - Vite
 - Canvas 2D API
-- d3-scale / d3-format / d3-time-format は使用可
+- d3-scale / d3-format / d3-time-format / d3-array は使用可（npm install 不要、インストール済み）
 - d3 による DOM 描画は禁止
 - CSS Modules は使わない
 - 色はすべて theme から注入する
 - renderer 内に固定色を書かない
+- テストは `node:test` + `node:assert/strict` を使う（Vitest は未インストール）
 
 # ディレクトリ構成
 
@@ -76,7 +83,7 @@ FinancialChart は以下のように使えること。
 types.ts に以下を定義する。
 
 - CandleData
-  - time: string | number | Date
+  - time: string  ← ISO 8601 形式の日時文字列のみ（例: "2024-01-01T00:00:00.000Z"）
   - open: number
   - high: number
   - low: number
@@ -85,7 +92,7 @@ types.ts に以下を定義する。
 - ChartType
   - "candlestick" | "line"
 
-- ChartTheme
+- ChartTheme（全フィールド string）
   - background
   - grid
   - axis
@@ -99,7 +106,13 @@ types.ts に以下を定義する。
   - tooltipGuideLine
   - tooltipBackground
   - tooltipText
-  - tooltipShadow
+  - tooltipShadow  ← CSS box-shadow 値（例: "0 2px 8px rgba(0,0,0,0.3)"）
+
+- ChartMargin
+  - top: number
+  - right: number
+  - bottom: number
+  - left: number
 
 - PlotRect
   - left
@@ -115,13 +128,22 @@ types.ts に以下を定義する。
 - TooltipContentItem
 - FinancialChartProps
 
-DEFAULT_MARGIN も types.ts に定義する。
+DEFAULT_MARGIN と DEFAULT_TOOLTIP_LABELS と DEFAULT_TOOLTIP_DATE_FORMAT も types.ts に定義する。
 
-例:
-left: 48
-right: 72
-top: 24
-bottom: 32
+DEFAULT_MARGIN の値:
+  top: 16
+  right: 64
+  bottom: 32
+  left: 16
+
+DEFAULT_TOOLTIP_LABELS の値:
+  date: '日付'
+  open: '始値'
+  high: '高値'
+  low: '安値'
+  close: '終値'
+
+DEFAULT_TOOLTIP_DATE_FORMAT の値: '%Y/%m/%d %H:%M'
 
 # FinancialChart.tsx の責務
 
@@ -186,10 +208,14 @@ drawAxis:
 - Y軸は右側。
 - 軸線、目盛、ラベルを描画する。
 - theme.axis / theme.text を使う。
-- X軸ラベルは timeframeMs に応じて表示を切り替える。
-  - 1日未満: 時刻中心
-  - 1日以上: 日付中心
-- Y軸ラベルは価格フォーマットする。
+- X軸ラベルは timeframeMs に応じて以下のフォーマットで表示を切り替える。
+  - timeframeMs < 86_400_000 (1日未満, イントラデイ):
+    - 通常のtick: `%H:%M:%S`
+    - 日付が前のtickから変わった最初のtick: `%Y/%m/%d %H:%M:%S`
+  - timeframeMs >= 86_400_000 (1日以上):
+    - 日付が前のtickから変わった最初のtick: `%Y/%m/%d`
+    - 同日内の重複tick: 空文字（ラベルを描画しない）
+- Y軸ラベルは価格フォーマットする（`format(',.2f')` 相当）。
 
 # ローソク足
 
@@ -251,72 +277,113 @@ createScales.ts:
 
 computeCandleWidth:
 - 隣接 time の xScale 差分の最小値を使う。
-- 70% をローソク幅にする。
+- 70% をローソク幅にする（`Math.floor(minStep * 0.7)`）。
 - 最低 1px。
-- 1件のみなら 8px。
+- 1件のみ、または有効な隣接ステップがない場合は 8px。
 
 # HiDPI対応
 
 setupHiDpiCanvas.ts を作る。
 
-- canvas.width = width * devicePixelRatio
-- canvas.height = height * devicePixelRatio
-- canvas.style.width = width px
-- canvas.style.height = height px
-- サイズが変わらない場合は canvas.width / height を再代入しない。
+- `canvas.width = Math.round(width * devicePixelRatio)`
+- `canvas.height = Math.round(height * devicePixelRatio)`
+- `canvas.style.width = '${width}px'`
+- `canvas.style.height = '${height}px'`
+- サイズが変わらない場合は `canvas.width` / `canvas.height` を再代入しない（Canvas クリアを避けるため）。
 
 FinancialChart 側では:
 
-ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+```
+ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0)
+```
 
 を使い、描画座標は CSS px 基準にする。
 
 window が存在しない環境でも落ちないようにする。
 
+# DPR変動追従
+
+FinancialChart.tsx で devicePixelRatio を useState で管理し、変更時に再描画する。
+
+実装パターン:
+```typescript
+const [devicePixelRatio, setDevicePixelRatio] = useState(() =>
+  typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1
+);
+
+useEffect(() => {
+  if (typeof window === 'undefined') return;
+  let mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+  const handler = () => {
+    setDevicePixelRatio(window.devicePixelRatio || 1);
+    mq.removeEventListener('change', handler);
+    mq = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    mq.addEventListener('change', handler);
+  };
+  mq.addEventListener('change', handler);
+  return () => mq.removeEventListener('change', handler);
+}, []);
+```
+
+devicePixelRatio は useEffect の依存配列に含める。
+
 # リサイズ
 
 useResizeObserver.ts:
 
-- 親要素の clientWidth / contentRect.width を監視する。
-- 初回は getBoundingClientRect でサイズを取得する。
-- ResizeObserver がない環境でも落ちないようにする。
+- 親要素の `contentRect.width` / `contentRect.height` を ResizeObserver で監視する。
+- 初回は `getBoundingClientRect()` でサイズを取得する（初回描画の1フレーム遅延を防ぐ）。
+- 前回値と同じサイズなら setState を呼ばない（不要な再レンダーを防ぐ）。
+- `ResizeObserver` がない環境でも落ちないようにする（try-catch は不要。`typeof ResizeObserver !== 'undefined'` で guard する）。
 
 # Tooltip
 
 Tooltip は Canvas に描かず、DOM overlay として canvas の上に重ねる。
 
 useTooltipInteraction.ts:
-- mouse move
-- mouse leave
-- requestAnimationFrame による更新間引き
-- plot外に出たら Tooltip を消す
-- dataLength 変化時は index を clamp する
-- getNearestDataIndexFromX を使う
+- mousemove / mouseleave イベントを処理する。
+- requestAnimationFrame で更新を間引く（rafIdRef + pendingPointerRef パターン）。
+  - mousemove のたびに pendingPointerRef に最新座標を保存し、RAF が未予約なら予約する。
+  - RAF コールバック内で pendingPointerRef を読んで setState する。
+- plot外に出たら Tooltip を消す（setState(null)）。
+- 既に null の場合は setState を呼ばない（`current ? null : current` パターン）。
+- dataLength 変化時は index を `Math.min(index, dataLength - 1)` で clamp する（useMemo で処理）。
+- getNearestDataIndexFromX を使う。
 - 戻り値:
-  - activeTooltipState
-  - handleMouseMove
-  - handleMouseLeave
+  - activeTooltipState: TooltipState | null
+  - handleMouseMove: (event: MouseEvent<HTMLCanvasElement>) => void
+  - handleMouseLeave: () => void
 
 getNearestDataIndexFromX:
 - pointerX を plot.left〜plot.right の比率に変換する。
-- dataLength に応じて index を求める。
-- 範囲外は clamp する。
+- `Math.round(ratio * (dataLength - 1))` で index を求める。
+- 範囲外は `Math.max(0, Math.min(index, dataLength - 1))` で clamp する。
 - dataLength <= 1 は 0 を返す。
 
 ChartTooltipOverlay.tsx:
-- 縦点線ガイドを表示する。
+- 縦点線ガイドを表示する（`borderLeft: 1px dashed theme.tooltipGuideLine`）。
 - Tooltipパネルを表示する。
 - theme.tooltipGuideLine / tooltipBackground / tooltipText / tooltipShadow を使う。
-- pointerEvents: none
-- zIndex を設定する。
-- 左右にはみ出さないようにする。
-- Tooltip の見た目:
-  - 角丸 6px
-  - padding 8px 10px
-  - fontSize 12px
-  - lineHeight 1.5
-  - minWidth 156px
-  - label と value を左右配置
+- 全要素に `pointerEvents: 'none'` を設定する。
+- ガイド線の zIndex: 5、Tooltipパネルの zIndex: 10。
+- Tooltipの横位置は以下の式で両端を制約する:
+  ```
+  const TOOLTIP_WIDTH = 180;
+  const PADDING = 8;
+  const OFFSET_X = 14;
+  left = Math.max(PADDING, Math.min(width - TOOLTIP_WIDTH - PADDING, x + OFFSET_X))
+  ```
+- Tooltip の見た目（inline style で指定）:
+  - background: theme.tooltipBackground
+  - color: theme.tooltipText
+  - boxShadow: theme.tooltipShadow
+  - borderRadius: '6px'
+  - padding: '8px 10px'
+  - fontSize: '12px'
+  - lineHeight: 1.5
+  - minWidth: '156px'
+  - fontFamily: 'ui-sans-serif, system-ui, sans-serif'
+  - label と value を `justifyContent: 'space-between'` で左右配置
   - value は fontWeight 600
 
 # アクセシビリティ
@@ -339,28 +406,68 @@ theme は必ず外部注入。
 renderer 内で固定色を書かない。
 Tooltipも theme で制御する。
 
+# index.ts のエクスポート
+
+index.ts は以下を named export する。
+
+```typescript
+export { default as FinancialChart } from './components/FinancialChart';
+export type {
+  CandleData,
+  ChartTheme,
+  ChartType,
+  FinancialChartProps,
+  TooltipLabels,
+  TooltipOptions,
+} from './types';
+```
+
+# 最新価格ラベル補足
+
+drawLatestPriceLabel:
+- 角丸矩形は `ctx.roundRect()` を使わず `quadraticCurveTo` で自前描画する（ブラウザ互換性のため）。
+- ラベルY座標: `Math.max(plot.top + rectH / 2, Math.min(plot.bottom - rectH / 2, y))` でクランプする。
+- 文字は `textAlign: 'center'`, `textBaseline: 'middle'` で中央揃えにする。
+
 # テスト
 
-可能なら Vitest で以下の utility テストを追加する。
+`node:test` + `node:assert/strict` を使って以下の utility テストを必ず追加する（省略しない）。
 
-対象:
-- getNearestDataIndexFromX
-- setupHiDpiCanvas
-- createScales
-- getPriceRange
-- formatters
+配置先: 各 util ファイルと同じディレクトリ（`utils/*.test.ts`）。
 
-確認ケース:
-- 空データ
-- 1件データ
-- 同値価格
-- 未ソートデータ
-- candlestick / line
-- plot.width = 0
-- pointerX 範囲外
-- DPR 2
-- 価格フォーマット
-- 時刻フォーマット
+対象ファイルと確認ケース:
+
+getNearestDataIndexFromX.test.ts:
+- dataLength が 0 のとき 0 を返す
+- dataLength が 1 のとき 0 を返す
+- plot.left で index 0 を返す
+- plot.right で index (dataLength - 1) を返す
+- 中央付近で中間 index を返す
+- pointerX が範囲外（負値・超大値）でも clamp する
+
+setupHiDpiCanvas.test.ts:
+- DPR 2 のとき canvas.width / height が CSS px の2倍になる
+- style.width / height が CSS px 単位で設定される
+- 同じサイズで2回呼んでも canvas.width / height への代入が1回しか起きない
+
+createScales.test.ts:
+- 空データで domain が [new Date(0), new Date(1)]
+- 1件データで X domain が 1ms 幅になる
+- 複数件データで X domain が先頭〜末尾
+- 未ソートデータで domain が min/max で補正される
+- candlestick / line の両チャートタイプで例外が出ない
+
+getPriceRange.test.ts:
+- 空データで { min: 0, max: 1 }
+- 同値価格のみでも min < price < max になる（潰れない）
+- candlestick では low / high を使う
+- line では close を使う
+- padding が適用されて min が raw min より小さく、max が raw max より大きい
+
+formatters.test.ts:
+- 価格フォーマット: `12345.678` → `'12,345.68'`
+- 時刻フォーマット: デフォルトパターンで月/日が含まれる
+- 時刻フォーマット: 明示的パターン `'%Y-%m-%d %H:%M'` で期待通りの文字列
 
 # 禁止事項
 
@@ -388,7 +495,9 @@ Tooltipも theme で制御する。
 - 空データでも例外が出ない。
 - 1件データでも例外が出ない。
 - 未ソートデータでも破綻しにくい。
+- DPR が変わったとき（ブラウザズームなど）に再描画される。
 - TypeScript strict / lint / build が通る。
+- utils/*.test.ts が全て存在し、各ケースが網羅されている。
 
 # 最重要方針
 
