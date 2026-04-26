@@ -1,12 +1,66 @@
 .sortable-dialog-lab {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
+
+.sdl-header h2 {
+  margin: 0 0 4px;
+}
+
+.sdl-header p {
+  margin: 0;
+  color: color-mix(in oklab, var(--text), transparent 25%);
+}
+
+/* Trigger ----------------------------------------------------------------- */
+
+.sdl-trigger {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in oklab, var(--accent), #fff 18%)
+  );
+  color: #fff;
+  font-weight: 600;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 18%) inset,
+    0 6px 18px -8px color-mix(in oklab, var(--accent), transparent 35%);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.sdl-trigger:hover {
+  transform: translateY(-1px);
+  border-color: transparent;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 22%) inset,
+    0 10px 24px -10px color-mix(in oklab, var(--accent), transparent 25%);
+}
+
+.sdl-trigger:active {
+  transform: translateY(0);
+}
+
+/* Overlay & content ------------------------------------------------------- */
 
 .sdl-overlay {
   position: fixed;
   inset: 0;
-  background: rgb(0 0 0 / 55%);
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      color-mix(in oklab, var(--accent), transparent 78%),
+      transparent 60%
+    ),
+    rgb(8 10 22 / 55%);
+  backdrop-filter: blur(6px);
+  animation: sdl-fade-in 180ms ease-out;
 }
 
 .sdl-content {
@@ -17,96 +71,308 @@
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
   overflow: auto;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg);
+  border-radius: 16px;
+  border: 1px solid color-mix(in oklab, var(--border), var(--accent) 25%);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--bg), var(--accent-light) 35%),
+      var(--bg) 35%
+    );
   color: var(--text);
-  padding: 20px;
+  padding: 24px;
   display: grid;
-  gap: 14px;
+  gap: 18px;
+  box-shadow:
+    0 1px 0 color-mix(in oklab, #fff, transparent 85%) inset,
+    0 30px 60px -20px rgb(0 0 0 / 45%);
+  animation: sdl-pop-in 220ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.sdl-content-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .sdl-title {
-  margin: 0;
+  margin: 0 0 4px;
+  font-size: 1.15rem;
 }
 
 .sdl-description {
   margin: 0;
-  color: color-mix(in oklab, var(--text), #666 35%);
+  font-size: 0.9rem;
+  color: color-mix(in oklab, var(--text), transparent 25%);
 }
+
+.sdl-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+}
+
+.sdl-close:hover {
+  background: color-mix(in oklab, var(--bg), var(--text) 8%);
+  border-color: var(--border);
+}
+
+/* List -------------------------------------------------------------------- */
 
 .sdl-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .sdl-item {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--bg), var(--accent-light) 22%);
-  border-radius: 10px;
-  padding: 10px;
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 18%);
+  transition:
+    transform 160ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease,
+    background 200ms ease;
 }
 
-.sdl-item.is-dragging {
-  opacity: 0.6;
+.sdl-item:hover {
+  border-color: color-mix(in oklab, var(--border), var(--accent) 40%);
+}
+
+.sdl-item[data-dragging] {
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 55%);
+  transform: scale(1.015);
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--accent), transparent 80%),
+    0 12px 28px -14px color-mix(in oklab, var(--accent), transparent 30%);
+  z-index: 1;
+}
+
+.sdl-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: color-mix(in oklab, var(--bg), var(--accent) 12%);
+  border: 1px solid color-mix(in oklab, var(--border), var(--accent) 25%);
+}
+
+.sdl-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sdl-label {
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.sdl-hint {
+  font-size: 0.82rem;
+  color: color-mix(in oklab, var(--text), transparent 35%);
 }
 
 .sdl-handle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--border);
+  width: 36px;
+  height: 36px;
+  padding: 0;
   border-radius: 8px;
-  cursor: grab;
+  border: 1px solid var(--border);
   background: var(--bg);
-  color: var(--text);
+  color: color-mix(in oklab, var(--text), transparent 20%);
+  cursor: grab;
+  touch-action: none;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
 }
 
-.sdl-handle:active {
-  cursor: grabbing;
+.sdl-handle:hover {
+  color: var(--accent);
+  border-color: color-mix(in oklab, var(--border), var(--accent) 50%);
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 30%);
 }
+
+.sdl-handle:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 75%);
+}
+
+.sdl-handle:active,
+.sdl-item[data-dragging] .sdl-handle {
+  cursor: grabbing;
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 50%);
+}
+
+/* Actions ----------------------------------------------------------------- */
 
 .sdl-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 10px;
+  padding-top: 4px;
+  border-top: 1px dashed color-mix(in oklab, var(--border), transparent 30%);
+  margin-top: 4px;
+  padding-block-start: 14px;
+}
+
+.sdl-ghost,
+.sdl-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.sdl-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+.sdl-ghost:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.sdl-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .sdl-primary {
-  background: var(--accent);
-  color: var(--bg);
+  border: 1px solid transparent;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in oklab, var(--accent), #fff 15%)
+  );
+  color: #fff;
+  box-shadow: 0 6px 18px -8px color-mix(in oklab, var(--accent), transparent 35%);
 }
 
-.sdl-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  border: none;
-  background: transparent;
-  color: inherit;
-  padding: 4px;
+.sdl-primary:hover {
+  border-color: transparent;
+  filter: brightness(1.05);
 }
+
+/* Preview ----------------------------------------------------------------- */
 
 .sdl-preview {
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  background: color-mix(in oklab, var(--bg), var(--accent-light) 20%);
+  border-radius: 14px;
+  padding: 18px;
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 22%);
+  display: grid;
+  gap: 12px;
 }
 
-.sdl-preview h3,
-.sdl-preview p {
+.sdl-preview h3 {
   margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: color-mix(in oklab, var(--text-h), transparent 10%);
 }
 
-.sdl-preview p {
-  margin-top: 8px;
+.sdl-preview-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sdl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--border), var(--accent) 20%);
+  background: var(--bg);
+  font-size: 0.88rem;
+  color: var(--text-h);
+}
+
+.sdl-chip-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    color-mix(in oklab, var(--accent), #fff 18%)
+  );
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Animations -------------------------------------------------------------- */
+
+@keyframes sdl-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sdl-pop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdl-overlay,
+  .sdl-content,
+  .sdl-trigger,
+  .sdl-item,
+  .sdl-handle {
+    animation: none;
+    transition: none;
+  }
 }

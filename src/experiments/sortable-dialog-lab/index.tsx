@@ -1,19 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { DragHandleDots2Icon, Cross2Icon } from '@radix-ui/react-icons';
+import {
+  CheckIcon,
+  Cross2Icon,
+  DragHandleDots2Icon,
+  ResetIcon,
+  Pencil2Icon,
+} from '@radix-ui/react-icons';
 import './styles.css';
 
 type Item = {
   id: string;
   label: string;
+  hint: string;
 };
 
 const INITIAL_ITEMS: Item[] = [
-  { id: 'item-1', label: 'ユーザー管理' },
-  { id: 'item-2', label: '売上レポート' },
-  { id: 'item-3', label: '請求処理' },
-  { id: 'item-4', label: '通知設定' },
-  { id: 'item-5', label: 'アクセス監査' },
+  { id: 'item-1', label: 'ユーザー管理', hint: 'メンバーと権限の制御' },
+  { id: 'item-2', label: '売上レポート', hint: '日次・月次のサマリー' },
+  { id: 'item-3', label: '請求処理', hint: '入金確認と請求書発行' },
+  { id: 'item-4', label: '通知設定', hint: '配信チャネルとルール' },
+  { id: 'item-5', label: 'アクセス監査', hint: '操作ログのレビュー' },
 ];
 
 function moveItem(items: Item[], fromId: string, toId: string): Item[] {
@@ -30,82 +37,181 @@ function moveItem(items: Item[], fromId: string, toId: string): Item[] {
   return next;
 }
 
+function swapByOffset(items: Item[], id: string, offset: number): Item[] {
+  const index = items.findIndex((item) => item.id === id);
+  const target = index + offset;
+  if (index < 0 || target < 0 || target >= items.length) return items;
+  const next = [...items];
+  [next[index], next[target]] = [next[target], next[index]];
+  return next;
+}
+
 function SortableDialogLab() {
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(INITIAL_ITEMS);
+  const [items, setItems] = useState<Item[]>(INITIAL_ITEMS);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
 
-  const orderedLabels = useMemo(() => items.map((item) => item.label).join(' → '), [items]);
+  const orderedLabels = useMemo(() => items.map((item) => item.label), [items]);
+  const isDirty = useMemo(
+    () => items.some((item, i) => item.id !== INITIAL_ITEMS[i].id),
+    [items],
+  );
+
+  const findItemIdAt = useCallback((clientY: number): string | null => {
+    const list = listRef.current;
+    if (!list) return null;
+    const elements = list.querySelectorAll<HTMLLIElement>('[data-item-id]');
+    for (const el of elements) {
+      const rect = el.getBoundingClientRect();
+      if (clientY >= rect.top && clientY <= rect.bottom) {
+        return el.dataset.itemId ?? null;
+      }
+    }
+    return null;
+  }, []);
+
+  const handlePointerDown = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    id: string,
+  ) => {
+    if (event.button !== 0 && event.pointerType === 'mouse') return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDraggingId(id);
+  };
+
+  const handlePointerMove = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    id: string,
+  ) => {
+    if (draggingId !== id) return;
+    const overId = findItemIdAt(event.clientY);
+    if (overId && overId !== id) {
+      setItems((current) => moveItem(current, id, overId));
+    }
+  };
+
+  const endDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setDraggingId(null);
+  };
+
+  const handleHandleKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    id: string,
+  ) => {
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setItems((current) => swapByOffset(current, id, -1));
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setItems((current) => swapByOffset(current, id, 1));
+    }
+  };
 
   return (
     <div className="sortable-dialog-lab">
-      <h2>Sortable Dialog Lab</h2>
-      <p>Radix UI Dialog 内で、ハンドルをつかんで項目の並び替えを試せます。</p>
+      <header className="sdl-header">
+        <h2>Sortable Dialog Lab</h2>
+        <p>
+          Radix UI Dialog 内でハンドルをドラッグして並び替えます。
+          キーボード（↑/↓）にも対応。
+        </p>
+      </header>
 
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Trigger asChild>
-          <button type="button">並び替えダイアログを開く</button>
+          <button type="button" className="sdl-trigger">
+            <Pencil2Icon aria-hidden />
+            <span>表示順を編集</span>
+          </button>
         </Dialog.Trigger>
 
         <Dialog.Portal>
           <Dialog.Overlay className="sdl-overlay" />
           <Dialog.Content className="sdl-content" aria-describedby="sdl-description">
-            <Dialog.Title className="sdl-title">表示順を並び替え</Dialog.Title>
-            <Dialog.Description id="sdl-description" className="sdl-description">
-              左のハンドルからドラッグして、項目の表示順を変更できます。
-            </Dialog.Description>
-
-            <ul className="sdl-list" aria-label="並び替え対象リスト">
-              {items.map((item) => (
-                <li
-                  key={item.id}
-                  className={`sdl-item ${draggingId === item.id ? 'is-dragging' : ''}`}
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    if (draggingId && draggingId !== item.id) {
-                      setItems((current) => moveItem(current, draggingId, item.id));
-                    }
-                  }}
-                  onDrop={(event) => event.preventDefault()}
-                >
-                  <button
-                    type="button"
-                    className="sdl-handle"
-                    draggable
-                    aria-label={`${item.label} をドラッグして並び替え`}
-                    onDragStart={() => setDraggingId(item.id)}
-                    onDragEnd={() => setDraggingId(null)}
-                  >
-                    <DragHandleDots2Icon />
-                  </button>
-                  <span>{item.label}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="sdl-actions">
-              <button type="button" onClick={() => setItems(INITIAL_ITEMS)}>
-                初期化（リセット）
-              </button>
+            <div className="sdl-content-head">
+              <div>
+                <Dialog.Title className="sdl-title">表示順を並び替え</Dialog.Title>
+                <Dialog.Description id="sdl-description" className="sdl-description">
+                  ハンドルをドラッグするか、ハンドルにフォーカス中に ↑ / ↓ で順序を変更できます。
+                </Dialog.Description>
+              </div>
               <Dialog.Close asChild>
-                <button type="button" className="sdl-primary">
-                  完了
+                <button type="button" className="sdl-close" aria-label="閉じる">
+                  <Cross2Icon aria-hidden />
                 </button>
               </Dialog.Close>
             </div>
 
-            <Dialog.Close asChild>
-              <button type="button" className="sdl-close" aria-label="閉じる">
-                <Cross2Icon />
+            <ul ref={listRef} className="sdl-list" aria-label="並び替え対象リスト">
+              {items.map((item, index) => {
+                const isDragging = draggingId === item.id;
+                return (
+                  <li
+                    key={item.id}
+                    data-item-id={item.id}
+                    data-dragging={isDragging || undefined}
+                    className="sdl-item"
+                  >
+                    <span className="sdl-index" aria-hidden>
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <div className="sdl-text">
+                      <span className="sdl-label">{item.label}</span>
+                      <span className="sdl-hint">{item.hint}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="sdl-handle"
+                      aria-label={`${item.label} を並び替え`}
+                      onPointerDown={(event) => handlePointerDown(event, item.id)}
+                      onPointerMove={(event) => handlePointerMove(event, item.id)}
+                      onPointerUp={endDrag}
+                      onPointerCancel={endDrag}
+                      onKeyDown={(event) => handleHandleKeyDown(event, item.id)}
+                    >
+                      <DragHandleDots2Icon aria-hidden />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <footer className="sdl-actions">
+              <button
+                type="button"
+                className="sdl-ghost"
+                onClick={() => setItems(INITIAL_ITEMS)}
+                disabled={!isDirty}
+              >
+                <ResetIcon aria-hidden />
+                <span>初期化</span>
               </button>
-            </Dialog.Close>
+              <Dialog.Close asChild>
+                <button type="button" className="sdl-primary">
+                  <CheckIcon aria-hidden />
+                  <span>完了</span>
+                </button>
+              </Dialog.Close>
+            </footer>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
 
-      <section className="sdl-preview">
+      <section className="sdl-preview" aria-live="polite">
         <h3>現在の順序</h3>
-        <p>{orderedLabels}</p>
+        <ol className="sdl-preview-list">
+          {orderedLabels.map((label, index) => (
+            <li key={label} className="sdl-chip">
+              <span className="sdl-chip-num">{index + 1}</span>
+              <span>{label}</span>
+            </li>
+          ))}
+        </ol>
       </section>
     </div>
   );
