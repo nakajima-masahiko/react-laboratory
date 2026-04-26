@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   CheckIcon,
@@ -51,6 +51,10 @@ function SortableDialogLab() {
   const [items, setItems] = useState<Item[]>(INITIAL_ITEMS);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
+  const dragPointerYRef = useRef<number | null>(null);
+  const dragRafRef = useRef<number | null>(null);
+  const draggedIdRef = useRef<string | null>(null);
+  const lastOverIdRef = useRef<string | null>(null);
 
   const orderedLabels = useMemo(() => items.map((item) => item.label), [items]);
   const isDirty = useMemo(
@@ -78,17 +82,36 @@ function SortableDialogLab() {
     if (event.button !== 0 && event.pointerType === 'mouse') return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
+    draggedIdRef.current = id;
+    lastOverIdRef.current = id;
     setDraggingId(id);
   };
+
+  const processDragFrame = useCallback(() => {
+    dragRafRef.current = null;
+    const draggedId = draggedIdRef.current;
+    const pointerY = dragPointerYRef.current;
+    if (!draggedId || pointerY == null) return;
+
+    const overId = findItemIdAt(pointerY);
+    if (!overId || overId === draggedId || overId === lastOverIdRef.current) return;
+
+    setItems((current) => {
+      const next = moveItem(current, draggedId, overId);
+      if (next === current) return current;
+      lastOverIdRef.current = overId;
+      return next;
+    });
+  }, [findItemIdAt]);
 
   const handlePointerMove = (
     event: React.PointerEvent<HTMLButtonElement>,
     id: string,
   ) => {
     if (draggingId !== id) return;
-    const overId = findItemIdAt(event.clientY);
-    if (overId && overId !== id) {
-      setItems((current) => moveItem(current, id, overId));
+    dragPointerYRef.current = event.clientY;
+    if (dragRafRef.current == null) {
+      dragRafRef.current = requestAnimationFrame(processDragFrame);
     }
   };
 
@@ -96,8 +119,24 @@ function SortableDialogLab() {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
+    if (dragRafRef.current != null) {
+      cancelAnimationFrame(dragRafRef.current);
+      dragRafRef.current = null;
+    }
+    dragPointerYRef.current = null;
+    draggedIdRef.current = null;
+    lastOverIdRef.current = null;
     setDraggingId(null);
   };
+
+  useEffect(
+    () => () => {
+      if (dragRafRef.current != null) {
+        cancelAnimationFrame(dragRafRef.current);
+      }
+    },
+    [],
+  );
 
   const handleHandleKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
@@ -155,6 +194,7 @@ function SortableDialogLab() {
                     key={item.id}
                     data-item-id={item.id}
                     data-dragging={isDragging || undefined}
+                    data-drag-state={isDragging ? 'active' : draggingId ? 'idle' : undefined}
                     className="sdl-item"
                   >
                     <span className="sdl-index" aria-hidden>

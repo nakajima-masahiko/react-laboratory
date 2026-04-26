@@ -160,11 +160,17 @@
 .sdl-item[data-dragging] {
   border-color: var(--accent);
   background: color-mix(in oklab, var(--bg), var(--accent-light) 55%);
-  transform: scale(1.015);
+  transform: scale(1.02);
+  opacity: 0.96;
   box-shadow:
     0 0 0 3px color-mix(in oklab, var(--accent), transparent 80%),
-    0 12px 28px -14px color-mix(in oklab, var(--accent), transparent 30%);
+    0 20px 30px -18px color-mix(in oklab, var(--accent), transparent 20%);
   z-index: 1;
+}
+
+.sdl-item[data-drag-state='idle'] {
+  transform: scale(0.995);
+  opacity: 0.84;
 }
 
 .sdl-index {
@@ -234,6 +240,7 @@
   color: var(--accent);
   border-color: var(--accent);
   background: color-mix(in oklab, var(--bg), var(--accent-light) 50%);
+  box-shadow: 0 10px 24px -18px color-mix(in oklab, var(--accent), transparent 10%);
 }
 
 /* Actions ----------------------------------------------------------------- */
