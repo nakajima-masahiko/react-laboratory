@@ -21,6 +21,12 @@ export const experiments: ExperimentEntry[] = [
     component: lazy(() => import('./daypicker-laboratory')),
   },
   {
+    id: 'sortable-dialog-lab',
+    title: 'Sortable Dialog Lab',
+    description: 'Radix UI Dialog 内でハンドルをドラッグして項目順を並び替え、リセットできる実験',
+    component: lazy(() => import('./sortable-dialog-lab')),
+  },
+  {
     id: 'dialog-laboratory',
     title: 'Dialog Laboratory',
     description: '各種ダイアログの開閉・確認パターンを試す実験室',
