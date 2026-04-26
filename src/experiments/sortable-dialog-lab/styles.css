@@ -1,0 +1,112 @@
+.sortable-dialog-lab {
+  display: grid;
+  gap: 16px;
+}
+
+.sdl-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 55%);
+}
+
+.sdl-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.sdl-title {
+  margin: 0;
+}
+
+.sdl-description {
+  margin: 0;
+  color: color-mix(in oklab, var(--text), #666 35%);
+}
+
+.sdl-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.sdl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 22%);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.sdl-item.is-dragging {
+  opacity: 0.6;
+}
+
+.sdl-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: grab;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.sdl-handle:active {
+  cursor: grabbing;
+}
+
+.sdl-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.sdl-primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.sdl-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 4px;
+}
+
+.sdl-preview {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  background: color-mix(in oklab, var(--bg), var(--accent-light) 20%);
+}
+
+.sdl-preview h3,
+.sdl-preview p {
+  margin: 0;
+}
+
+.sdl-preview p {
+  margin-top: 8px;
+}
