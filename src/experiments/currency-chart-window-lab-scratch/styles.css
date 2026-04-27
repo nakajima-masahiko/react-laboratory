@@ -62,14 +62,44 @@
   gap: 12px;
 }
 
+.ccws-legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding: 0 8px;
+}
+
 .ccws-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 14px;
   margin: 0;
-  padding: 0 8px;
+  padding: 0;
   list-style: none;
   justify-content: center;
+}
+
+.ccws-add-currency {
+  border: 1px dashed var(--border);
+  background: var(--bg);
+  color: var(--text);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.ccws-add-currency:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--bg), var(--accent) 12%);
+  border-color: var(--accent);
+}
+
+.ccws-add-currency:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .ccws-legend-item {

@@ -12,9 +12,16 @@ export const CURRENCY_SERIES = [
   { key: 'GBP', label: 'GBP', color: '#e15759' },
   { key: 'JPY', label: 'JPY', color: '#76b7b2' },
   { key: 'BTC', label: 'BTC', color: '#edc948' },
+  { key: 'AUD', label: 'AUD', color: '#59a14f' },
+  { key: 'CAD', label: 'CAD', color: '#af7aa1' },
+  { key: 'CHF', label: 'CHF', color: '#ff9da7' },
+  { key: 'CNY', label: 'CNY', color: '#9c755f' },
+  { key: 'KRW', label: 'KRW', color: '#bab0ac' },
 ] as const satisfies ReadonlyArray<SeriesDefinition<string>>;
 
 export type Currency = (typeof CURRENCY_SERIES)[number]['key'];
+
+export const INITIAL_CURRENCY_COUNT = 5;
 
 export interface ChartRow<Key extends string = Currency> {
   key: string;
