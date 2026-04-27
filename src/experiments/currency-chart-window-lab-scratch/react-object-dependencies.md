@@ -14,13 +14,13 @@ graph TD
   axes["chart/axes.tsx<br/>XAxis / YAxis"]
   tooltip["chart/tooltip.tsx<br/>ChartTooltip"]
   scales["chart/scales.ts<br/>buildScales"]
-  style["styles.css"]
+  css["styles.css"]
 
   index --> types
   index --> data
   index --> barsvg
   index --> legend
-  index --> style
+  index --> css
 
   data --> types
 
