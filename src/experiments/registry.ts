@@ -82,6 +82,12 @@ export const experiments: ExperimentEntry[] = [
     component: lazy(() => import('./currency-chart-window-lab')),
   },
   {
+    id: 'currency-chart-window-lab-scratch',
+    title: '通貨別つみたて棒グラフ（自前描画版）',
+    description: 'Recharts を使わず SVG + d3-scale + Radix Slider で再構築した、36カ月の通貨別積み上げ棒グラフ実験',
+    component: lazy(() => import('./currency-chart-window-lab-scratch')),
+  },
+  {
     id: 'currency-chart',
     title: 'Currency Chart',
     description: 'Recharts の積み上げ棒グラフで12カ月分の通貨別保有量を可視化する実験',
