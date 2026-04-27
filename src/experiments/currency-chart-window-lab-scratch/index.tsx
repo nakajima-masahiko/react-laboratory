@@ -24,7 +24,10 @@ function CurrencyChartWindowLabScratch() {
   const maxStartIndex = Math.max(0, data.length - visibleMonths);
   const safeStartIndex = Math.min(startIndex, maxStartIndex);
   const endIndex = Math.min(safeStartIndex + visibleMonths - 1, data.length - 1);
-  const chartData = data.slice(safeStartIndex, endIndex + 1);
+  const chartData = useMemo(
+    () => data.slice(safeStartIndex, endIndex + 1),
+    [data, safeStartIndex, endIndex],
+  );
   const startLabel = data[safeStartIndex]?.label ?? '';
   const endLabel = data[endIndex]?.label ?? '';
   const rangeLabel = visibleMonths === 1 ? startLabel : `${startLabel} 〜 ${endLabel}`;
@@ -53,7 +56,7 @@ function CurrencyChartWindowLabScratch() {
     });
   };
 
-  const animationKey = `${selectedRange}-${safeStartIndex}`;
+  const animationKey = selectedRange;
 
   return (
     <div className="ccws-root">

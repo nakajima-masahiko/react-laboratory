@@ -50,7 +50,7 @@
 
 .ccws-toggle-item[data-state='on'] {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-foreground);
 }
 
 .ccws-card {
@@ -144,7 +144,7 @@
   color: var(--text);
   padding: 8px 10px;
   font-size: 0.85rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px color-mix(in oklab, var(--text) 18%, transparent);
   pointer-events: none;
   z-index: 2;
 }
