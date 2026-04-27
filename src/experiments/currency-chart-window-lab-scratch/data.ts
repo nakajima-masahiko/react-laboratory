@@ -1,4 +1,4 @@
-import { CURRENCIES, CURRENT_INDEX, TOTAL_MONTHS, type ChartRow, type Currency } from './types';
+import { CURRENT_INDEX, CURRENCY_SERIES, TOTAL_MONTHS, type ChartRow, type Currency } from './types';
 
 function addMonths(base: Date, offset: number) {
   return new Date(base.getFullYear(), base.getMonth() + offset, 1);
@@ -45,9 +45,9 @@ export function buildData(now = new Date()): ChartRow[] {
       key: `${date.getFullYear()}-${date.getMonth() + 1}`,
       label: formatMonth(date),
       monthLabel: `${date.getMonth() + 1}月`,
-      ...Object.fromEntries(
-        CURRENCIES.map((currency) => [currency, createAmount(index, currency)]),
-      ),
-    } as ChartRow;
+      values: Object.fromEntries(
+        CURRENCY_SERIES.map((series) => [series.key, createAmount(index, series.key)]),
+      ) as Record<Currency, number>,
+    };
   });
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { COLORS, CURRENCIES, type ChartRow, type Currency } from '../types';
+import type { ChartRow, SeriesDefinition } from '../types';
 import { XAxis, YAxis } from './axes';
 import { buildScales } from './scales';
 import { ChartTooltip } from './tooltip';
@@ -7,13 +7,19 @@ import { ChartTooltip } from './tooltip';
 const MARGIN = { top: 8, right: 24, bottom: 32, left: 56 } as const;
 const CHART_HEIGHT = 460;
 
-interface BarChartSvgProps {
-  chartData: ChartRow[];
-  hiddenCurrencies: Set<Currency>;
+interface BarChartSvgProps<Key extends string> {
+  chartData: ChartRow<Key>[];
+  series: ReadonlyArray<SeriesDefinition<Key>>;
+  hiddenSeriesKeys: Set<Key>;
   animationKey: string;
 }
 
-export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarChartSvgProps) {
+export function BarChartSvg<Key extends string>({
+  chartData,
+  series,
+  hiddenSeriesKeys,
+  animationKey,
+}: BarChartSvgProps<Key>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
@@ -37,14 +43,20 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
   const innerWidth = Math.max(0, chartWidth - MARGIN.left - MARGIN.right);
   const innerHeight = Math.max(0, CHART_HEIGHT - MARGIN.top - MARGIN.bottom);
 
-  const scales = useMemo(
-    () => buildScales(chartData, hiddenCurrencies, innerWidth, innerHeight),
-    [chartData, hiddenCurrencies, innerWidth, innerHeight],
+  const visibleSeries = useMemo(
+    () => series.filter((item) => !hiddenSeriesKeys.has(item.key)),
+    [series, hiddenSeriesKeys],
   );
 
-  const visibleCurrencies = useMemo(
-    () => CURRENCIES.filter((currency) => !hiddenCurrencies.has(currency)),
-    [hiddenCurrencies],
+  const scales = useMemo(
+    () =>
+      buildScales(
+        chartData,
+        visibleSeries.map((item) => item.key),
+        innerWidth,
+        innerHeight,
+      ),
+    [chartData, visibleSeries, innerWidth, innerHeight],
   );
 
   const stackSegments = useMemo(() => {
@@ -53,8 +65,9 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
     }
     const cumulative = new Array(chartData.length).fill(0);
     const segments: Array<{
-      currency: Currency;
-      currencyIndex: number;
+      seriesKey: Key;
+      color: string;
+      seriesIndex: number;
       key: string;
       x: number;
       y: number;
@@ -62,18 +75,20 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
       height: number;
       rowIndex: number;
     }> = [];
-    visibleCurrencies.forEach((currency, currencyIndex) => {
+
+    visibleSeries.forEach((item, seriesIndex) => {
       chartData.forEach((row, rowIndex) => {
-        const value = row[currency];
+        const value = row.values[item.key];
         const yTop = scales.yScale(cumulative[rowIndex] + value);
         const yBottom = scales.yScale(cumulative[rowIndex]);
         const x = scales.xScale(row.key) ?? 0;
         const width = scales.xScale.bandwidth();
         const height = Math.max(0, yBottom - yTop);
         segments.push({
-          currency,
-          currencyIndex,
-          key: `${currency}-${row.key}`,
+          seriesKey: item.key,
+          color: item.color,
+          seriesIndex,
+          key: `${item.key}-${row.key}`,
           x,
           y: yTop,
           width,
@@ -84,7 +99,7 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
       });
     });
     return segments;
-  }, [chartData, visibleCurrencies, scales, innerWidth]);
+  }, [chartData, visibleSeries, scales, innerWidth]);
 
   const handlePointerMove = (event: React.PointerEvent<SVGRectElement>) => {
     const svg = svgRef.current;
@@ -97,10 +112,7 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
     if (step <= 0) {
       return;
     }
-    const index = Math.max(
-      0,
-      Math.min(chartData.length - 1, Math.floor(localX / step)),
-    );
+    const index = Math.max(0, Math.min(chartData.length - 1, Math.floor(localX / step)));
     setHoverIndex(index);
   };
 
@@ -138,10 +150,9 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
 
             <g key={animationKey} className="ccws-bars">
               {stackSegments.map((segment) => {
-                const dim =
-                  hoverIndex !== null && hoverIndex !== segment.rowIndex ? 0.5 : 1;
+                const dim = hoverIndex !== null && hoverIndex !== segment.rowIndex ? 0.5 : 1;
                 const style = {
-                  '--bar-delay': `${segment.currencyIndex * 120}ms`,
+                  '--bar-delay': `${segment.seriesIndex * 120}ms`,
                   transformOrigin: `${segment.x + segment.width / 2}px ${innerHeight}px`,
                   opacity: dim,
                 } as CSSProperties;
@@ -153,8 +164,9 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
                     y={segment.y}
                     width={segment.width}
                     height={segment.height}
-                    fill={COLORS[segment.currency]}
+                    fill={segment.color}
                     style={style}
+                    data-series={segment.seriesKey}
                   />
                 );
               })}
@@ -181,7 +193,8 @@ export function BarChartSvg({ chartData, hiddenCurrencies, animationKey }: BarCh
       {tooltipPosition && (
         <ChartTooltip
           row={tooltipPosition.row}
-          hiddenCurrencies={hiddenCurrencies}
+          series={series}
+          hiddenSeriesKeys={hiddenSeriesKeys}
           x={tooltipPosition.x}
           y={tooltipPosition.y}
           containerWidth={chartWidth}
