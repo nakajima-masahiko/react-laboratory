@@ -1,29 +1,34 @@
-import { COLORS, CURRENCIES, type Currency } from '../types';
+import type { SeriesDefinition } from '../types';
 
-interface ChartLegendProps {
-  hiddenCurrencies: Set<Currency>;
-  onToggle: (currency: Currency) => void;
+interface ChartLegendProps<Key extends string> {
+  series: ReadonlyArray<SeriesDefinition<Key>>;
+  hiddenSeriesKeys: Set<Key>;
+  onToggle: (key: Key) => void;
 }
 
-export function ChartLegend({ hiddenCurrencies, onToggle }: ChartLegendProps) {
+export function ChartLegend<Key extends string>({
+  series,
+  hiddenSeriesKeys,
+  onToggle,
+}: ChartLegendProps<Key>) {
   return (
     <ul className="ccws-legend" role="list">
-      {CURRENCIES.map((currency) => {
-        const hidden = hiddenCurrencies.has(currency);
+      {series.map((item) => {
+        const hidden = hiddenSeriesKeys.has(item.key);
         return (
-          <li key={currency}>
+          <li key={item.key}>
             <button
               type="button"
               className={`ccws-legend-item${hidden ? ' is-hidden' : ''}`}
-              onClick={() => onToggle(currency)}
+              onClick={() => onToggle(item.key)}
               aria-pressed={!hidden}
             >
               <span
                 className="ccws-legend-swatch"
-                style={{ background: COLORS[currency] }}
+                style={{ background: item.color }}
                 aria-hidden="true"
               />
-              <span className="ccws-legend-label">{currency}</span>
+              <span className="ccws-legend-label">{item.label}</span>
             </button>
           </li>
         );

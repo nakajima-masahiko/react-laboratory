@@ -25,14 +25,7 @@ export function YAxis({ yScale, innerWidth }: YAxisProps) {
               stroke="var(--border)"
               strokeDasharray="3 3"
             />
-            <text
-              x={-8}
-              y={0}
-              dy="0.32em"
-              textAnchor="end"
-              fontSize={13}
-              fill="var(--text)"
-            >
+            <text x={-8} y={0} dy="0.32em" textAnchor="end" fontSize={13} fill="var(--text)">
               {formatNumber(tick)}
             </text>
           </g>
@@ -42,13 +35,13 @@ export function YAxis({ yScale, innerWidth }: YAxisProps) {
   );
 }
 
-interface XAxisProps {
+interface XAxisProps<Key extends string> {
   xScale: ScaleBand<string>;
   innerHeight: number;
-  chartData: ChartRow[];
+  chartData: ChartRow<Key>[];
 }
 
-export function XAxis({ xScale, innerHeight, chartData }: XAxisProps) {
+export function XAxis<Key extends string>({ xScale, innerHeight, chartData }: XAxisProps<Key>) {
   const bandwidth = xScale.bandwidth();
   const showAll = bandwidth >= 28;
   const fontSize = bandwidth >= 36 ? 13 : bandwidth >= 24 ? 12 : 11;
@@ -62,14 +55,7 @@ export function XAxis({ xScale, innerHeight, chartData }: XAxisProps) {
           return null;
         }
         return (
-          <text
-            key={key}
-            x={x}
-            y={20}
-            textAnchor="middle"
-            fontSize={fontSize}
-            fill="var(--text)"
-          >
+          <text key={key} x={x} y={20} textAnchor="middle" fontSize={fontSize} fill="var(--text)">
             {labelByKey.get(key)}
           </text>
         );

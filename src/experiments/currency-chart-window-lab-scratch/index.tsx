@@ -4,14 +4,20 @@ import { useMemo, useState } from 'react';
 import { BarChartSvg } from './chart/BarChartSvg';
 import { ChartLegend } from './chart/legend';
 import { buildData } from './data';
-import { CURRENT_INDEX, RANGE_OPTIONS, type Currency, type RangeValue } from './types';
+import {
+  CURRENT_INDEX,
+  CURRENCY_SERIES,
+  RANGE_OPTIONS,
+  type Currency,
+  type RangeValue,
+} from './types';
 import './styles.css';
 
 function CurrencyChartWindowLabScratch() {
   const data = useMemo(() => buildData(), []);
   const [selectedRange, setSelectedRange] = useState<RangeValue>('6');
   const [startIndex, setStartIndex] = useState<number>(CURRENT_INDEX);
-  const [hiddenCurrencies, setHiddenCurrencies] = useState<Set<Currency>>(() => new Set());
+  const [hiddenSeriesKeys, setHiddenSeriesKeys] = useState<Set<Currency>>(() => new Set());
 
   const visibleMonths =
     RANGE_OPTIONS.find((option) => option.value === selectedRange)?.months ?? 6;
@@ -35,13 +41,13 @@ function CurrencyChartWindowLabScratch() {
     setStartIndex(Math.min(CURRENT_INDEX, nextMaxStart));
   };
 
-  const handleToggleCurrency = (currency: Currency) => {
-    setHiddenCurrencies((prev) => {
+  const handleToggleSeries = (seriesKey: Currency) => {
+    setHiddenSeriesKeys((prev) => {
       const next = new Set(prev);
-      if (next.has(currency)) {
-        next.delete(currency);
+      if (next.has(seriesKey)) {
+        next.delete(seriesKey);
       } else {
-        next.add(currency);
+        next.add(seriesKey);
       }
       return next;
     });
@@ -54,7 +60,7 @@ function CurrencyChartWindowLabScratch() {
       <div className="ccws-header">
         <div>
           <h2>通貨別つみたて棒グラフ（自前描画版）</h2>
-          <p>Recharts を使わず SVG + d3-scale + Radix Slider で再構築した版です。</p>
+          <p>汎用的な系列定義を使って SVG + d3-scale + Radix Slider で再構築した版です。</p>
         </div>
 
         <ToggleGroup.Root
@@ -78,11 +84,16 @@ function CurrencyChartWindowLabScratch() {
       </div>
 
       <div className="ccws-card">
-        <ChartLegend hiddenCurrencies={hiddenCurrencies} onToggle={handleToggleCurrency} />
+        <ChartLegend
+          series={CURRENCY_SERIES}
+          hiddenSeriesKeys={hiddenSeriesKeys}
+          onToggle={handleToggleSeries}
+        />
 
         <BarChartSvg
           chartData={chartData}
-          hiddenCurrencies={hiddenCurrencies}
+          series={CURRENCY_SERIES}
+          hiddenSeriesKeys={hiddenSeriesKeys}
           animationKey={animationKey}
         />
 
