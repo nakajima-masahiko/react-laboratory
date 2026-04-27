@@ -6,6 +6,7 @@ import { ChartTooltip } from './tooltip';
 
 const MARGIN = { top: 8, right: 24, bottom: 32, left: 56 } as const;
 const CHART_HEIGHT = 460;
+const STAGGER_WINDOW_MS = 480;
 
 interface BarChartSvgProps<Key extends string> {
   chartData: ChartRow<Key>[];
@@ -162,8 +163,10 @@ export function BarChartSvg<Key extends string>({
             <g key={animationKey} className="ccws-bars">
               {stackSegments.map((segment) => {
                 const dim = hoverIndex !== null && hoverIndex !== segment.rowIndex ? 0.5 : 1;
+                const perSeriesDelay =
+                  visibleSeries.length > 1 ? STAGGER_WINDOW_MS / (visibleSeries.length - 1) : 0;
                 const style = {
-                  '--bar-delay': `${segment.seriesIndex * 120}ms`,
+                  '--bar-delay': `${segment.seriesIndex * perSeriesDelay}ms`,
                   transformOrigin: `${segment.x + segment.width / 2}px ${innerHeight}px`,
                   opacity: dim,
                 } as CSSProperties;
