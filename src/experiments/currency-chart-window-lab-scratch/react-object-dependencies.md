@@ -6,15 +6,15 @@
 
 ```mermaid
 graph TD
-  index[index.tsx\nCurrencyChartWindowLabScratch]
-  types[types.ts\n型・定数]
-  data[data.ts\nbuildData]
-  barsvg[chart/BarChartSvg.tsx]
-  legend[chart/legend.tsx\nChartLegend]
-  axes[chart/axes.tsx\nXAxis / YAxis]
-  tooltip[chart/tooltip.tsx\nChartTooltip]
-  scales[chart/scales.ts\nbuildScales]
-  style[styles.css]
+  index["index.tsx<br/>CurrencyChartWindowLabScratch"]
+  types["types.ts<br/>型・定数"]
+  data["data.ts<br/>buildData"]
+  barsvg["chart/BarChartSvg.tsx"]
+  legend["chart/legend.tsx<br/>ChartLegend"]
+  axes["chart/axes.tsx<br/>XAxis / YAxis"]
+  tooltip["chart/tooltip.tsx<br/>ChartTooltip"]
+  scales["chart/scales.ts<br/>buildScales"]
+  style["styles.css"]
 
   index --> types
   index --> data
@@ -41,22 +41,22 @@ graph TD
 
 ```mermaid
 graph LR
-  subgraph Root[index.tsx]
-    S1[selectedRange]
-    S2[startIndex]
-    S3[hiddenSeriesKeys]
-    S4[currencyCount]
-    M1[data = buildData()]
-    D1[activeSeries]
-    D2[visibleMonths]
-    D3[maxStartIndex / safeStartIndex / endIndex]
-    D4[chartData]
-    D5[rangeLabel]
+  subgraph Root["index.tsx"]
+    S1["selectedRange"]
+    S2["startIndex"]
+    S3["hiddenSeriesKeys"]
+    S4["currencyCount"]
+    M1["data = buildData()"]
+    D1["activeSeries"]
+    D2["visibleMonths"]
+    D3["maxStartIndex / safeStartIndex / endIndex"]
+    D4["chartData"]
+    D5["rangeLabel"]
 
-    E1[handleRangeChange]
-    E2[handleToggleSeries]
-    E3[handleAddCurrency]
-    E4[slider / nav button]
+    E1["handleRangeChange"]
+    E2["handleToggleSeries"]
+    E3["handleAddCurrency"]
+    E4["slider / nav button"]
   end
 
   M1 --> D3
@@ -69,11 +69,11 @@ graph LR
   M1 --> D5
 
   S4 --> D1
-  D1 --> L[ChartLegend]
+  D1 --> L["ChartLegend"]
   S3 --> L
   E2 --> S3
 
-  D1 --> B[BarChartSvg]
+  D1 --> B["BarChartSvg"]
   D4 --> B
   S3 --> B
 
@@ -89,21 +89,21 @@ graph LR
 
 ```mermaid
 graph TD
-  P1[props.chartData]
-  P2[props.series]
-  P3[props.hiddenSeriesKeys]
-  P4[props.animationKey]
+  P1["props.chartData"]
+  P2["props.series"]
+  P3["props.hiddenSeriesKeys"]
+  P4["props.animationKey"]
 
-  W[chartWidth(useState)\nResizeObserverで更新]
-  H[hoverIndex(useState)]
-  V[visibleSeries(useMemo)]
-  I[innerWidth / innerHeight]
-  S[scales = buildScales(...)]
-  SEG[stackSegments(useMemo)]
-  EVT[handlePointerMove / Leave]
-  TT[tooltipPosition]
-  AX[XAxis / YAxis]
-  TIP[ChartTooltip]
+  W["chartWidth(useState)<br/>ResizeObserverで更新"]
+  H["hoverIndex(useState)"]
+  V["visibleSeries(useMemo)"]
+  I["innerWidth / innerHeight"]
+  S["scales = buildScales(...)"]
+  SEG["stackSegments(useMemo)"]
+  EVT["handlePointerMove / Leave"]
+  TT["tooltipPosition"]
+  AX["XAxis / YAxis"]
+  TIP["ChartTooltip"]
 
   P2 --> V
   P3 --> V
