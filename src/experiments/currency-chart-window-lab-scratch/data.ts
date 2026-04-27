@@ -15,6 +15,11 @@ function createAmount(index: number, currency: Currency) {
     GBP: 1.2,
     JPY: 1.6,
     BTC: 2.1,
+    AUD: 0.4,
+    CAD: 1.0,
+    CHF: 1.8,
+    CNY: 2.4,
+    KRW: 2.8,
   };
 
   const baseByCurrency: Record<Currency, number> = {
@@ -23,6 +28,11 @@ function createAmount(index: number, currency: Currency) {
     GBP: 72,
     JPY: 190,
     BTC: 28,
+    AUD: 60,
+    CAD: 80,
+    CHF: 50,
+    CNY: 110,
+    KRW: 140,
   };
 
   const growthByCurrency: Record<Currency, number> = {
@@ -31,6 +41,11 @@ function createAmount(index: number, currency: Currency) {
     GBP: 0.9,
     JPY: 2.3,
     BTC: 1.7,
+    AUD: 1.1,
+    CAD: 1.5,
+    CHF: 0.7,
+    CNY: 2.0,
+    KRW: 1.4,
   };
 
   const seasonal = Math.sin(index / 3 + phaseByCurrency[currency]) * 10;

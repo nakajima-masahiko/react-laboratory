@@ -7,6 +7,7 @@ import { buildData } from './data';
 import {
   CURRENT_INDEX,
   CURRENCY_SERIES,
+  INITIAL_CURRENCY_COUNT,
   RANGE_OPTIONS,
   type Currency,
   type RangeValue,
@@ -18,6 +19,13 @@ function CurrencyChartWindowLabScratch() {
   const [selectedRange, setSelectedRange] = useState<RangeValue>('6');
   const [startIndex, setStartIndex] = useState<number>(CURRENT_INDEX);
   const [hiddenSeriesKeys, setHiddenSeriesKeys] = useState<Set<Currency>>(() => new Set());
+  const [currencyCount, setCurrencyCount] = useState<number>(INITIAL_CURRENCY_COUNT);
+
+  const activeSeries = useMemo(
+    () => CURRENCY_SERIES.slice(0, currencyCount),
+    [currencyCount],
+  );
+  const canAddCurrency = currencyCount < CURRENCY_SERIES.length;
 
   const visibleMonths =
     RANGE_OPTIONS.find((option) => option.value === selectedRange)?.months ?? 6;
@@ -56,7 +64,11 @@ function CurrencyChartWindowLabScratch() {
     });
   };
 
-  const animationKey = selectedRange;
+  const animationKey = `${selectedRange}-${currencyCount}`;
+
+  const handleAddCurrency = () => {
+    setCurrencyCount((prev) => Math.min(CURRENCY_SERIES.length, prev + 1));
+  };
 
   return (
     <div className="ccws-root">
@@ -87,15 +99,26 @@ function CurrencyChartWindowLabScratch() {
       </div>
 
       <div className="ccws-card">
-        <ChartLegend
-          series={CURRENCY_SERIES}
-          hiddenSeriesKeys={hiddenSeriesKeys}
-          onToggle={handleToggleSeries}
-        />
+        <div className="ccws-legend-row">
+          <ChartLegend
+            series={activeSeries}
+            hiddenSeriesKeys={hiddenSeriesKeys}
+            onToggle={handleToggleSeries}
+          />
+          <button
+            type="button"
+            className="ccws-add-currency"
+            onClick={handleAddCurrency}
+            disabled={!canAddCurrency}
+            aria-label="通貨を追加"
+          >
+            + 通貨を追加（{currencyCount}/{CURRENCY_SERIES.length}）
+          </button>
+        </div>
 
         <BarChartSvg
           chartData={chartData}
-          series={CURRENCY_SERIES}
+          series={activeSeries}
           hiddenSeriesKeys={hiddenSeriesKeys}
           animationKey={animationKey}
         />
