@@ -113,13 +113,24 @@ export function BarChartSvg<Key extends string>({
       return;
     }
     const index = Math.max(0, Math.min(chartData.length - 1, Math.floor(localX / step)));
+    const row = chartData[index];
+    if (!row) {
+      setHoverIndex(null);
+      return;
+    }
+    const bandStart = scales.xScale(row.key) ?? 0;
+    const bandEnd = bandStart + scales.xScale.bandwidth();
+    if (localX < bandStart || localX > bandEnd) {
+      setHoverIndex(null);
+      return;
+    }
     setHoverIndex(index);
   };
 
   const handlePointerLeave = () => setHoverIndex(null);
 
   const tooltipPosition = (() => {
-    if (hoverIndex === null) {
+    if (hoverIndex === null || visibleSeries.length === 0) {
       return null;
     }
     const row = chartData[hoverIndex];

@@ -5,6 +5,7 @@
   --border: #e0e0e0;
   --accent: #646cff;
   --accent-light: rgba(100, 108, 255, 0.1);
+  --accent-foreground: #fff;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -24,6 +25,7 @@
     --border: #333;
     --accent: #818cf8;
     --accent-light: rgba(129, 140, 248, 0.15);
+    --accent-foreground: #0b1020;
   }
 }
 
