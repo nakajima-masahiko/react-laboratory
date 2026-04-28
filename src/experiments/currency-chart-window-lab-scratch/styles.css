@@ -223,6 +223,13 @@
   stroke-opacity: 0.45;
 }
 
+.ccws-tooltip-positioner {
+  position: absolute;
+  transform: translateX(-50%) translateY(-100%);
+  pointer-events: none;
+  z-index: 100;
+}
+
 .ccws-tooltip {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -231,14 +238,14 @@
   padding: 8px 10px;
   font-size: 0.85rem;
   box-shadow: 0 4px 12px color-mix(in oklab, var(--text) 18%, transparent);
-  pointer-events: none;
-  z-index: 100;
   width: 180px;
 }
 
 .ccws-tooltip-arrow {
+  display: block;
   fill: var(--ccws-tooltip-fill, var(--bg));
   filter: drop-shadow(0 1px 0 var(--ccws-tooltip-border, var(--border)));
+  margin: -1px auto 0;
 }
 
 .ccws-tooltip-title {
