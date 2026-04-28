@@ -1,4 +1,3 @@
-import * as RadixTooltip from '@radix-ui/react-tooltip';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { ChartRow, SeriesDefinition } from '../types';
 import { XAxis, YAxis } from './axes';
@@ -18,6 +17,8 @@ interface BarChartSvgProps<Key extends string> {
   gridColor: string;
   tooltipBg: string;
   tooltipBorder: string;
+  /** クリックでツールチップを固定する機能を有効にする。デフォルト: false */
+  pinnableTooltip?: boolean;
 }
 
 export function BarChartSvg<Key extends string>({
@@ -29,6 +30,7 @@ export function BarChartSvg<Key extends string>({
   gridColor,
   tooltipBg,
   tooltipBorder,
+  pinnableTooltip = false,
 }: BarChartSvgProps<Key>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -56,6 +58,18 @@ export function BarChartSvg<Key extends string>({
     setPinnedIndex(null);
     setHoverIndex(null);
   }, [animationKey]);
+
+  // チャート外クリックでツールチップを閉じる
+  useEffect(() => {
+    const handleOutsideClick = (e: PointerEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) {
+        setHoverIndex(null);
+        setPinnedIndex(null);
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsideClick);
+    return () => document.removeEventListener('pointerdown', handleOutsideClick);
+  }, []);
 
   const innerWidth = Math.max(0, chartWidth - MARGIN.left - MARGIN.right);
   const innerHeight = Math.max(0, CHART_HEIGHT - MARGIN.top - MARGIN.bottom);
@@ -119,7 +133,6 @@ export function BarChartSvg<Key extends string>({
   }, [chartData, visibleSeries, scales, innerWidth]);
 
   // チャートエリア内のカーソル位置から最近傍バーのインデックスを返す
-  // バー幅外のギャップにいる場合も含め、チャートエリア全体でインデックスを解決する
   const getIndexFromClientX = (clientX: number): number | null => {
     const svg = svgRef.current;
     if (!svg || innerWidth === 0 || chartData.length === 0) {
@@ -151,6 +164,7 @@ export function BarChartSvg<Key extends string>({
   const handlePointerLeave = () => setHoverIndex(null);
 
   const handleClick = (event: React.MouseEvent<SVGRectElement>) => {
+    if (!pinnableTooltip) return;
     const index = getIndexFromClientX(event.clientX);
     if (index === null) {
       setPinnedIndex(null);
@@ -180,133 +194,117 @@ export function BarChartSvg<Key extends string>({
   const ready = chartWidth > 0 && innerWidth > 0;
 
   return (
-    <RadixTooltip.Provider>
-      <RadixTooltip.Root open={tooltipAnchor !== null} onOpenChange={() => {}} delayDuration={0}>
-        <div ref={containerRef} className="ccws-chart-host">
-          {ready ? (
-            <svg
-              ref={svgRef}
-              width={chartWidth}
-              height={CHART_HEIGHT}
-              className="ccws-svg"
-              role="img"
-              aria-label="通貨別つみたて棒グラフ"
-            >
-              <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
-                {/* チャートエリア背景 */}
-                <rect
-                  x={0}
-                  y={0}
-                  width={innerWidth}
-                  height={innerHeight}
-                  fill={chartBackground}
-                  rx={4}
-                />
+    <div ref={containerRef} className="ccws-chart-host">
+      {ready ? (
+        <svg
+          ref={svgRef}
+          width={chartWidth}
+          height={CHART_HEIGHT}
+          className="ccws-svg"
+          role="img"
+          aria-label="通貨別つみたて棒グラフ"
+        >
+          <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
+            {/* チャートエリア背景 */}
+            <rect
+              x={0}
+              y={0}
+              width={innerWidth}
+              height={innerHeight}
+              fill={chartBackground}
+              rx={4}
+            />
 
-                <YAxis yScale={scales.yScale} innerWidth={innerWidth} gridColor={gridColor} />
-                <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} gridColor={gridColor} />
+            <YAxis yScale={scales.yScale} innerWidth={innerWidth} gridColor={gridColor} />
+            <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} gridColor={gridColor} />
 
-                {/* ピン留め列のハイライト（ホバー中の列とは別表示） */}
-                {pinnedIndex !== null && hoverIndex !== pinnedIndex && chartData[pinnedIndex] && (
+            {/* ピン留め列のハイライト（ホバー中の列とは別表示） */}
+            {pinnedIndex !== null && hoverIndex !== pinnedIndex && chartData[pinnedIndex] && (
+              <rect
+                className="ccws-column-highlight is-pinned"
+                x={scales.xScale(chartData[pinnedIndex]!.key) ?? 0}
+                y={0}
+                width={scales.xScale.bandwidth()}
+                height={innerHeight}
+                rx={3}
+                pointerEvents="none"
+              />
+            )}
+
+            {/* ホバー列のハイライト */}
+            {hoverIndex !== null && chartData[hoverIndex] && (
+              <rect
+                className="ccws-column-highlight"
+                x={scales.xScale(chartData[hoverIndex]!.key) ?? 0}
+                y={0}
+                width={scales.xScale.bandwidth()}
+                height={innerHeight}
+                rx={3}
+                pointerEvents="none"
+              />
+            )}
+
+            <g key={animationKey} className="ccws-bars">
+              {stackSegments.map((segment) => {
+                const perSeriesDelay =
+                  visibleSeries.length > 1 ? STAGGER_WINDOW_MS / (visibleSeries.length - 1) : 0;
+                const style = {
+                  '--bar-delay': `${segment.seriesIndex * perSeriesDelay}ms`,
+                  transformOrigin: `${segment.x + segment.width / 2}px ${innerHeight}px`,
+                } as CSSProperties;
+                return (
                   <rect
-                    className="ccws-column-highlight is-pinned"
-                    x={scales.xScale(chartData[pinnedIndex]!.key) ?? 0}
-                    y={0}
-                    width={scales.xScale.bandwidth()}
-                    height={innerHeight}
-                    rx={3}
-                    pointerEvents="none"
+                    key={segment.key}
+                    className="ccws-bar"
+                    x={segment.x}
+                    y={segment.y}
+                    width={segment.width}
+                    height={segment.height}
+                    fill={segment.color}
+                    style={style}
+                    data-series={segment.seriesKey}
                   />
-                )}
+                );
+              })}
+            </g>
 
-                {/* ホバー列のハイライト */}
-                {hoverIndex !== null && chartData[hoverIndex] && (
-                  <rect
-                    className="ccws-column-highlight"
-                    x={scales.xScale(chartData[hoverIndex]!.key) ?? 0}
-                    y={0}
-                    width={scales.xScale.bandwidth()}
-                    height={innerHeight}
-                    rx={3}
-                    pointerEvents="none"
-                  />
-                )}
-
-                <g key={animationKey} className="ccws-bars">
-                  {stackSegments.map((segment) => {
-                    const perSeriesDelay =
-                      visibleSeries.length > 1 ? STAGGER_WINDOW_MS / (visibleSeries.length - 1) : 0;
-                    const style = {
-                      '--bar-delay': `${segment.seriesIndex * perSeriesDelay}ms`,
-                      transformOrigin: `${segment.x + segment.width / 2}px ${innerHeight}px`,
-                    } as CSSProperties;
-                    return (
-                      <rect
-                        key={segment.key}
-                        className="ccws-bar"
-                        x={segment.x}
-                        y={segment.y}
-                        width={segment.width}
-                        height={segment.height}
-                        fill={segment.color}
-                        style={style}
-                        data-series={segment.seriesKey}
-                      />
-                    );
-                  })}
-                </g>
-
-                <rect
-                  className="ccws-hover-layer"
-                  x={0}
-                  y={0}
-                  width={innerWidth}
-                  height={innerHeight}
-                  fill="transparent"
-                  pointerEvents="all"
-                  onPointerMove={handlePointerMove}
-                  onPointerLeave={handlePointerLeave}
-                  onClick={handleClick}
-                  aria-hidden="true"
-                  style={{ cursor: pinnedIndex !== null ? 'pointer' : 'default' }}
-                />
-              </g>
-            </svg>
-          ) : (
-            <div className="ccws-svg-placeholder" style={{ height: CHART_HEIGHT }} aria-hidden="true" />
-          )}
-
-          {/* 棒グラフ上端中央に配置する不可視のツールチップアンカー */}
-          <RadixTooltip.Trigger asChild>
-            <div
+            <rect
+              className="ccws-hover-layer"
+              x={0}
+              y={0}
+              width={innerWidth}
+              height={innerHeight}
+              fill="transparent"
+              pointerEvents="all"
+              onPointerMove={handlePointerMove}
+              onPointerLeave={handlePointerLeave}
+              onClick={handleClick}
               aria-hidden="true"
-              tabIndex={-1}
-              style={{
-                position: 'absolute',
-                left: tooltipAnchor?.x ?? 0,
-                top: tooltipAnchor?.y ?? 0,
-                width: 0,
-                height: 0,
-                pointerEvents: 'none',
-                outline: 'none',
-              }}
+              style={{ cursor: pinnableTooltip && pinnedIndex !== null ? 'pointer' : 'default' }}
             />
-          </RadixTooltip.Trigger>
-        </div>
+          </g>
+        </svg>
+      ) : (
+        <div className="ccws-svg-placeholder" style={{ height: CHART_HEIGHT }} aria-hidden="true" />
+      )}
 
-        <RadixTooltip.Portal>
-          {tooltipAnchor && (
-            <ChartTooltipContent
-              row={tooltipAnchor.row}
-              series={series}
-              hiddenSeriesKeys={hiddenSeriesKeys}
-              isPinned={isPinned}
-              tooltipBg={tooltipBg}
-              tooltipBorder={tooltipBorder}
-            />
-          )}
-        </RadixTooltip.Portal>
-      </RadixTooltip.Root>
-    </RadixTooltip.Provider>
+      {/* ツールチップ: 棒グラフ上端中央に直接配置してズレを防ぐ */}
+      {tooltipAnchor && (
+        <div
+          className="ccws-tooltip-positioner"
+          style={{ left: tooltipAnchor.x, top: tooltipAnchor.y }}
+        >
+          <ChartTooltipContent
+            row={tooltipAnchor.row}
+            series={series}
+            hiddenSeriesKeys={hiddenSeriesKeys}
+            isPinned={isPinned}
+            pinnableTooltip={pinnableTooltip}
+            tooltipBg={tooltipBg}
+            tooltipBorder={tooltipBorder}
+          />
+        </div>
+      )}
+    </div>
   );
 }
