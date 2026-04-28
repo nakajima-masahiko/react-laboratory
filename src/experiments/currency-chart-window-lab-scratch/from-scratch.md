@@ -99,7 +99,54 @@ interface ChartRow<Key extends string> {
 
 ---
 
-## 6. 将来拡張ポイント
+## 6. テーマカラー機能
+
+### 6.1 設計
+
+3種類のカラーテーマを切り替え可能にする。テーマは `types.ts` の `CHART_THEMES` 配列で定義し、各テーマが10色（系列数分）の色パレットを保持する。
+
+```ts
+type ThemeId = 'default' | 'warm' | 'cool';
+
+interface ChartTheme {
+  id: ThemeId;
+  label: string;
+  colors: readonly string[];
+}
+```
+
+### 6.2 テーマ一覧
+
+| ID | ラベル | 特徴 |
+|---|---|---|
+| `default` | デフォルト | Tableau 風の多色パレット（既存の色） |
+| `warm` | ウォーム | 赤・橙・黄系の暖色パレット |
+| `cool` | クール | 青・緑・紫系の寒色パレット |
+
+### 6.3 色の適用方法
+
+`CURRENCY_SERIES` の固定色はデフォルト値として保持し、`activeSeries` を計算する `useMemo` 内でテーマ色を上書きする。
+
+```ts
+const activeSeries = useMemo(
+  () =>
+    CURRENCY_SERIES.slice(0, currencyCount).map((s, i) => ({
+      ...s,
+      color: selectedTheme.colors[i] ?? s.color,
+    })),
+  [currencyCount, selectedTheme],
+);
+```
+
+この方式により `BarChartSvg` / `ChartLegend` / `ChartTooltip` 側の変更は不要で、`SeriesDefinition.color` を参照する既存コードがそのまま動作する。
+
+### 6.4 UI
+
+ヘッダー右側に `.ccws-theme-selector` グループを配置。各テーマボタンはそのテーマの先頭3色をスウォッチとして表示し、選択中のボタンには `is-active` クラスでアウトラインを付与する。テーマ変更は色の即時反映のみで、棒グラフのエントリーアニメーション（`animationKey`）は再起動しない。
+
+---
+
+## 7. 将来拡張ポイント
 
 1. `ChartRow` の `monthLabel` を `xTickLabel` 等へリネームし、時系列以外に適用。
 2. `Tooltip` の表示フォーマッタを props 注入可能にする（通貨・比率・小数桁対応）。

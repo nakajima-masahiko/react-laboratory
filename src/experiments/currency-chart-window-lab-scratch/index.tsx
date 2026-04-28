@@ -5,12 +5,14 @@ import { BarChartSvg } from './chart/BarChartSvg';
 import { ChartLegend } from './chart/legend';
 import { buildData } from './data';
 import {
+  CHART_THEMES,
   CURRENT_INDEX,
   CURRENCY_SERIES,
   INITIAL_CURRENCY_COUNT,
   RANGE_OPTIONS,
   type Currency,
   type RangeValue,
+  type ThemeId,
 } from './types';
 import './styles.css';
 
@@ -20,10 +22,17 @@ function CurrencyChartWindowLabScratch() {
   const [startIndex, setStartIndex] = useState<number>(CURRENT_INDEX);
   const [hiddenSeriesKeys, setHiddenSeriesKeys] = useState<Set<Currency>>(() => new Set());
   const [currencyCount, setCurrencyCount] = useState<number>(INITIAL_CURRENCY_COUNT);
+  const [selectedThemeId, setSelectedThemeId] = useState<ThemeId>('default');
+
+  const selectedTheme = CHART_THEMES.find((t) => t.id === selectedThemeId) ?? CHART_THEMES[0]!
 
   const activeSeries = useMemo(
-    () => CURRENCY_SERIES.slice(0, currencyCount),
-    [currencyCount],
+    () =>
+      CURRENCY_SERIES.slice(0, currencyCount).map((s, i) => ({
+        ...s,
+        color: selectedTheme.colors[i] ?? s.color,
+      })),
+    [currencyCount, selectedTheme],
   );
   const canAddCurrency = currencyCount < CURRENCY_SERIES.length;
 
@@ -78,24 +87,46 @@ function CurrencyChartWindowLabScratch() {
           <p>汎用的な系列定義を使って SVG + d3-scale + Radix Slider で再構築した版です。</p>
         </div>
 
-        <ToggleGroup.Root
-          type="single"
-          value={selectedRange}
-          onValueChange={handleRangeChange}
-          className="ccws-toggle-group"
-          aria-label="表示月数"
-        >
-          {RANGE_OPTIONS.map((option) => (
-            <ToggleGroup.Item
-              key={option.value}
-              value={option.value}
-              className="ccws-toggle-item"
-              aria-label={option.label}
-            >
-              {option.label}
-            </ToggleGroup.Item>
-          ))}
-        </ToggleGroup.Root>
+        <div className="ccws-header-controls">
+          <div className="ccws-theme-selector" role="group" aria-label="テーマカラー">
+            {CHART_THEMES.map((theme) => (
+              <button
+                key={theme.id}
+                type="button"
+                className={`ccws-theme-button${selectedThemeId === theme.id ? ' is-active' : ''}`}
+                onClick={() => setSelectedThemeId(theme.id)}
+                aria-label={theme.label}
+                aria-pressed={selectedThemeId === theme.id}
+                title={theme.label}
+              >
+                <span className="ccws-theme-swatches" aria-hidden="true">
+                  {theme.colors.slice(0, 3).map((color) => (
+                    <span key={color} className="ccws-theme-swatch" style={{ background: color }} />
+                  ))}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <ToggleGroup.Root
+            type="single"
+            value={selectedRange}
+            onValueChange={handleRangeChange}
+            className="ccws-toggle-group"
+            aria-label="表示月数"
+          >
+            {RANGE_OPTIONS.map((option) => (
+              <ToggleGroup.Item
+                key={option.value}
+                value={option.value}
+                className="ccws-toggle-item"
+                aria-label={option.label}
+              >
+                {option.label}
+              </ToggleGroup.Item>
+            ))}
+          </ToggleGroup.Root>
+        </div>
       </div>
 
       <div className="ccws-card">
