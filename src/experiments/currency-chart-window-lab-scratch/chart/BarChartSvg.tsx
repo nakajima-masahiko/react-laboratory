@@ -16,6 +16,8 @@ interface BarChartSvgProps<Key extends string> {
   animationKey: string;
   chartBackground: string;
   gridColor: string;
+  tooltipBg: string;
+  tooltipBorder: string;
 }
 
 export function BarChartSvg<Key extends string>({
@@ -25,6 +27,8 @@ export function BarChartSvg<Key extends string>({
   animationKey,
   chartBackground,
   gridColor,
+  tooltipBg,
+  tooltipBorder,
 }: BarChartSvgProps<Key>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -114,28 +118,30 @@ export function BarChartSvg<Key extends string>({
     return segments;
   }, [chartData, visibleSeries, scales, innerWidth]);
 
+  // チャートエリア内のカーソル位置から最近傍バーのインデックスを返す
+  // バー幅外のギャップにいる場合も含め、チャートエリア全体でインデックスを解決する
   const getIndexFromClientX = (clientX: number): number | null => {
     const svg = svgRef.current;
-    if (!svg || innerWidth === 0) {
+    if (!svg || innerWidth === 0 || chartData.length === 0) {
       return null;
     }
     const rect = svg.getBoundingClientRect();
     const localX = clientX - rect.left - MARGIN.left;
-    const step = scales.xScale.step();
-    if (step <= 0) {
+    if (localX < 0 || localX > innerWidth) {
       return null;
     }
-    const index = Math.max(0, Math.min(chartData.length - 1, Math.floor(localX / step)));
-    const row = chartData[index];
-    if (!row) {
-      return null;
-    }
-    const bandStart = scales.xScale(row.key) ?? 0;
-    const bandEnd = bandStart + scales.xScale.bandwidth();
-    if (localX < bandStart || localX > bandEnd) {
-      return null;
-    }
-    return index;
+    const bandwidth = scales.xScale.bandwidth();
+    let bestIndex = 0;
+    let bestDist = Infinity;
+    chartData.forEach((row, i) => {
+      const barCenter = (scales.xScale(row.key) ?? 0) + bandwidth / 2;
+      const dist = Math.abs(localX - barCenter);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIndex = i;
+      }
+    });
+    return bestIndex;
   };
 
   const handlePointerMove = (event: React.PointerEvent<SVGRectElement>) => {
@@ -146,11 +152,18 @@ export function BarChartSvg<Key extends string>({
 
   const handleClick = (event: React.MouseEvent<SVGRectElement>) => {
     const index = getIndexFromClientX(event.clientX);
-    setPinnedIndex((prev) => (index === null || prev === index ? null : index));
+    if (index === null) {
+      setPinnedIndex(null);
+      return;
+    }
+    // 同じ列をクリックしたら解除、別の列ならそこにピン留め
+    setPinnedIndex((prev) => (prev === index ? null : index));
   };
 
   // ホバー中はホバーを優先、離れた後はピン留め表示
   const activeIndex = hoverIndex ?? pinnedIndex;
+  // ピン留め状態（ホバーしていない状態でピン留めされている）
+  const isPinned = pinnedIndex !== null && hoverIndex === null;
 
   // ツールチップのアンカー位置（棒グラフ上端の中央）
   const tooltipAnchor = useMemo(() => {
@@ -193,6 +206,32 @@ export function BarChartSvg<Key extends string>({
                 <YAxis yScale={scales.yScale} innerWidth={innerWidth} gridColor={gridColor} />
                 <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} gridColor={gridColor} />
 
+                {/* ピン留め列のハイライト（ホバー中の列とは別表示） */}
+                {pinnedIndex !== null && hoverIndex !== pinnedIndex && chartData[pinnedIndex] && (
+                  <rect
+                    className="ccws-column-highlight is-pinned"
+                    x={scales.xScale(chartData[pinnedIndex]!.key) ?? 0}
+                    y={0}
+                    width={scales.xScale.bandwidth()}
+                    height={innerHeight}
+                    rx={3}
+                    pointerEvents="none"
+                  />
+                )}
+
+                {/* ホバー列のハイライト */}
+                {hoverIndex !== null && chartData[hoverIndex] && (
+                  <rect
+                    className="ccws-column-highlight"
+                    x={scales.xScale(chartData[hoverIndex]!.key) ?? 0}
+                    y={0}
+                    width={scales.xScale.bandwidth()}
+                    height={innerHeight}
+                    rx={3}
+                    pointerEvents="none"
+                  />
+                )}
+
                 <g key={animationKey} className="ccws-bars">
                   {stackSegments.map((segment) => {
                     const perSeriesDelay =
@@ -229,7 +268,7 @@ export function BarChartSvg<Key extends string>({
                   onPointerLeave={handlePointerLeave}
                   onClick={handleClick}
                   aria-hidden="true"
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: pinnedIndex !== null ? 'pointer' : 'default' }}
                 />
               </g>
             </svg>
@@ -261,6 +300,9 @@ export function BarChartSvg<Key extends string>({
               row={tooltipAnchor.row}
               series={series}
               hiddenSeriesKeys={hiddenSeriesKeys}
+              isPinned={isPinned}
+              tooltipBg={tooltipBg}
+              tooltipBorder={tooltipBorder}
             />
           )}
         </RadixTooltip.Portal>

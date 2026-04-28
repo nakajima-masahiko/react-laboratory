@@ -210,6 +210,19 @@
   }
 }
 
+/* ホバー列ハイライト */
+.ccws-column-highlight {
+  fill: color-mix(in oklab, var(--accent) 14%, transparent);
+}
+
+/* ピン留め列ハイライト */
+.ccws-column-highlight.is-pinned {
+  fill: color-mix(in oklab, var(--accent) 22%, transparent);
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-opacity: 0.45;
+}
+
 .ccws-tooltip {
   background: var(--bg);
   border: 1px solid var(--border);
@@ -224,14 +237,34 @@
 }
 
 .ccws-tooltip-arrow {
-  fill: var(--bg);
-  filter: drop-shadow(0 1px 0 var(--border));
+  fill: var(--ccws-tooltip-fill, var(--bg));
+  filter: drop-shadow(0 1px 0 var(--ccws-tooltip-border, var(--border)));
 }
 
 .ccws-tooltip-title {
   font-weight: 600;
   margin-bottom: 6px;
   color: var(--text-h);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ccws-tooltip-pin-badge {
+  font-size: 0.72em;
+  font-weight: 500;
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  border-radius: 9999px;
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+.ccws-tooltip-pin-hint {
+  margin: 5px 0 0;
+  font-size: 0.78em;
+  opacity: 0.55;
+  text-align: center;
 }
 
 .ccws-tooltip-list {
