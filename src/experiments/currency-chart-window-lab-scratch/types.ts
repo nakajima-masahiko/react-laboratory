@@ -1,11 +1,15 @@
 export type RangeValue = '1' | '3' | '6' | '12';
 
-export type ThemeId = 'default' | 'warm' | 'cool';
+export type ThemeId = 'default' | 'warm' | 'cool' | 'light';
 
 export interface ChartTheme {
   id: ThemeId;
   label: string;
   colors: readonly string[];
+  /** SVG チャートエリアの背景色。'transparent' でカード背景を透過する */
+  background: string;
+  /** グリッド線の色 */
+  gridColor: string;
 }
 
 export const CHART_THEMES: readonly ChartTheme[] = [
@@ -13,16 +17,29 @@ export const CHART_THEMES: readonly ChartTheme[] = [
     id: 'default',
     label: 'デフォルト',
     colors: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#edc948', '#59a14f', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ac'],
+    background: 'transparent',
+    gridColor: 'var(--border)',
   },
   {
     id: 'warm',
     label: 'ウォーム',
     colors: ['#e63946', '#f4a261', '#e76f51', '#f9c74f', '#f3722c', '#d62828', '#fb8500', '#e9c46a', '#c77b46', '#a4432b'],
+    background: 'transparent',
+    gridColor: 'var(--border)',
   },
   {
     id: 'cool',
     label: 'クール',
     colors: ['#4361ee', '#3a86ff', '#2a9d8f', '#43aa8b', '#4cc9f0', '#7209b7', '#480ca8', '#52b788', '#4895ef', '#48cae4'],
+    background: 'transparent',
+    gridColor: 'var(--border)',
+  },
+  {
+    id: 'light',
+    label: 'ライト',
+    colors: ['#1a6faf', '#d14b00', '#2a9d3a', '#8b3fbf', '#c47800', '#006e8c', '#b53060', '#4d7c00', '#0047ab', '#7b5800'],
+    background: '#ffffff',
+    gridColor: 'rgba(0, 0, 0, 0.10)',
   },
 ] as const;
 

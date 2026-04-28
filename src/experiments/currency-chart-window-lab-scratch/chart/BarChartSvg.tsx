@@ -13,6 +13,8 @@ interface BarChartSvgProps<Key extends string> {
   series: ReadonlyArray<SeriesDefinition<Key>>;
   hiddenSeriesKeys: Set<Key>;
   animationKey: string;
+  chartBackground: string;
+  gridColor: string;
 }
 
 export function BarChartSvg<Key extends string>({
@@ -20,11 +22,14 @@ export function BarChartSvg<Key extends string>({
   series,
   hiddenSeriesKeys,
   animationKey,
+  chartBackground,
+  gridColor,
 }: BarChartSvgProps<Key>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -40,6 +45,12 @@ export function BarChartSvg<Key extends string>({
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
+
+  // グラフ更新時にツールチップを非表示にする
+  useEffect(() => {
+    setPinnedIndex(null);
+    setHoverIndex(null);
+  }, [animationKey]);
 
   const innerWidth = Math.max(0, chartWidth - MARGIN.left - MARGIN.right);
   const innerHeight = Math.max(0, CHART_HEIGHT - MARGIN.top - MARGIN.bottom);
@@ -102,39 +113,49 @@ export function BarChartSvg<Key extends string>({
     return segments;
   }, [chartData, visibleSeries, scales, innerWidth]);
 
-  const handlePointerMove = (event: React.PointerEvent<SVGRectElement>) => {
+  const getIndexFromClientX = (clientX: number): number | null => {
     const svg = svgRef.current;
     if (!svg || innerWidth === 0) {
-      return;
+      return null;
     }
     const rect = svg.getBoundingClientRect();
-    const localX = event.clientX - rect.left - MARGIN.left;
+    const localX = clientX - rect.left - MARGIN.left;
     const step = scales.xScale.step();
     if (step <= 0) {
-      return;
+      return null;
     }
     const index = Math.max(0, Math.min(chartData.length - 1, Math.floor(localX / step)));
     const row = chartData[index];
     if (!row) {
-      setHoverIndex(null);
-      return;
+      return null;
     }
     const bandStart = scales.xScale(row.key) ?? 0;
     const bandEnd = bandStart + scales.xScale.bandwidth();
     if (localX < bandStart || localX > bandEnd) {
-      setHoverIndex(null);
-      return;
+      return null;
     }
-    setHoverIndex(index);
+    return index;
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<SVGRectElement>) => {
+    setHoverIndex(getIndexFromClientX(event.clientX));
   };
 
   const handlePointerLeave = () => setHoverIndex(null);
 
+  const handleClick = (event: React.MouseEvent<SVGRectElement>) => {
+    const index = getIndexFromClientX(event.clientX);
+    setPinnedIndex((prev) => (index === null || prev === index ? null : index));
+  };
+
+  // ホバー中はホバーを優先、離れた後はピン留め表示
+  const activeIndex = hoverIndex ?? pinnedIndex;
+
   const tooltipPosition = (() => {
-    if (hoverIndex === null || visibleSeries.length === 0) {
+    if (activeIndex === null || visibleSeries.length === 0) {
       return null;
     }
-    const row = chartData[hoverIndex];
+    const row = chartData[activeIndex];
     if (!row) {
       return null;
     }
@@ -157,18 +178,26 @@ export function BarChartSvg<Key extends string>({
           aria-label="通貨別つみたて棒グラフ"
         >
           <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
-            <YAxis yScale={scales.yScale} innerWidth={innerWidth} />
-            <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} />
+            {/* チャートエリア背景 */}
+            <rect
+              x={0}
+              y={0}
+              width={innerWidth}
+              height={innerHeight}
+              fill={chartBackground}
+              rx={4}
+            />
+
+            <YAxis yScale={scales.yScale} innerWidth={innerWidth} gridColor={gridColor} />
+            <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} gridColor={gridColor} />
 
             <g key={animationKey} className="ccws-bars">
               {stackSegments.map((segment) => {
-                const dim = hoverIndex !== null && hoverIndex !== segment.rowIndex ? 0.5 : 1;
                 const perSeriesDelay =
                   visibleSeries.length > 1 ? STAGGER_WINDOW_MS / (visibleSeries.length - 1) : 0;
                 const style = {
                   '--bar-delay': `${segment.seriesIndex * perSeriesDelay}ms`,
                   transformOrigin: `${segment.x + segment.width / 2}px ${innerHeight}px`,
-                  opacity: dim,
                 } as CSSProperties;
                 return (
                   <rect
@@ -196,7 +225,9 @@ export function BarChartSvg<Key extends string>({
               pointerEvents="all"
               onPointerMove={handlePointerMove}
               onPointerLeave={handlePointerLeave}
+              onClick={handleClick}
               aria-hidden="true"
+              style={{ cursor: 'pointer' }}
             />
           </g>
         </svg>

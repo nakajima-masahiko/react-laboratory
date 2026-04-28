@@ -152,6 +152,8 @@ function CurrencyChartWindowLabScratch() {
           series={activeSeries}
           hiddenSeriesKeys={hiddenSeriesKeys}
           animationKey={animationKey}
+          chartBackground={selectedTheme.background}
+          gridColor={selectedTheme.gridColor}
         />
 
         <div className="ccws-controls" role="group" aria-label="表示月の移動">
