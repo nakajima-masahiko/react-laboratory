@@ -1,3 +1,5 @@
+import type { StackedDataPoint, StackedSeries } from '../../features/stacked-bar-window-chart';
+
 export type RangeValue = '1' | '3' | '6' | '12';
 
 export type ThemeId = 'default' | 'warm' | 'cool' | 'light';
@@ -8,13 +10,9 @@ export interface ChartTheme {
   id: ThemeId;
   label: string;
   colors: readonly string[];
-  /** SVG チャートエリアの背景色。'transparent' でカード背景を透過する */
   background: string;
-  /** グリッド線の色 */
   gridColor: string;
-  /** ツールチップ背景色 */
   tooltipBg: string;
-  /** ツールチップ枠線色 */
   tooltipBorder: string;
 }
 
@@ -57,11 +55,7 @@ export const CHART_THEMES: readonly ChartTheme[] = [
   },
 ] as const;
 
-export interface SeriesDefinition<Key extends string> {
-  key: Key;
-  label: string;
-  color: string;
-}
+export type SeriesDefinition<Key extends string> = StackedSeries<Key>;
 
 export const CURRENCY_SERIES = [
   { key: 'USD', label: 'USD', color: '#4e79a7' },
@@ -74,7 +68,7 @@ export const CURRENCY_SERIES = [
   { key: 'CHF', label: 'CHF', color: '#ff9da7' },
   { key: 'CNY', label: 'CNY', color: '#9c755f' },
   { key: 'KRW', label: 'KRW', color: '#bab0ac' },
-] as const satisfies ReadonlyArray<SeriesDefinition<string>>;
+] as const satisfies ReadonlyArray<StackedSeries<string>>;
 
 export const PORTFOLIO_SERIES = [
   { key: 'cash', label: '現金', color: '#4e79a7' },
@@ -83,7 +77,7 @@ export const PORTFOLIO_SERIES = [
   { key: 'reit', label: 'REIT', color: '#76b7b2' },
   { key: 'commodity', label: 'コモディティ', color: '#59a14f' },
   { key: 'crypto', label: '暗号資産', color: '#af7aa1' },
-] as const satisfies ReadonlyArray<SeriesDefinition<string>>;
+] as const satisfies ReadonlyArray<StackedSeries<string>>;
 
 export type Currency = (typeof CURRENCY_SERIES)[number]['key'];
 export type PortfolioKind = (typeof PORTFOLIO_SERIES)[number]['key'];
@@ -93,12 +87,7 @@ export const INITIAL_VISIBLE_SERIES_COUNT: Record<ChartMode, number> = {
   portfolio: 4,
 };
 
-export interface ChartRow<Key extends string = Currency> {
-  key: string;
-  label: string;
-  monthLabel: string;
-  values: Record<Key, number>;
-}
+export type ChartRow<Key extends string = Currency> = StackedDataPoint<Key>;
 
 export const RANGE_OPTIONS: ReadonlyArray<{
   value: RangeValue;

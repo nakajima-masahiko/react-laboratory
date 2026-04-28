@@ -50,8 +50,8 @@ function buildMonthlyData<Key extends string>(
     const date = addMonths(now, index - CURRENT_INDEX);
     return {
       key: `${date.getFullYear()}-${date.getMonth() + 1}`,
-      label: formatMonth(date),
-      monthLabel: `${date.getMonth() + 1}月`,
+      tooltipLabel: formatMonth(date),
+      axisLabel: `${date.getMonth() + 1}月`,
       values: buildSeriesData(index, series, profiles),
     };
   });
