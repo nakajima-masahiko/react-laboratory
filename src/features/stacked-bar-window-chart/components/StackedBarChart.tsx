@@ -1,42 +1,54 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import type { ChartRow, SeriesDefinition } from '../types';
-import { XAxis, YAxis } from './axes';
-import { buildScales } from './scales';
-import { ChartTooltipContent } from './tooltip';
+
+import { XAxis, YAxis } from '../chart/axes';
+import { buildScales } from '../chart/scales';
+import type { StackedBarChartTheme, StackedDataPoint, StackedSeries, ValueFormatter } from '../types';
+import { ChartTooltip } from './ChartTooltip';
 
 const MARGIN = { top: 8, right: 24, bottom: 32, left: 56 } as const;
-const CHART_HEIGHT = 460;
 const STAGGER_WINDOW_MS = 480;
 
-interface BarChartSvgProps<Key extends string> {
-  chartData: ChartRow<Key>[];
-  series: ReadonlyArray<SeriesDefinition<Key>>;
+interface StackedBarChartProps<Key extends string> {
+  chartData: StackedDataPoint<Key>[];
+  series: ReadonlyArray<StackedSeries<Key>>;
   hiddenSeriesKeys: Set<Key>;
   animationKey: string;
-  chartBackground: string;
-  gridColor: string;
-  tooltipBg: string;
-  tooltipBorder: string;
-  /** クリックでツールチップを固定する機能を有効にする。デフォルト: false */
-  pinnableTooltip?: boolean;
+  theme: StackedBarChartTheme;
+  formatValue: ValueFormatter;
+  height: number;
+  /** クリックでツールチップを固定する機能を有効にする */
+  pinnableTooltip: boolean;
+  ariaLabel: string;
+  pinnedBadgeLabel: string;
+  pinnedHintLabel: string;
 }
 
-export function BarChartSvg<Key extends string>({
+export function StackedBarChart<Key extends string>({
   chartData,
   series,
   hiddenSeriesKeys,
   animationKey,
-  chartBackground,
-  gridColor,
-  tooltipBg,
-  tooltipBorder,
-  pinnableTooltip = false,
-}: BarChartSvgProps<Key>) {
+  theme,
+  formatValue,
+  height,
+  pinnableTooltip,
+  ariaLabel,
+  pinnedBadgeLabel,
+  pinnedHintLabel,
+}: StackedBarChartProps<Key>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
+  const [prevAnimationKey, setPrevAnimationKey] = useState(animationKey);
+
+  // データ更新時はツールチップ・ピン留めをクリア（React 推奨: render 中に props 変化を検知）
+  if (prevAnimationKey !== animationKey) {
+    setPrevAnimationKey(animationKey);
+    setHoverIndex(null);
+    setPinnedIndex(null);
+  }
 
   useEffect(() => {
     const node = containerRef.current;
@@ -53,12 +65,6 @@ export function BarChartSvg<Key extends string>({
     return () => observer.disconnect();
   }, []);
 
-  // グラフ更新時にツールチップを非表示にする
-  useEffect(() => {
-    setPinnedIndex(null);
-    setHoverIndex(null);
-  }, [animationKey]);
-
   // チャート外クリックでツールチップを閉じる
   useEffect(() => {
     const handleOutsideClick = (e: PointerEvent) => {
@@ -72,7 +78,7 @@ export function BarChartSvg<Key extends string>({
   }, []);
 
   const innerWidth = Math.max(0, chartWidth - MARGIN.left - MARGIN.right);
-  const innerHeight = Math.max(0, CHART_HEIGHT - MARGIN.top - MARGIN.bottom);
+  const innerHeight = Math.max(0, height - MARGIN.top - MARGIN.bottom);
 
   const visibleSeries = useMemo(
     () => series.filter((item) => !hiddenSeriesKeys.has(item.key)),
@@ -114,7 +120,7 @@ export function BarChartSvg<Key extends string>({
         const yBottom = scales.yScale(cumulative[rowIndex]);
         const x = scales.xScale(row.key) ?? 0;
         const width = scales.xScale.bandwidth();
-        const height = Math.max(0, yBottom - yTop);
+        const segHeight = Math.max(0, yBottom - yTop);
         segments.push({
           seriesKey: item.key,
           color: item.color,
@@ -123,7 +129,7 @@ export function BarChartSvg<Key extends string>({
           x,
           y: yTop,
           width,
-          height,
+          height: segHeight,
           rowIndex,
         });
         cumulative[rowIndex] += value;
@@ -132,7 +138,6 @@ export function BarChartSvg<Key extends string>({
     return segments;
   }, [chartData, visibleSeries, scales, innerWidth]);
 
-  // チャートエリア内のカーソル位置から最近傍バーのインデックスを返す
   const getIndexFromClientX = (clientX: number): number | null => {
     const svg = svgRef.current;
     if (!svg || innerWidth === 0 || chartData.length === 0) {
@@ -169,9 +174,8 @@ export function BarChartSvg<Key extends string>({
   };
 
   const handlePointerLeave = (event: React.PointerEvent<SVGRectElement>) => {
-    // タッチ操作では指を離すと pointerleave が発火してツールチップが消えてしまうため、
-    // タッチの場合は hover 表示を維持する（チャート外タップで解除）。
-    // ピン留めが有効な場合のみ pinnedIndex に変換する。
+    // タッチ操作では指を離すと pointerleave が発火するため hover を維持し、
+    // ピン留め可能なら pinnedIndex に転写する。
     if (event.pointerType === 'touch') {
       if (pinnableTooltip) {
         setPinnedIndex(hoverIndex);
@@ -188,16 +192,12 @@ export function BarChartSvg<Key extends string>({
       setPinnedIndex(null);
       return;
     }
-    // 同じ列をクリックしたら解除、別の列ならそこにピン留め
     setPinnedIndex((prev) => (prev === index ? null : index));
   };
 
-  // ホバー中はホバーを優先、離れた後はピン留め表示
   const activeIndex = hoverIndex ?? pinnedIndex;
-  // ピン留め状態（ホバーしていない状態でピン留めされている）
   const isPinned = pinnedIndex !== null && hoverIndex === null;
 
-  // ツールチップのアンカー位置（棒グラフ上端の中央）
   const tooltipAnchor = useMemo(() => {
     if (activeIndex === null || visibleSeries.length === 0) return null;
     const row = chartData[activeIndex];
@@ -212,34 +212,42 @@ export function BarChartSvg<Key extends string>({
   const ready = chartWidth > 0 && innerWidth > 0;
 
   return (
-    <div ref={containerRef} className="ccws-chart-host">
+    <div ref={containerRef} className="sbwc-chart-host">
       {ready ? (
         <svg
           ref={svgRef}
           width={chartWidth}
-          height={CHART_HEIGHT}
-          className="ccws-svg"
+          height={height}
+          className="sbwc-svg"
           role="img"
-          aria-label="通貨別つみたて棒グラフ"
+          aria-label={ariaLabel}
         >
           <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
-            {/* チャートエリア背景 */}
             <rect
               x={0}
               y={0}
               width={innerWidth}
               height={innerHeight}
-              fill={chartBackground}
+              fill={theme.background}
               rx={4}
             />
 
-            <YAxis yScale={scales.yScale} innerWidth={innerWidth} gridColor={gridColor} />
-            <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} gridColor={gridColor} />
+            <YAxis
+              yScale={scales.yScale}
+              innerWidth={innerWidth}
+              gridColor={theme.gridColor}
+              formatValue={formatValue}
+            />
+            <XAxis
+              xScale={scales.xScale}
+              innerHeight={innerHeight}
+              chartData={chartData}
+              gridColor={theme.gridColor}
+            />
 
-            {/* ピン留め列のハイライト（ホバー中の列とは別表示） */}
             {pinnedIndex !== null && hoverIndex !== pinnedIndex && chartData[pinnedIndex] && (
               <rect
-                className="ccws-column-highlight is-pinned"
+                className="sbwc-column-highlight is-pinned"
                 x={scales.xScale(chartData[pinnedIndex]!.key) ?? 0}
                 y={0}
                 width={scales.xScale.bandwidth()}
@@ -249,10 +257,9 @@ export function BarChartSvg<Key extends string>({
               />
             )}
 
-            {/* ホバー列のハイライト */}
             {hoverIndex !== null && chartData[hoverIndex] && (
               <rect
-                className="ccws-column-highlight"
+                className="sbwc-column-highlight"
                 x={scales.xScale(chartData[hoverIndex]!.key) ?? 0}
                 y={0}
                 width={scales.xScale.bandwidth()}
@@ -262,7 +269,7 @@ export function BarChartSvg<Key extends string>({
               />
             )}
 
-            <g key={animationKey} className="ccws-bars">
+            <g key={animationKey} className="sbwc-bars">
               {stackSegments.map((segment) => {
                 const perSeriesDelay =
                   visibleSeries.length > 1 ? STAGGER_WINDOW_MS / (visibleSeries.length - 1) : 0;
@@ -273,7 +280,7 @@ export function BarChartSvg<Key extends string>({
                 return (
                   <rect
                     key={segment.key}
-                    className="ccws-bar"
+                    className="sbwc-bar"
                     x={segment.x}
                     y={segment.y}
                     width={segment.width}
@@ -287,7 +294,7 @@ export function BarChartSvg<Key extends string>({
             </g>
 
             <rect
-              className="ccws-hover-layer"
+              className="sbwc-hover-layer"
               x={0}
               y={0}
               width={innerWidth}
@@ -304,23 +311,25 @@ export function BarChartSvg<Key extends string>({
           </g>
         </svg>
       ) : (
-        <div className="ccws-svg-placeholder" style={{ height: CHART_HEIGHT }} aria-hidden="true" />
+        <div className="sbwc-svg-placeholder" style={{ height }} aria-hidden="true" />
       )}
 
-      {/* ツールチップ: 棒グラフ上端中央に直接配置してズレを防ぐ */}
       {tooltipAnchor && (
         <div
-          className="ccws-tooltip-positioner"
+          className="sbwc-tooltip-positioner"
           style={{ left: tooltipAnchor.x, top: tooltipAnchor.y }}
         >
-          <ChartTooltipContent
+          <ChartTooltip
             row={tooltipAnchor.row}
             series={series}
             hiddenSeriesKeys={hiddenSeriesKeys}
             isPinned={isPinned}
             pinnableTooltip={pinnableTooltip}
-            tooltipBg={tooltipBg}
-            tooltipBorder={tooltipBorder}
+            tooltipBg={theme.tooltipBg}
+            tooltipBorder={theme.tooltipBorder}
+            formatValue={formatValue}
+            pinnedBadgeLabel={pinnedBadgeLabel}
+            pinnedHintLabel={pinnedHintLabel}
           />
         </div>
       )}

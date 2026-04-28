@@ -1,8 +1,6 @@
-import * as Slider from '@radix-ui/react-slider';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useMemo, useState } from 'react';
-import { BarChartSvg } from './chart/BarChartSvg';
-import { ChartLegend } from './chart/legend';
+import { StackedBarWindowChart } from '../../features/stacked-bar-window-chart';
 import { buildCurrencyData, buildPortfolioData } from './data';
 import {
   CHART_THEMES,
@@ -66,17 +64,8 @@ function CurrencyChartWindowLabScratch() {
   const maxStartIndex = Math.max(0, data.length - visibleMonths);
   const safeStartIndex = Math.min(startIndex, maxStartIndex);
   const endIndex = Math.min(safeStartIndex + visibleMonths - 1, data.length - 1);
-  const currencyChartData = useMemo(
-    () => currencyData.slice(safeStartIndex, endIndex + 1),
-    [currencyData, safeStartIndex, endIndex],
-  );
-  const portfolioChartData = useMemo(
-    () => portfolioData.slice(safeStartIndex, endIndex + 1),
-    [portfolioData, safeStartIndex, endIndex],
-  );
-
-  const startLabel = data[safeStartIndex]?.label ?? '';
-  const endLabel = data[endIndex]?.label ?? '';
+  const startLabel = data[safeStartIndex]?.tooltipLabel ?? '';
+  const endLabel = data[endIndex]?.tooltipLabel ?? '';
   const rangeLabel = visibleMonths === 1 ? startLabel : `${startLabel} 〜 ${endLabel}`;
 
   const handleRangeChange = (value: string) => {
@@ -131,6 +120,28 @@ function CurrencyChartWindowLabScratch() {
   const canAddSeries = visibleSeriesCount < totalSeriesCount;
   const animationKey = `${selectedMode}-${selectedRange}-${visibleSeriesCount}`;
   const title = isCurrencyMode ? '通貨別つみたて棒グラフ（自前描画版）' : '資金内訳ポートフォリオ（積み上げ棒グラフ）';
+
+  const addSeriesButton = (
+    <button
+      type="button"
+      className="ccws-add-series"
+      onClick={handleAddSeries}
+      disabled={!canAddSeries}
+      aria-label="系列を追加"
+    >
+      + 系列を追加（{visibleSeriesCount}/{totalSeriesCount}）
+    </button>
+  );
+
+  const ariaLabels = {
+    chart: title,
+    legend: '系列の表示切替',
+    slider: '表示する月',
+    prevButton: '前の月へ',
+    nextButton: '次の月へ',
+    windowControls: '表示月の移動',
+    pinnedBadge: '固定',
+  };
 
   return (
     <div className="ccws-root">
@@ -197,92 +208,39 @@ function CurrencyChartWindowLabScratch() {
       </div>
 
       <div className="ccws-card">
-        <div className="ccws-legend-row">
-          {isCurrencyMode ? (
-            <ChartLegend series={currencySeries} hiddenSeriesKeys={hiddenCurrencyKeys} onToggle={handleToggleCurrency} />
-          ) : (
-            <ChartLegend series={portfolioSeries} hiddenSeriesKeys={hiddenPortfolioKeys} onToggle={handleTogglePortfolio} />
-          )}
-          <button
-            type="button"
-            className="ccws-add-currency"
-            onClick={handleAddSeries}
-            disabled={!canAddSeries}
-            aria-label="系列を追加"
-          >
-            + 系列を追加（{visibleSeriesCount}/{totalSeriesCount}）
-          </button>
-        </div>
-
         {isCurrencyMode ? (
-          <BarChartSvg
-            chartData={currencyChartData}
+          <StackedBarWindowChart
+            data={currencyData}
             series={currencySeries}
             hiddenSeriesKeys={hiddenCurrencyKeys}
+            onToggleSeries={handleToggleCurrency}
+            windowSize={visibleMonths}
+            startIndex={safeStartIndex}
+            onStartIndexChange={setStartIndex}
+            theme={selectedTheme}
+            rangeLabel={rangeLabel}
             animationKey={animationKey}
-            chartBackground={selectedTheme.background}
-            gridColor={selectedTheme.gridColor}
-            tooltipBg={selectedTheme.tooltipBg}
-            tooltipBorder={selectedTheme.tooltipBorder}
+            legendActions={addSeriesButton}
+            ariaLabels={ariaLabels}
+            pinnedHintLabel="クリックで解除"
           />
         ) : (
-          <BarChartSvg
-            chartData={portfolioChartData}
+          <StackedBarWindowChart
+            data={portfolioData}
             series={portfolioSeries}
             hiddenSeriesKeys={hiddenPortfolioKeys}
+            onToggleSeries={handleTogglePortfolio}
+            windowSize={visibleMonths}
+            startIndex={safeStartIndex}
+            onStartIndexChange={setStartIndex}
+            theme={selectedTheme}
+            rangeLabel={rangeLabel}
             animationKey={animationKey}
-            chartBackground={selectedTheme.background}
-            gridColor={selectedTheme.gridColor}
-            tooltipBg={selectedTheme.tooltipBg}
-            tooltipBorder={selectedTheme.tooltipBorder}
+            legendActions={addSeriesButton}
+            ariaLabels={ariaLabels}
+            pinnedHintLabel="クリックで解除"
           />
         )}
-
-        <div className="ccws-controls" role="group" aria-label="表示月の移動">
-          <button
-            type="button"
-            className="ccws-nav-button"
-            onClick={() => setStartIndex((prev) => Math.max(0, prev - 1))}
-            disabled={safeStartIndex <= 0}
-            aria-label="前の月へ"
-          >
-            ‹
-          </button>
-
-          <div className="ccws-slider-wrap">
-            <span className="ccws-slider-label">{rangeLabel}</span>
-            <Slider.Root
-              className="ccws-slider-root"
-              value={[safeStartIndex]}
-              min={0}
-              max={maxStartIndex}
-              step={1}
-              onValueChange={(values) => {
-                const next = values[0];
-                if (typeof next === 'number') {
-                  setStartIndex(next);
-                }
-              }}
-              aria-label="表示する月"
-              aria-valuetext={rangeLabel}
-            >
-              <Slider.Track className="ccws-slider-track">
-                <Slider.Range className="ccws-slider-range" />
-              </Slider.Track>
-              <Slider.Thumb className="ccws-slider-thumb" />
-            </Slider.Root>
-          </div>
-
-          <button
-            type="button"
-            className="ccws-nav-button"
-            onClick={() => setStartIndex((prev) => Math.min(maxStartIndex, prev + 1))}
-            disabled={safeStartIndex >= maxStartIndex}
-            aria-label="次の月へ"
-          >
-            ›
-          </button>
-        </div>
       </div>
     </div>
   );

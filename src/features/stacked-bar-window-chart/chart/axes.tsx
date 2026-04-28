@@ -1,19 +1,17 @@
-import { format } from 'd3-format';
 import type { ScaleBand, ScaleLinear } from 'd3-scale';
-import type { ChartRow } from '../types';
-
-const formatNumber = format(',');
+import type { StackedDataPoint, ValueFormatter } from '../types';
 
 interface YAxisProps {
   yScale: ScaleLinear<number, number>;
   innerWidth: number;
   gridColor: string;
+  formatValue: ValueFormatter;
 }
 
-export function YAxis({ yScale, innerWidth, gridColor }: YAxisProps) {
+export function YAxis({ yScale, innerWidth, gridColor, formatValue }: YAxisProps) {
   const ticks = yScale.ticks(5);
   return (
-    <g className="ccws-y-axis" aria-hidden="true">
+    <g className="sbwc-y-axis" aria-hidden="true">
       {ticks.map((tick) => {
         const y = yScale(tick);
         return (
@@ -27,7 +25,7 @@ export function YAxis({ yScale, innerWidth, gridColor }: YAxisProps) {
               strokeDasharray="3 3"
             />
             <text x={-8} y={0} dy="0.32em" textAnchor="end" fontSize={13} fill="var(--text)">
-              {formatNumber(tick)}
+              {formatValue(tick)}
             </text>
           </g>
         );
@@ -39,7 +37,7 @@ export function YAxis({ yScale, innerWidth, gridColor }: YAxisProps) {
 interface XAxisProps<Key extends string> {
   xScale: ScaleBand<string>;
   innerHeight: number;
-  chartData: ChartRow<Key>[];
+  chartData: StackedDataPoint<Key>[];
   gridColor: string;
 }
 
@@ -47,10 +45,10 @@ export function XAxis<Key extends string>({ xScale, innerHeight, chartData, grid
   const bandwidth = xScale.bandwidth();
   const showAll = bandwidth >= 28;
   const fontSize = bandwidth >= 36 ? 13 : bandwidth >= 24 ? 12 : 11;
-  const labelByKey = new Map(chartData.map((row) => [row.key, row.monthLabel]));
+  const labelByKey = new Map(chartData.map((row) => [row.key, row.axisLabel]));
 
   return (
-    <g className="ccws-x-axis" transform={`translate(0, ${innerHeight})`} aria-hidden="true">
+    <g className="sbwc-x-axis" transform={`translate(0, ${innerHeight})`} aria-hidden="true">
       {xScale.domain().map((key, i) => {
         if (!showAll && i % 2 === 1) {
           return null;

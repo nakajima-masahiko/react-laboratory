@@ -1,6 +1,6 @@
 import { max } from 'd3-array';
 import { scaleBand, scaleLinear, type ScaleBand, type ScaleLinear } from 'd3-scale';
-import type { ChartRow } from '../types';
+import type { StackedDataPoint } from '../types';
 
 export interface ChartScales {
   xScale: ScaleBand<string>;
@@ -8,7 +8,7 @@ export interface ChartScales {
 }
 
 export function buildScales<Key extends string>(
-  chartData: ChartRow<Key>[],
+  chartData: StackedDataPoint<Key>[],
   visibleSeriesKeys: Key[],
   innerWidth: number,
   innerHeight: number,
