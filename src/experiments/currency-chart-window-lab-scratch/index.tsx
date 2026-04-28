@@ -3,66 +3,99 @@ import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useMemo, useState } from 'react';
 import { BarChartSvg } from './chart/BarChartSvg';
 import { ChartLegend } from './chart/legend';
-import { buildData } from './data';
+import { buildCurrencyData, buildPortfolioData } from './data';
 import {
   CHART_THEMES,
   CURRENT_INDEX,
   CURRENCY_SERIES,
-  INITIAL_CURRENCY_COUNT,
+  INITIAL_VISIBLE_SERIES_COUNT,
+  PORTFOLIO_SERIES,
   RANGE_OPTIONS,
+  type ChartMode,
   type Currency,
+  type PortfolioKind,
   type RangeValue,
+  type SeriesDefinition,
   type ThemeId,
 } from './types';
 import './styles.css';
 
+const CHART_MODE_OPTIONS: ReadonlyArray<{ value: ChartMode; label: string }> = [
+  { value: 'currency', label: '通貨別' },
+  { value: 'portfolio', label: '資金内訳' },
+];
+
+function buildColoredSeries<Key extends string>(
+  series: readonly SeriesDefinition<Key>[],
+  maxCount: number,
+  colors: readonly string[],
+) {
+  return series.slice(0, maxCount).map((item, index) => ({
+    ...item,
+    color: colors[index] ?? item.color,
+  }));
+}
+
 function CurrencyChartWindowLabScratch() {
-  const data = useMemo(() => buildData(), []);
+  const currencyData = useMemo(() => buildCurrencyData(), []);
+  const portfolioData = useMemo(() => buildPortfolioData(), []);
+
+  const [selectedMode, setSelectedMode] = useState<ChartMode>('currency');
   const [selectedRange, setSelectedRange] = useState<RangeValue>('6');
   const [startIndex, setStartIndex] = useState<number>(CURRENT_INDEX);
-  const [hiddenSeriesKeys, setHiddenSeriesKeys] = useState<Set<Currency>>(() => new Set());
-  const [currencyCount, setCurrencyCount] = useState<number>(INITIAL_CURRENCY_COUNT);
+  const [hiddenCurrencyKeys, setHiddenCurrencyKeys] = useState<Set<Currency>>(() => new Set());
+  const [hiddenPortfolioKeys, setHiddenPortfolioKeys] = useState<Set<PortfolioKind>>(() => new Set());
+  const [currencyCount, setCurrencyCount] = useState<number>(INITIAL_VISIBLE_SERIES_COUNT.currency);
+  const [portfolioCount, setPortfolioCount] = useState<number>(INITIAL_VISIBLE_SERIES_COUNT.portfolio);
   const [selectedThemeId, setSelectedThemeId] = useState<ThemeId>('default');
 
-  const selectedTheme = CHART_THEMES.find((t) => t.id === selectedThemeId) ?? CHART_THEMES[0]!
+  const selectedTheme = CHART_THEMES.find((theme) => theme.id === selectedThemeId) ?? CHART_THEMES[0]!;
+  const isCurrencyMode = selectedMode === 'currency';
 
-  const activeSeries = useMemo(
-    () =>
-      CURRENCY_SERIES.slice(0, currencyCount).map((s, i) => ({
-        ...s,
-        color: selectedTheme.colors[i] ?? s.color,
-      })),
-    [currencyCount, selectedTheme],
+  const currencySeries = useMemo(
+    () => buildColoredSeries(CURRENCY_SERIES, currencyCount, selectedTheme.colors),
+    [currencyCount, selectedTheme.colors],
   );
-  const canAddCurrency = currencyCount < CURRENCY_SERIES.length;
+  const portfolioSeries = useMemo(
+    () => buildColoredSeries(PORTFOLIO_SERIES, portfolioCount, selectedTheme.colors),
+    [portfolioCount, selectedTheme.colors],
+  );
 
-  const visibleMonths =
-    RANGE_OPTIONS.find((option) => option.value === selectedRange)?.months ?? 6;
+  const data = isCurrencyMode ? currencyData : portfolioData;
+  const visibleMonths = RANGE_OPTIONS.find((option) => option.value === selectedRange)?.months ?? 6;
   const maxStartIndex = Math.max(0, data.length - visibleMonths);
   const safeStartIndex = Math.min(startIndex, maxStartIndex);
   const endIndex = Math.min(safeStartIndex + visibleMonths - 1, data.length - 1);
-  const chartData = useMemo(
-    () => data.slice(safeStartIndex, endIndex + 1),
-    [data, safeStartIndex, endIndex],
+  const currencyChartData = useMemo(
+    () => currencyData.slice(safeStartIndex, endIndex + 1),
+    [currencyData, safeStartIndex, endIndex],
   );
+  const portfolioChartData = useMemo(
+    () => portfolioData.slice(safeStartIndex, endIndex + 1),
+    [portfolioData, safeStartIndex, endIndex],
+  );
+
   const startLabel = data[safeStartIndex]?.label ?? '';
   const endLabel = data[endIndex]?.label ?? '';
   const rangeLabel = visibleMonths === 1 ? startLabel : `${startLabel} 〜 ${endLabel}`;
 
   const handleRangeChange = (value: string) => {
-    if (!value) {
-      return;
-    }
+    if (!value) return;
     const nextRange = value as RangeValue;
     setSelectedRange(nextRange);
-    const nextVisibleMonths =
-      RANGE_OPTIONS.find((option) => option.value === nextRange)?.months ?? 6;
+
+    const nextVisibleMonths = RANGE_OPTIONS.find((option) => option.value === nextRange)?.months ?? 6;
     const nextMaxStart = Math.max(0, data.length - nextVisibleMonths);
     setStartIndex(Math.min(CURRENT_INDEX, nextMaxStart));
   };
 
-  const handleToggleSeries = (seriesKey: Currency) => {
-    setHiddenSeriesKeys((prev) => {
+  const handleModeChange = (value: string) => {
+    if (!value) return;
+    setSelectedMode(value as ChartMode);
+  };
+
+  const handleToggleCurrency = (seriesKey: Currency) => {
+    setHiddenCurrencyKeys((prev) => {
       const next = new Set(prev);
       if (next.has(seriesKey)) {
         next.delete(seriesKey);
@@ -73,21 +106,55 @@ function CurrencyChartWindowLabScratch() {
     });
   };
 
-  const animationKey = `${selectedRange}-${currencyCount}`;
-
-  const handleAddCurrency = () => {
-    setCurrencyCount((prev) => Math.min(CURRENCY_SERIES.length, prev + 1));
+  const handleTogglePortfolio = (seriesKey: PortfolioKind) => {
+    setHiddenPortfolioKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(seriesKey)) {
+        next.delete(seriesKey);
+      } else {
+        next.add(seriesKey);
+      }
+      return next;
+    });
   };
+
+  const handleAddSeries = () => {
+    if (isCurrencyMode) {
+      setCurrencyCount((prev) => Math.min(CURRENCY_SERIES.length, prev + 1));
+      return;
+    }
+    setPortfolioCount((prev) => Math.min(PORTFOLIO_SERIES.length, prev + 1));
+  };
+
+  const visibleSeriesCount = isCurrencyMode ? currencyCount : portfolioCount;
+  const totalSeriesCount = isCurrencyMode ? CURRENCY_SERIES.length : PORTFOLIO_SERIES.length;
+  const canAddSeries = visibleSeriesCount < totalSeriesCount;
+  const animationKey = `${selectedMode}-${selectedRange}-${visibleSeriesCount}`;
+  const title = isCurrencyMode ? '通貨別つみたて棒グラフ（自前描画版）' : '資金内訳ポートフォリオ（積み上げ棒グラフ）';
 
   return (
     <div className="ccws-root">
       <div className="ccws-header">
         <div>
-          <h2>通貨別つみたて棒グラフ（自前描画版）</h2>
-          <p>汎用的な系列定義を使って SVG + d3-scale + Radix Slider で再構築した版です。</p>
+          <h2>{title}</h2>
+          <p>データ種類 + 金額の組み合わせを積み上げ可能な構成に抽象化し、通貨別 / 資金内訳を切り替え可能にしています。</p>
         </div>
 
         <div className="ccws-header-controls">
+          <ToggleGroup.Root
+            type="single"
+            value={selectedMode}
+            onValueChange={handleModeChange}
+            className="ccws-toggle-group"
+            aria-label="チャート種類"
+          >
+            {CHART_MODE_OPTIONS.map((option) => (
+              <ToggleGroup.Item key={option.value} value={option.value} className="ccws-toggle-item" aria-label={option.label}>
+                {option.label}
+              </ToggleGroup.Item>
+            ))}
+          </ToggleGroup.Root>
+
           <div className="ccws-theme-selector" role="group" aria-label="テーマカラー">
             {CHART_THEMES.map((theme) => (
               <button
@@ -131,32 +198,45 @@ function CurrencyChartWindowLabScratch() {
 
       <div className="ccws-card">
         <div className="ccws-legend-row">
-          <ChartLegend
-            series={activeSeries}
-            hiddenSeriesKeys={hiddenSeriesKeys}
-            onToggle={handleToggleSeries}
-          />
+          {isCurrencyMode ? (
+            <ChartLegend series={currencySeries} hiddenSeriesKeys={hiddenCurrencyKeys} onToggle={handleToggleCurrency} />
+          ) : (
+            <ChartLegend series={portfolioSeries} hiddenSeriesKeys={hiddenPortfolioKeys} onToggle={handleTogglePortfolio} />
+          )}
           <button
             type="button"
             className="ccws-add-currency"
-            onClick={handleAddCurrency}
-            disabled={!canAddCurrency}
-            aria-label="通貨を追加"
+            onClick={handleAddSeries}
+            disabled={!canAddSeries}
+            aria-label="系列を追加"
           >
-            + 通貨を追加（{currencyCount}/{CURRENCY_SERIES.length}）
+            + 系列を追加（{visibleSeriesCount}/{totalSeriesCount}）
           </button>
         </div>
 
-        <BarChartSvg
-          chartData={chartData}
-          series={activeSeries}
-          hiddenSeriesKeys={hiddenSeriesKeys}
-          animationKey={animationKey}
-          chartBackground={selectedTheme.background}
-          gridColor={selectedTheme.gridColor}
-          tooltipBg={selectedTheme.tooltipBg}
-          tooltipBorder={selectedTheme.tooltipBorder}
-        />
+        {isCurrencyMode ? (
+          <BarChartSvg
+            chartData={currencyChartData}
+            series={currencySeries}
+            hiddenSeriesKeys={hiddenCurrencyKeys}
+            animationKey={animationKey}
+            chartBackground={selectedTheme.background}
+            gridColor={selectedTheme.gridColor}
+            tooltipBg={selectedTheme.tooltipBg}
+            tooltipBorder={selectedTheme.tooltipBorder}
+          />
+        ) : (
+          <BarChartSvg
+            chartData={portfolioChartData}
+            series={portfolioSeries}
+            hiddenSeriesKeys={hiddenPortfolioKeys}
+            animationKey={animationKey}
+            chartBackground={selectedTheme.background}
+            gridColor={selectedTheme.gridColor}
+            tooltipBg={selectedTheme.tooltipBg}
+            tooltipBorder={selectedTheme.tooltipBorder}
+          />
+        )}
 
         <div className="ccws-controls" role="group" aria-label="表示月の移動">
           <button
