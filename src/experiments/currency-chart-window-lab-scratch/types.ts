@@ -2,6 +2,8 @@ export type RangeValue = '1' | '3' | '6' | '12';
 
 export type ThemeId = 'default' | 'warm' | 'cool' | 'light';
 
+export type ChartMode = 'currency' | 'portfolio';
+
 export interface ChartTheme {
   id: ThemeId;
   label: string;
@@ -74,9 +76,22 @@ export const CURRENCY_SERIES = [
   { key: 'KRW', label: 'KRW', color: '#bab0ac' },
 ] as const satisfies ReadonlyArray<SeriesDefinition<string>>;
 
-export type Currency = (typeof CURRENCY_SERIES)[number]['key'];
+export const PORTFOLIO_SERIES = [
+  { key: 'cash', label: '現金', color: '#4e79a7' },
+  { key: 'equity', label: '株式', color: '#f28e2b' },
+  { key: 'bond', label: '債券', color: '#e15759' },
+  { key: 'reit', label: 'REIT', color: '#76b7b2' },
+  { key: 'commodity', label: 'コモディティ', color: '#59a14f' },
+  { key: 'crypto', label: '暗号資産', color: '#af7aa1' },
+] as const satisfies ReadonlyArray<SeriesDefinition<string>>;
 
-export const INITIAL_CURRENCY_COUNT = 5;
+export type Currency = (typeof CURRENCY_SERIES)[number]['key'];
+export type PortfolioKind = (typeof PORTFOLIO_SERIES)[number]['key'];
+
+export const INITIAL_VISIBLE_SERIES_COUNT: Record<ChartMode, number> = {
+  currency: 5,
+  portfolio: 4,
+};
 
 export interface ChartRow<Key extends string = Currency> {
   key: string;
