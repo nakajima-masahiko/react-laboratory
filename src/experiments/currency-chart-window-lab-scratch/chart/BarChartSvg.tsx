@@ -161,11 +161,22 @@ export function BarChartSvg<Key extends string>({
     setHoverIndex(getIndexFromClientX(event.clientX));
   };
 
+  const handlePointerDown = (event: React.PointerEvent<SVGRectElement>) => {
+    if (event.pointerType !== 'touch') {
+      return;
+    }
+    setHoverIndex(getIndexFromClientX(event.clientX));
+  };
+
   const handlePointerLeave = (event: React.PointerEvent<SVGRectElement>) => {
     // タッチ操作では指を離すと pointerleave が発火してツールチップが消えてしまうため、
-    // タッチの場合は pinnedIndex に変換して表示を維持する（チャート外タップで解除）
+    // タッチの場合は hover 表示を維持する（チャート外タップで解除）。
+    // ピン留めが有効な場合のみ pinnedIndex に変換する。
     if (event.pointerType === 'touch') {
-      setPinnedIndex(hoverIndex);
+      if (pinnableTooltip) {
+        setPinnedIndex(hoverIndex);
+      }
+      return;
     }
     setHoverIndex(null);
   };
@@ -283,6 +294,7 @@ export function BarChartSvg<Key extends string>({
               height={innerHeight}
               fill="transparent"
               pointerEvents="all"
+              onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerLeave={handlePointerLeave}
               onClick={handleClick}
