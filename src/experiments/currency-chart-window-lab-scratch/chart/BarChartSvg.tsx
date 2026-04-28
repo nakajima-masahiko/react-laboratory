@@ -1,8 +1,9 @@
+import * as RadixTooltip from '@radix-ui/react-tooltip';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { ChartRow, SeriesDefinition } from '../types';
 import { XAxis, YAxis } from './axes';
 import { buildScales } from './scales';
-import { ChartTooltip } from './tooltip';
+import { ChartTooltipContent } from './tooltip';
 
 const MARGIN = { top: 8, right: 24, bottom: 32, left: 56 } as const;
 const CHART_HEIGHT = 460;
@@ -151,100 +152,119 @@ export function BarChartSvg<Key extends string>({
   // ホバー中はホバーを優先、離れた後はピン留め表示
   const activeIndex = hoverIndex ?? pinnedIndex;
 
-  const tooltipPosition = (() => {
-    if (activeIndex === null || visibleSeries.length === 0) {
-      return null;
-    }
+  // ツールチップのアンカー位置（棒グラフ上端の中央）
+  const tooltipAnchor = useMemo(() => {
+    if (activeIndex === null || visibleSeries.length === 0) return null;
     const row = chartData[activeIndex];
-    if (!row) {
-      return null;
-    }
-    const x = (scales.xScale(row.key) ?? 0) + scales.xScale.bandwidth() / 2 + MARGIN.left;
-    const y = MARGIN.top + 12;
-    return { row, x, y };
-  })();
+    if (!row) return null;
+    const barCenterX = (scales.xScale(row.key) ?? 0) + scales.xScale.bandwidth() / 2 + MARGIN.left;
+    const rowSegments = stackSegments.filter((s) => s.rowIndex === activeIndex);
+    if (rowSegments.length === 0) return null;
+    const barTopY = Math.min(...rowSegments.map((s) => s.y)) + MARGIN.top;
+    return { row, x: barCenterX, y: barTopY };
+  }, [activeIndex, chartData, scales, stackSegments, visibleSeries.length]);
 
   const ready = chartWidth > 0 && innerWidth > 0;
 
   return (
-    <div ref={containerRef} className="ccws-chart-host">
-      {ready ? (
-        <svg
-          ref={svgRef}
-          width={chartWidth}
-          height={CHART_HEIGHT}
-          className="ccws-svg"
-          role="img"
-          aria-label="通貨別つみたて棒グラフ"
-        >
-          <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
-            {/* チャートエリア背景 */}
-            <rect
-              x={0}
-              y={0}
-              width={innerWidth}
-              height={innerHeight}
-              fill={chartBackground}
-              rx={4}
-            />
+    <RadixTooltip.Provider>
+      <RadixTooltip.Root open={tooltipAnchor !== null} onOpenChange={() => {}} delayDuration={0}>
+        <div ref={containerRef} className="ccws-chart-host">
+          {ready ? (
+            <svg
+              ref={svgRef}
+              width={chartWidth}
+              height={CHART_HEIGHT}
+              className="ccws-svg"
+              role="img"
+              aria-label="通貨別つみたて棒グラフ"
+            >
+              <g transform={`translate(${MARGIN.left}, ${MARGIN.top})`}>
+                {/* チャートエリア背景 */}
+                <rect
+                  x={0}
+                  y={0}
+                  width={innerWidth}
+                  height={innerHeight}
+                  fill={chartBackground}
+                  rx={4}
+                />
 
-            <YAxis yScale={scales.yScale} innerWidth={innerWidth} gridColor={gridColor} />
-            <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} gridColor={gridColor} />
+                <YAxis yScale={scales.yScale} innerWidth={innerWidth} gridColor={gridColor} />
+                <XAxis xScale={scales.xScale} innerHeight={innerHeight} chartData={chartData} gridColor={gridColor} />
 
-            <g key={animationKey} className="ccws-bars">
-              {stackSegments.map((segment) => {
-                const perSeriesDelay =
-                  visibleSeries.length > 1 ? STAGGER_WINDOW_MS / (visibleSeries.length - 1) : 0;
-                const style = {
-                  '--bar-delay': `${segment.seriesIndex * perSeriesDelay}ms`,
-                  transformOrigin: `${segment.x + segment.width / 2}px ${innerHeight}px`,
-                } as CSSProperties;
-                return (
-                  <rect
-                    key={segment.key}
-                    className="ccws-bar"
-                    x={segment.x}
-                    y={segment.y}
-                    width={segment.width}
-                    height={segment.height}
-                    fill={segment.color}
-                    style={style}
-                    data-series={segment.seriesKey}
-                  />
-                );
-              })}
-            </g>
+                <g key={animationKey} className="ccws-bars">
+                  {stackSegments.map((segment) => {
+                    const perSeriesDelay =
+                      visibleSeries.length > 1 ? STAGGER_WINDOW_MS / (visibleSeries.length - 1) : 0;
+                    const style = {
+                      '--bar-delay': `${segment.seriesIndex * perSeriesDelay}ms`,
+                      transformOrigin: `${segment.x + segment.width / 2}px ${innerHeight}px`,
+                    } as CSSProperties;
+                    return (
+                      <rect
+                        key={segment.key}
+                        className="ccws-bar"
+                        x={segment.x}
+                        y={segment.y}
+                        width={segment.width}
+                        height={segment.height}
+                        fill={segment.color}
+                        style={style}
+                        data-series={segment.seriesKey}
+                      />
+                    );
+                  })}
+                </g>
 
-            <rect
-              className="ccws-hover-layer"
-              x={0}
-              y={0}
-              width={innerWidth}
-              height={innerHeight}
-              fill="transparent"
-              pointerEvents="all"
-              onPointerMove={handlePointerMove}
-              onPointerLeave={handlePointerLeave}
-              onClick={handleClick}
+                <rect
+                  className="ccws-hover-layer"
+                  x={0}
+                  y={0}
+                  width={innerWidth}
+                  height={innerHeight}
+                  fill="transparent"
+                  pointerEvents="all"
+                  onPointerMove={handlePointerMove}
+                  onPointerLeave={handlePointerLeave}
+                  onClick={handleClick}
+                  aria-hidden="true"
+                  style={{ cursor: 'pointer' }}
+                />
+              </g>
+            </svg>
+          ) : (
+            <div className="ccws-svg-placeholder" style={{ height: CHART_HEIGHT }} aria-hidden="true" />
+          )}
+
+          {/* 棒グラフ上端中央に配置する不可視のツールチップアンカー */}
+          <RadixTooltip.Trigger asChild>
+            <div
               aria-hidden="true"
-              style={{ cursor: 'pointer' }}
+              tabIndex={-1}
+              style={{
+                position: 'absolute',
+                left: tooltipAnchor?.x ?? 0,
+                top: tooltipAnchor?.y ?? 0,
+                width: 0,
+                height: 0,
+                pointerEvents: 'none',
+                outline: 'none',
+              }}
             />
-          </g>
-        </svg>
-      ) : (
-        <div className="ccws-svg-placeholder" style={{ height: CHART_HEIGHT }} aria-hidden="true" />
-      )}
+          </RadixTooltip.Trigger>
+        </div>
 
-      {tooltipPosition && (
-        <ChartTooltip
-          row={tooltipPosition.row}
-          series={series}
-          hiddenSeriesKeys={hiddenSeriesKeys}
-          x={tooltipPosition.x}
-          y={tooltipPosition.y}
-          containerWidth={chartWidth}
-        />
-      )}
-    </div>
+        <RadixTooltip.Portal>
+          {tooltipAnchor && (
+            <ChartTooltipContent
+              row={tooltipAnchor.row}
+              series={series}
+              hiddenSeriesKeys={hiddenSeriesKeys}
+            />
+          )}
+        </RadixTooltip.Portal>
+      </RadixTooltip.Root>
+    </RadixTooltip.Provider>
   );
 }

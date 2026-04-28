@@ -211,7 +211,6 @@
 }
 
 .ccws-tooltip {
-  position: absolute;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -220,7 +219,13 @@
   font-size: 0.85rem;
   box-shadow: 0 4px 12px color-mix(in oklab, var(--text) 18%, transparent);
   pointer-events: none;
-  z-index: 2;
+  z-index: 100;
+  width: 180px;
+}
+
+.ccws-tooltip-arrow {
+  fill: var(--bg);
+  filter: drop-shadow(0 1px 0 var(--border));
 }
 
 .ccws-tooltip-title {
