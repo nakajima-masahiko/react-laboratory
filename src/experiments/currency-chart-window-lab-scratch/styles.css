@@ -20,6 +20,50 @@
   margin: 0;
 }
 
+.ccws-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ccws-theme-selector {
+  display: flex;
+  gap: 6px;
+}
+
+.ccws-theme-button {
+  display: flex;
+  align-items: center;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ccws-theme-button:hover {
+  border-color: var(--accent);
+}
+
+.ccws-theme-button.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 35%, transparent);
+}
+
+.ccws-theme-swatches {
+  display: flex;
+  gap: 3px;
+}
+
+.ccws-theme-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
 .ccws-toggle-group {
   display: flex;
   border: 1px solid var(--border);

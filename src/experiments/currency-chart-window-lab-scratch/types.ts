@@ -1,5 +1,31 @@
 export type RangeValue = '1' | '3' | '6' | '12';
 
+export type ThemeId = 'default' | 'warm' | 'cool';
+
+export interface ChartTheme {
+  id: ThemeId;
+  label: string;
+  colors: readonly string[];
+}
+
+export const CHART_THEMES: readonly ChartTheme[] = [
+  {
+    id: 'default',
+    label: 'デフォルト',
+    colors: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#edc948', '#59a14f', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ac'],
+  },
+  {
+    id: 'warm',
+    label: 'ウォーム',
+    colors: ['#e63946', '#f4a261', '#e76f51', '#f9c74f', '#f3722c', '#d62828', '#fb8500', '#e9c46a', '#c77b46', '#a4432b'],
+  },
+  {
+    id: 'cool',
+    label: 'クール',
+    colors: ['#4361ee', '#3a86ff', '#2a9d8f', '#43aa8b', '#4cc9f0', '#7209b7', '#480ca8', '#52b788', '#4895ef', '#48cae4'],
+  },
+] as const;
+
 export interface SeriesDefinition<Key extends string> {
   key: Key;
   label: string;
