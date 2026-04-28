@@ -1,39 +1,31 @@
+import * as RadixTooltip from '@radix-ui/react-tooltip';
 import { format } from 'd3-format';
 import type { ChartRow, SeriesDefinition } from '../types';
 
 const formatNumber = format(',');
 
-interface ChartTooltipProps<Key extends string> {
+interface ChartTooltipContentProps<Key extends string> {
   row: ChartRow<Key>;
   series: ReadonlyArray<SeriesDefinition<Key>>;
   hiddenSeriesKeys: Set<Key>;
-  x: number;
-  y: number;
-  containerWidth: number;
 }
 
-const TOOLTIP_WIDTH = 180;
-
-export function ChartTooltip<Key extends string>({
+export function ChartTooltipContent<Key extends string>({
   row,
   series,
   hiddenSeriesKeys,
-  x,
-  y,
-  containerWidth,
-}: ChartTooltipProps<Key>) {
-  const flipLeft = x + TOOLTIP_WIDTH + 16 > containerWidth;
-  const left = flipLeft ? Math.max(8, x - TOOLTIP_WIDTH - 12) : x + 12;
-  const top = Math.max(8, y - 8);
-
+}: ChartTooltipContentProps<Key>) {
   return (
-    <div className="ccws-tooltip" role="tooltip" style={{ left, top, width: TOOLTIP_WIDTH }}>
+    <RadixTooltip.Content
+      className="ccws-tooltip"
+      side="top"
+      sideOffset={0}
+      align="center"
+    >
       <div className="ccws-tooltip-title">{row.label}</div>
       <ul className="ccws-tooltip-list">
         {series.map((item) => {
-          if (hiddenSeriesKeys.has(item.key)) {
-            return null;
-          }
+          if (hiddenSeriesKeys.has(item.key)) return null;
           return (
             <li key={item.key} className="ccws-tooltip-row">
               <span
@@ -47,6 +39,7 @@ export function ChartTooltip<Key extends string>({
           );
         })}
       </ul>
-    </div>
+      <RadixTooltip.Arrow className="ccws-tooltip-arrow" width={14} height={8} />
+    </RadixTooltip.Content>
   );
 }
