@@ -10,6 +10,10 @@ export interface ChartTheme {
   background: string;
   /** グリッド線の色 */
   gridColor: string;
+  /** ツールチップ背景色 */
+  tooltipBg: string;
+  /** ツールチップ枠線色 */
+  tooltipBorder: string;
 }
 
 export const CHART_THEMES: readonly ChartTheme[] = [
@@ -19,6 +23,8 @@ export const CHART_THEMES: readonly ChartTheme[] = [
     colors: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#edc948', '#59a14f', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ac'],
     background: 'transparent',
     gridColor: 'var(--border)',
+    tooltipBg: 'var(--bg)',
+    tooltipBorder: 'var(--border)',
   },
   {
     id: 'warm',
@@ -26,6 +32,8 @@ export const CHART_THEMES: readonly ChartTheme[] = [
     colors: ['#e63946', '#f4a261', '#e76f51', '#f9c74f', '#f3722c', '#d62828', '#fb8500', '#e9c46a', '#c77b46', '#a4432b'],
     background: 'transparent',
     gridColor: 'var(--border)',
+    tooltipBg: 'color-mix(in oklab, var(--bg) 88%, #e63946 12%)',
+    tooltipBorder: '#f4a261',
   },
   {
     id: 'cool',
@@ -33,6 +41,8 @@ export const CHART_THEMES: readonly ChartTheme[] = [
     colors: ['#4361ee', '#3a86ff', '#2a9d8f', '#43aa8b', '#4cc9f0', '#7209b7', '#480ca8', '#52b788', '#4895ef', '#48cae4'],
     background: 'transparent',
     gridColor: 'var(--border)',
+    tooltipBg: 'color-mix(in oklab, var(--bg) 88%, #4361ee 12%)',
+    tooltipBorder: '#4361ee',
   },
   {
     id: 'light',
@@ -40,6 +50,8 @@ export const CHART_THEMES: readonly ChartTheme[] = [
     colors: ['#1a6faf', '#d14b00', '#2a9d3a', '#8b3fbf', '#c47800', '#006e8c', '#b53060', '#4d7c00', '#0047ab', '#7b5800'],
     background: '#ffffff',
     gridColor: 'rgba(0, 0, 0, 0.10)',
+    tooltipBg: '#fffdf8',
+    tooltipBorder: 'rgba(0, 0, 0, 0.18)',
   },
 ] as const;
 
