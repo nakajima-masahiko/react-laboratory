@@ -64,6 +64,33 @@ npm i @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 - → 当時はレジストリアクセス制御 / プロキシ / セキュリティポリシー側で複数パッケージが
   ブロックされている状態。`package.json` を変更してはいけない、と判断していた。
 
+## iPad で DragOverlay の表示位置がずれる問題（2026-04-29）
+
+### 症状
+- iPad（iOS Safari）で並び替えダイアログを開きハンドルをドラッグすると、
+  `DragOverlay` のプレビューが指の位置から大きくずれた場所に表示される。
+
+### 原因
+- Radix Dialog の `Dialog.Content` に `transform: translate(-50%, -50%)` を当てて中央寄せしている。
+- `transform` を持つ要素は CSS 仕様上「fixed 配置の包含ブロック」になる。
+- `@dnd-kit/core` の `DragOverlay` は内部で `position: fixed` + `transform: translate3d(...)` で
+  位置決めしているため、JSX 上の親（= 変換された Dialog.Content）の座標系を基準にしてしまう。
+- 結果として「Dialog の左上を原点とし、さらに `translate(-50%, -50%)` を重ね掛けした位置」に
+  プレビューが描画される。
+- 仕様としてはどのブラウザでも同様にずれるはずだが、iPad は触る指との距離で違和感が顕著に出る。
+
+### 対処
+- `DragOverlay` を `react-dom` の `createPortal` で `document.body` に逃がす。
+- `createPortal` は React のコンテキストを保持するため、`DndContext` 配下である必要がある
+  `DragOverlay` の動作要件は満たしたまま、DOM 上の親だけを `<body>` 直下に移動できる。
+- これで `position: fixed` の包含ブロックがビューポートになり、位置計算が正しくなる。
+
+### 代替案として検討したが採用しなかったもの
+- Dialog.Content の中央寄せから `transform` を排除する: CSS の独立した `translate` プロパティも
+  包含ブロックを生成するため不可。`inset` だけでは自要素サイズ分の中央寄せが書けない。
+- DragOverlay 自体を Dialog の外に出す: `useSortable` から `DragOverlay` への内部アクセスを
+  保つため、同じ `DndContext` 配下に置く必要があり、ツリーを大きく書き換える羽目になる。
+
 ## 今後の改善余地
 - モディファイア（`@dnd-kit/modifiers`）を入れると、ドラッグ軸を縦に固定したり
   リスト境界を超えたドラッグを抑制できる。挙動を厳密にしたくなったら追加する。
