@@ -117,7 +117,7 @@ interface StackedBarChartTheme {
 | `onStartIndexChange` | `(next: number) => void` | Yes | - | スライダー / 前後ボタン操作時のコールバック |
 | `theme` | `StackedBarChartTheme` | Yes | - | テーマトークン |
 | `rangeLabel` | `string` | No | - | スライダー上に表示する文字列（例: "Apr 〜 Sep"） |
-| `animationKey` | `string` | No | `${windowSize}-${series.length}` | 値変化で棒アニメーション再起動 + ツールチップクリア |
+| `animationKey` | `string` | No | `${windowSize}-${series.length}-${data.length}` | 値変化で棒アニメーション再起動 + ツールチップクリア（`startIndex` のみ変更では再起動しない） |
 | `formatValue` | `ValueFormatter` | No | `d3-format(',')` | 軸目盛・ツールチップで使う数値フォーマッタ |
 | `chartHeight` | `number` | No | `460` | チャート高さ（CSS px） |
 | `pinnableTooltip` | `boolean` | No | `false` | クリックでツールチップを固定する機能 |
