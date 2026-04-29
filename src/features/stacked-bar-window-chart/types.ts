@@ -54,3 +54,6 @@ export interface StackedBarWindowAriaLabels {
   windowControls?: string;
   pinnedBadge?: string;
 }
+
+
+export type TooltipTotalMode = 'visible' | 'all';
