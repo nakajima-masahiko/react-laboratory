@@ -1,7 +1,7 @@
 # StackedBarWindowChart 仕様書
 
 任意キーと数値の組み合わせを **積み上げ棒グラフ + ウィンドウ移動スライダー** で可視化する汎用 React コンポーネントの仕様書。
-通貨・金額・売上といったドメイン語彙を一切含まず、`Record<Key, number>` の時系列・カテゴリ列ならそのまま投入可能。
+通貨・金額・売上といったドメイン語彙を一切含まず、`Record<Key, number \| null \| undefined>` の時系列・カテゴリ列ならそのまま投入可能。
 他リポジトリでもこの仕様書とソースをコピーすれば同等のチャートを再現できる。
 
 ---
@@ -87,11 +87,11 @@ interface StackedDataPoint<Key extends string = string> {
   key: string;          // X 軸内のユニークキー（React key にも利用）
   axisLabel: string;    // X 軸の短いラベル
   tooltipLabel: string; // ツールチップ見出し用の詳細ラベル
-  values: Record<Key, number>; // 系列キーごとの値（負値は未対応 = 積み上げの前提）
+  values: Record<Key, number | null | undefined>; // 系列キーごとの値（null/undefined は 0 扱い）
 }
 ```
 
-`values[seriesKey]` が欠落するとランタイム NaN を生むため、consumer 側で **全系列の値を 0 で埋める** こと。
+`values[seriesKey]` が `null` / `undefined` の場合は内部で `0` に正規化して描画する。
 
 ### 4.3 `StackedBarChartTheme`
 
@@ -131,7 +131,7 @@ interface StackedBarChartTheme {
 `startIndex` は内部で `[0, max(0, data.length - windowSize)]` に clamp される。`windowSize` も `[1, data.length]` に clamp。
 
 
-### 4.6 ツールチップ合計値オプション
+### 4.5 ツールチップ合計値オプション
 
 - `showTooltipTotal` が `true` のときのみ、ツールチップのタイトル直下に合計値行を表示する。
 - `tooltipTotalLabel` は合計値行のラベル文字列（既定値: `合計`）。
@@ -140,7 +140,7 @@ interface StackedBarChartTheme {
   - `all`: 非表示系列も含めて全系列を合計する。
 - 合計値は `sanitizeStackedValue` 後の値を使って計算する。
 
-### 4.5 ARIA ラベル既定値
+### 4.6 ARIA ラベル既定値
 
 ```ts
 {
