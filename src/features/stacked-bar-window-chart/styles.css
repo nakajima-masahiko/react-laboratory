@@ -271,3 +271,61 @@
 .sbwc-slider-thumb:active {
   cursor: grabbing;
 }
+
+.sbwc-empty {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--text);
+}
+
+.sbwc-tooltip-positioner[data-placement='top'] {
+  transform: translateX(-50%) translateY(-100%);
+}
+
+.sbwc-tooltip-positioner[data-placement='bottom'] {
+  transform: translateX(-50%) translateY(0);
+}
+
+.sbwc-tooltip-arrow {
+  margin-left: calc(var(--sbwc-arrow-x, 50%) - 7px);
+}
+
+.sbwc-tooltip-positioner[data-placement='bottom'] .sbwc-tooltip-arrow {
+  transform: rotate(180deg);
+  margin-top: -1px;
+}
+
+.sbwc-bars.is-static .sbwc-bar {
+  animation: none;
+  transform: none;
+}
+
+@media (max-width: 480px) {
+  .sbwc-controls {
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+    gap: 6px;
+    padding-inline: 0;
+  }
+
+  .sbwc-nav-button {
+    width: 32px;
+    height: 32px;
+    font-size: 1.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sbwc-bars .sbwc-bar {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+
+  .sbwc-legend-item,
+  .sbwc-slider-thumb,
+  .sbwc-nav-button {
+    transition: none;
+  }
+}

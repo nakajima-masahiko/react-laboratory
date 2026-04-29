@@ -1,6 +1,8 @@
 import { format } from 'd3-format';
 import { useMemo, type ReactNode } from 'react';
+import { sanitizeChartData } from '../chart/sanitize';
 import type {
+  StackedBarAnimationMode,
   StackedBarChartTheme,
   StackedBarWindowAriaLabels,
   StackedDataPoint,
@@ -13,122 +15,25 @@ import { WindowSlider } from './WindowSlider';
 
 const DEFAULT_FORMATTER: ValueFormatter = format(',');
 const DEFAULT_HEIGHT = 460;
+const DEFAULT_EMPTY_MESSAGE = '表示できるデータがありません';
+const DEFAULT_LABELS: Required<StackedBarWindowAriaLabels> = { chart: '積み上げ棒グラフ', legend: '系列の表示切り替え', slider: '表示範囲の開始位置', prevButton: '前の表示範囲へ', nextButton: '次の表示範囲へ', windowControls: '表示範囲の操作', pinnedBadge: '固定中', };
+const DEFAULT_PINNED_HINT = 'クリックで固定を解除';
 
-const DEFAULT_LABELS: Required<StackedBarWindowAriaLabels> = {
-  chart: 'Stacked bar chart',
-  legend: 'Series legend',
-  slider: 'Window start index',
-  prevButton: 'Previous window',
-  nextButton: 'Next window',
-  windowControls: 'Window controls',
-  pinnedBadge: 'Pinned',
-};
+export interface StackedBarWindowChartProps<Key extends string = string> { data: StackedDataPoint<Key>[]; series: ReadonlyArray<StackedSeries<Key>>; hiddenSeriesKeys: Set<Key>; onToggleSeries: (key: Key) => void; windowSize: number; startIndex: number; onStartIndexChange: (next: number) => void; theme: StackedBarChartTheme; rangeLabel?: string; animationKey?: string; animationMode?: StackedBarAnimationMode; formatValue?: ValueFormatter; chartHeight?: number; pinnableTooltip?: boolean; legendActions?: ReactNode; ariaLabels?: StackedBarWindowAriaLabels; pinnedHintLabel?: string; emptyMessage?: string; }
 
-const DEFAULT_PINNED_HINT = 'Click to release';
-
-export interface StackedBarWindowChartProps<Key extends string = string> {
-  /** 全データ点（系列キーごとの値を保持する row の配列） */
-  data: StackedDataPoint<Key>[];
-  /** 系列定義（凡例・色・ラベルの源泉） */
-  series: ReadonlyArray<StackedSeries<Key>>;
-  /** 非表示にする系列キーの集合 */
-  hiddenSeriesKeys: Set<Key>;
-  /** 凡例ボタン押下時に呼ばれる */
-  onToggleSeries: (key: Key) => void;
-  /** 同時に表示するデータ点数（ウィンドウ幅） */
-  windowSize: number;
-  /** ウィンドウの開始インデックス（0 〜 data.length - windowSize） */
-  startIndex: number;
-  /** スライダー操作・ナビボタンクリックで呼ばれる */
-  onStartIndexChange: (next: number) => void;
-  /** 色・背景・グリッドのテーマトークン */
-  theme: StackedBarChartTheme;
-  /** スライダー上に表示するレンジラベル（例: "Apr 〜 Sep"） */
-  rangeLabel?: string;
-  /** 値が変わると棒アニメーションが再起動する。未指定時は windowSize/startIndex から自動生成 */
-  animationKey?: string;
-  /** 軸目盛・ツールチップで使う数値フォーマッタ。既定は `format(',')` */
-  formatValue?: ValueFormatter;
-  /** チャート高さ（CSS px）。既定 460 */
-  chartHeight?: number;
-  /** クリックでツールチップを固定する機能を有効にする。既定 false */
-  pinnableTooltip?: boolean;
-  /** 凡例の右端に並べる任意 UI（例: 系列追加ボタン） */
-  legendActions?: ReactNode;
-  /** a11y / i18n 用ラベル（i18n 時に差し替え） */
-  ariaLabels?: StackedBarWindowAriaLabels;
-  /** ピン留めヒント文（pinnableTooltip=true 時に表示） */
-  pinnedHintLabel?: string;
-}
-
-export function StackedBarWindowChart<Key extends string>({
-  data,
-  series,
-  hiddenSeriesKeys,
-  onToggleSeries,
-  windowSize,
-  startIndex,
-  onStartIndexChange,
-  theme,
-  rangeLabel,
-  animationKey,
-  formatValue = DEFAULT_FORMATTER,
-  chartHeight = DEFAULT_HEIGHT,
-  pinnableTooltip = false,
-  legendActions,
-  ariaLabels,
-  pinnedHintLabel = DEFAULT_PINNED_HINT,
-}: StackedBarWindowChartProps<Key>) {
+export function StackedBarWindowChart<Key extends string>({ data, series, hiddenSeriesKeys, onToggleSeries, windowSize, startIndex, onStartIndexChange, theme, rangeLabel, animationKey, animationMode='data-change', formatValue = DEFAULT_FORMATTER, chartHeight = DEFAULT_HEIGHT, pinnableTooltip = false, legendActions, ariaLabels, pinnedHintLabel = DEFAULT_PINNED_HINT, emptyMessage=DEFAULT_EMPTY_MESSAGE, }: StackedBarWindowChartProps<Key>) {
   const labels = { ...DEFAULT_LABELS, ...ariaLabels };
-
-  const safeWindow = Math.max(1, Math.min(windowSize, data.length || 1));
-  const maxStartIndex = Math.max(0, data.length - safeWindow);
+  const sanitizedData = useMemo(()=>sanitizeChartData(data, series), [data, series]);
+  const safeWindow = Math.max(1, Math.min(windowSize, sanitizedData.length || 1));
+  const maxStartIndex = Math.max(0, sanitizedData.length - safeWindow);
   const safeStartIndex = Math.min(Math.max(0, startIndex), maxStartIndex);
-  const endIndex = Math.min(safeStartIndex + safeWindow - 1, data.length - 1);
+  const endIndex = Math.min(safeStartIndex + safeWindow - 1, sanitizedData.length - 1);
+  const chartData = useMemo(() => sanitizedData.slice(safeStartIndex, endIndex + 1), [sanitizedData, safeStartIndex, endIndex]);
+  const resolvedAnimationKey = animationKey ?? `${safeWindow}-${series.length}-${safeStartIndex}`;
+  const isEmpty = sanitizedData.length === 0 || series.length === 0;
 
-  const chartData = useMemo(
-    () => data.slice(safeStartIndex, endIndex + 1),
-    [data, safeStartIndex, endIndex],
-  );
-
-  const resolvedAnimationKey = animationKey ?? `${safeWindow}-${series.length}`;
-
-  return (
-    <div className="sbwc-root">
-      <ChartLegend
-        series={series}
-        hiddenSeriesKeys={hiddenSeriesKeys}
-        onToggle={onToggleSeries}
-        actions={legendActions}
-        ariaLabel={labels.legend}
-      />
-
-      <StackedBarChart
-        chartData={chartData}
-        series={series}
-        hiddenSeriesKeys={hiddenSeriesKeys}
-        animationKey={resolvedAnimationKey}
-        theme={theme}
-        formatValue={formatValue}
-        height={chartHeight}
-        pinnableTooltip={pinnableTooltip}
-        ariaLabel={labels.chart}
-        pinnedBadgeLabel={labels.pinnedBadge}
-        pinnedHintLabel={pinnedHintLabel}
-      />
-
-      <WindowSlider
-        startIndex={safeStartIndex}
-        maxStartIndex={maxStartIndex}
-        rangeLabel={rangeLabel}
-        onStartIndexChange={onStartIndexChange}
-        ariaLabels={{
-          slider: labels.slider,
-          prevButton: labels.prevButton,
-          nextButton: labels.nextButton,
-          windowControls: labels.windowControls,
-        }}
-      />
-    </div>
-  );
+  return (<div className="sbwc-root"><ChartLegend series={series} hiddenSeriesKeys={hiddenSeriesKeys} onToggle={onToggleSeries} actions={legendActions} ariaLabel={labels.legend} />
+  {isEmpty ? <div className="sbwc-empty" role="status" aria-live="polite">{emptyMessage}</div> : <StackedBarChart chartData={chartData} series={series} hiddenSeriesKeys={hiddenSeriesKeys} animationKey={resolvedAnimationKey} animationMode={animationMode} theme={theme} formatValue={formatValue} height={chartHeight} pinnableTooltip={pinnableTooltip} ariaLabel={labels.chart} pinnedBadgeLabel={labels.pinnedBadge} pinnedHintLabel={pinnedHintLabel} />}
+  <WindowSlider startIndex={safeStartIndex} maxStartIndex={maxStartIndex} rangeLabel={rangeLabel} onStartIndexChange={onStartIndexChange} ariaLabels={{ slider: labels.slider, prevButton: labels.prevButton, nextButton: labels.nextButton, windowControls: labels.windowControls }} />
+  </div>);
 }
