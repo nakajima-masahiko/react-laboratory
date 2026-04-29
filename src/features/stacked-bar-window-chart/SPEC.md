@@ -122,8 +122,8 @@ interface StackedBarChartTheme {
 | `chartHeight` | `number` | No | `460` | チャート高さ（CSS px） |
 | `pinnableTooltip` | `boolean` | No | `false` | クリックでツールチップを固定する機能 |
 | `legendActions` | `ReactNode` | No | - | 凡例の右隣に並べる任意 UI |
-| `ariaLabels` | `StackedBarWindowAriaLabels` | No | 英語既定値 | a11y / i18n 用ラベル |
-| `pinnedHintLabel` | `string` | No | `"Click to release"` | ピン留め時の解除ヒント文 |
+| `ariaLabels` | `StackedBarWindowAriaLabels` | No | 日本語既定値 | a11y / i18n 用ラベル |
+| `pinnedHintLabel` | `string` | No | `"クリックで固定を解除"` | ピン留め時の解除ヒント文 |
 
 `startIndex` は内部で `[0, max(0, data.length - windowSize)]` に clamp される。`windowSize` も `[1, data.length]` に clamp。
 
@@ -131,13 +131,13 @@ interface StackedBarChartTheme {
 
 ```ts
 {
-  chart: 'Stacked bar chart',
-  legend: 'Series legend',
-  slider: 'Window start index',
-  prevButton: 'Previous window',
-  nextButton: 'Next window',
-  windowControls: 'Window controls',
-  pinnedBadge: 'Pinned',
+  chart: '積み上げ棒グラフ',
+  legend: '系列の表示切り替え',
+  slider: '表示範囲の開始位置',
+  prevButton: '前の表示範囲へ',
+  nextButton: '次の表示範囲へ',
+  windowControls: '表示範囲の操作',
+  pinnedBadge: '固定中',
 }
 ```
 
@@ -422,5 +422,5 @@ CSS 変数 `--bar-delay`（棒アニメ遅延）、`--sbwc-tooltip-fill` / `--sb
 > 本仕様の基本設計は維持しつつ、以下の改善を適用している。
 > - `sanitizeStackedValue` により `null / undefined / NaN / Infinity / 負値` を 0 として扱う
 > - `prefers-reduced-motion: reduce` 時は主要アニメーションを抑制する
-> - 既定ラベルは日本語
+> - 既定の ARIA ラベルとピン留めヒント文は日本語
 > - `data=[]` または `series=[]` の場合は空データメッセージを表示する
