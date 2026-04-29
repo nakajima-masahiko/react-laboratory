@@ -290,7 +290,7 @@
 }
 
 .sbwc-tooltip-arrow {
-  margin-left: calc(var(--sbwc-arrow-x, 50%) - 7px);
+  margin-left: calc(var(--sbwc-tooltip-arrow-x, 90px) - 7px);
 }
 
 .sbwc-tooltip-positioner[data-placement='bottom'] .sbwc-tooltip-arrow {
