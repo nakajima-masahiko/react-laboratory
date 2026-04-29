@@ -1,133 +1,318 @@
-# StackedBarWindowChart 仕様書
+# StackedBarWindowChart 実装再現仕様書（再現性優先）
 
-任意キーと数値の組み合わせを **積み上げ棒グラフ + ウィンドウ移動スライダー** で可視化する汎用 React コンポーネントの仕様書。
-通貨・金額・売上といったドメイン語彙を一切含まず、`Record<Key, number>` の時系列・カテゴリ列ならそのまま投入可能。
-他リポジトリでもこの仕様書とソースをコピーすれば同等のチャートを再現できる。
-
----
-
-## 1. 目的
-
-- N 個のデータ点（`StackedDataPoint[]`）を **積み上げ棒** で描画する
-- データ点が多くて全部表示しきれない場合に **下部スライダー** で表示窓（連続する windowSize 件）を左右にスクロールする
-- 系列（series）の **凡例 ON/OFF**、棒上端への **ツールチップ吸着**、テーマ差し替え（色・背景・グリッド・ツールチップ）を提供する
-- ドメイン色（通貨記号、金額単位、ヶ月など）を **一切持たない** — ラベルは consumer 側から文字列で注入する
-
-非目的:
-
-- 折れ線・グルーピング棒・円などの追加チャート種
-- ズーム・パン・パン慣性
-- データのソート・正規化（呼び出し側の責務）
+本仕様は **このファイル単体** を別の生成 AI（Claude / Codex / Copilot など）へ渡した場合でも、`src/features/stacked-bar-window-chart` の現行実装を高い再現性で再構築することを目的とする。  
+対象は **積み上げ棒グラフ + 表示窓スライダー + 凡例 ON/OFF + hover/pinned tooltip** である。
 
 ---
 
-## 2. 配置（features 層）
+## 0. 適用範囲と非対象
 
-```
-src/features/stacked-bar-window-chart/
-├── components/
-│   ├── StackedBarWindowChart.tsx  # 公開コンテナ（凡例 + チャート + スライダー）
-│   ├── StackedBarChart.tsx        # SVG 描画コア
-│   ├── ChartLegend.tsx            # 凡例
-│   ├── ChartTooltip.tsx           # ツールチップ本体
-│   └── WindowSlider.tsx           # スライダー + 前後ナビボタン
-├── chart/
-│   ├── axes.tsx                   # X / Y 軸（グリッド線含む）
-│   └── scales.ts                  # d3-scale 生成
-├── styles.css                     # 全スタイル（CSS カスタムプロパティ依存）
-├── types.ts                       # 公開型（StackedSeries / StackedDataPoint / StackedBarChartTheme 等）
-├── index.ts                       # 公開 API（StackedBarWindowChart, 型）
-└── SPEC.md                        # この仕様書
-```
+- 適用範囲: `src/features/stacked-bar-window-chart/` 配下。
+- 本仕様で扱う変更対象: **`SPEC.md` のみ**。
+- 非対象:
+  - `*.tsx`, `*.ts`, `*.css`, `package.json` の仕様外変更。
+  - ドメイン固有語彙（売上、金額、通貨など）の feature 内ハードコード。
 
 ---
 
-## 3. 依存パッケージ
+## 1. ファイル別責務（必須）
 
-| パッケージ | バージョン目安 | 用途 |
+| ファイル | 役割（持つべき責務） | 持ってはいけない責務 |
 |---|---|---|
-| `react` / `react-dom` | `^19.x` | コンポーネント・hooks |
-| `d3-array` | `^3.x` | `max` |
-| `d3-format` | `^3.x` | 既定の数値フォーマッタ（`format(',')`） |
-| `d3-scale` | `^4.x` | `scaleBand` / `scaleLinear` |
-| `@radix-ui/react-slider` | `^1.x` | ウィンドウ移動スライダー |
-
-`@types/d3-*` は別途追加。すべてのパッケージは型定義を内包または `@types/` 経由で取得できる。
+| `components/StackedBarWindowChart.tsx` | **公開コンテナ**。凡例・チャート・スライダーを統合し、`window` 切り出し、空状態、props 受け渡しを管理。 | SVG 座標計算や tooltip 本体レイアウト詳細を直接持たない。 |
+| `components/StackedBarChart.tsx` | **SVG 描画コア**。積み上げ棒描画、軸合成、hover/pinned 管理、tooltip anchor 計算、tooltip 位置 clamp 管理。 | 公開 API の集約責務や凡例 UI の責務を持たない。 |
+| `components/ChartLegend.tsx` | 系列表示 ON/OFF UI。`aria-pressed` を備えたトグルボタン群。 | データ集計、チャート座標計算を持たない。 |
+| `components/ChartTooltip.tsx` | **表示専用**。タイトル・合計行・系列行・pinned 表示を描画。 | **座標計算を持たない**（left/top/clamp/arrowX 計算禁止）。 |
+| `components/WindowSlider.tsx` | 表示窓の開始位置操作（前後ボタン + スライダー）。`onStartIndexChange` 呼び出し。 | チャート描画・tooltip 状態保持を持たない。 |
+| `chart/axes.tsx` | X/Y 軸とグリッド線の SVG 描画。フォーマッタ適用。 | ホバー処理や積み上げ計算を持たない。 |
+| `chart/scales.ts` | `scaleBand` / `scaleLinear` の生成。0 データ時の安全 domain 処理。 | React state や DOM イベント処理を持たない。 |
+| `chart/sanitize.ts` | `sanitizeStackedValue` を提供。`null / undefined / NaN / Infinity / -Infinity / 負値` を 0 化。 | 描画や UI ロジックを持たない。 |
+| `styles.css` | コンポーネント全体の見た目定義。**CSS 変数前提**で色・遅延・矢印位置を表現。 | JS 側状態管理・座標計算責務を持たない。 |
+| `types.ts` | **公開型定義**（props / data / theme / aria / formatter など）。 | 実装ロジックを持たない。 |
+| `index.ts` | 公開エントリ。`StackedBarWindowChart` と公開型を再 export。 | 実装詳細やロジックを持たない。 |
 
 ---
 
-## 4. 公開 API
+## 2. 公開型定義（TypeScript 正式仕様）
 
 ```ts
-import { StackedBarWindowChart } from 'features/stacked-bar-window-chart';
-import type {
-  StackedSeries,
-  StackedDataPoint,
-  StackedBarChartTheme,
-  StackedBarWindowChartProps,
-  ValueFormatter,
-  StackedBarWindowAriaLabels,
-} from 'features/stacked-bar-window-chart';
-```
+import type { ReactNode } from 'react';
 
-### 4.1 `StackedSeries<Key>`
+export type ValueFormatter = (value: number) => string;
 
-```ts
-interface StackedSeries<Key extends string = string> {
-  key: Key;       // データと結合する識別子
-  label: string;  // 凡例 / ツールチップ表示名
-  color: string;  // 棒色（CSS color）
+export interface StackedSeries<Key extends string = string> {
+  key: Key;
+  label: string;
+  color: string;
+}
+
+export interface StackedDataPoint<Key extends string = string> {
+  key: string;
+  axisLabel: string;
+  tooltipLabel: string;
+  values: Record<Key, number | null | undefined>;
+}
+
+export interface StackedBarChartTheme {
+  background: string;
+  gridColor: string;
+  tooltipBg: string;
+  tooltipBorder: string;
+}
+
+export interface StackedBarWindowAriaLabels {
+  chart?: string;
+  legend?: string;
+  slider?: string;
+  prevButton?: string;
+  nextButton?: string;
+  windowControls?: string;
+  pinnedBadge?: string;
+}
+
+export type TooltipTotalMode = 'visible' | 'all';
+
+export interface StackedBarWindowChartProps<Key extends string = string> {
+  data: StackedDataPoint<Key>[];
+  series: ReadonlyArray<StackedSeries<Key>>;
+  hiddenSeriesKeys: Set<Key>;
+  onToggleSeries: (key: Key) => void;
+  windowSize: number;
+  startIndex: number;
+  onStartIndexChange: (next: number) => void;
+  theme: StackedBarChartTheme;
+  rangeLabel?: string;
+  animationKey?: string;
+  formatValue?: ValueFormatter;
+  chartHeight?: number;
+  pinnableTooltip?: boolean;
+  showTooltipTotal?: boolean;
+  tooltipTotalLabel?: string;
+  tooltipTotalMode?: TooltipTotalMode;
+  legendActions?: ReactNode;
+  ariaLabels?: StackedBarWindowAriaLabels;
+  pinnedHintLabel?: string;
+  emptyMessage?: string;
 }
 ```
 
-### 4.2 `StackedDataPoint<Key>`
+---
+
+## 3. 公開 Props 完全仕様
+
+| Prop | 型 | 必須 | 既定値 | 役割 | 注意点 |
+|---|---|---|---|---|---|
+| `data` | `StackedDataPoint<Key>[]` | 必須 | - | 全データ点 | `data=[]` なら空状態表示。 |
+| `series` | `ReadonlyArray<StackedSeries<Key>>` | 必須 | - | 系列定義と積み上げ順 | `series=[]` も空状態表示。 |
+| `hiddenSeriesKeys` | `Set<Key>` | 必須 | - | 非表示系列管理 | `visible` 計算時に除外。 |
+| `onToggleSeries` | `(key: Key) => void` | 必須 | - | 凡例トグル通知 | state は親管理。 |
+| `windowSize` | `number` | 必須 | - | 同時表示件数 | 実装で 1〜`data.length` に clamp。 |
+| `startIndex` | `number` | 必須 | - | 表示窓開始位置 | 実装で 0〜`maxStartIndex` に clamp。 |
+| `onStartIndexChange` | `(next: number) => void` | 必須 | - | スライダー/ボタン操作通知 | controlled 前提。 |
+| `theme` | `StackedBarChartTheme` | 必須 | - | 背景/グリッド/tooltip 色 | CSS 変数値を渡せる。 |
+| `rangeLabel` | `string` | 任意 | `undefined` | 表示範囲ラベル | スライダー上表示に利用。 |
+| `animationKey` | `string` | 任意 | ``${windowSize}-${series.length}-${data.length}`` | 棒アニメ再起動キー | 変更時は hover/pinned クリア。 |
+| `formatValue` | `ValueFormatter` | 任意 | `d3-format(',')` | 数値整形 | 軸/tooltipで利用。 |
+| `chartHeight` | `number` | 任意 | `460` | SVG 高さ | px 扱い。 |
+| `pinnableTooltip` | `boolean` | 任意 | `false` | クリック固定可否 | true で pinned interaction 有効。 |
+| `showTooltipTotal` | `boolean` | 任意 | `false` | 合計行表示可否 | **既定 true にしない**。 |
+| `tooltipTotalLabel` | `string` | 任意 | `'合計'` | 合計行ラベル | 合計値の前に表示。 |
+| `tooltipTotalMode` | `TooltipTotalMode` | 任意 | `'visible'` | 合計計算対象制御 | `visible`/`all` の挙動を厳守。 |
+| `legendActions` | `ReactNode` | 任意 | `undefined` | 凡例右側拡張領域 | 任意操作 UI を差し込む。 |
+| `ariaLabels` | `StackedBarWindowAriaLabels` | 任意 | 日本語既定値 | a11y 文言上書き | 未指定項目は既定値で補完。 |
+| `pinnedHintLabel` | `string` | 任意 | `'クリックで固定を解除'` | pinned 時ヒント | tooltip 内表示。 |
+| `emptyMessage` | `string` | 任意 | `'表示できるデータがありません'` | 空状態文言 | `role=status` 領域で表示。 |
+
+---
+
+## 4. sanitize 仕様（厳密）
+
+`chart/sanitize.ts` に以下仕様を固定する。
+
+- number 以外 → `0`
+- `NaN` → `0`
+- `Infinity` → `0`
+- `-Infinity` → `0`
+- `null` → `0`
+- `undefined` → `0`
+- 負値 → `0`
+- `0` 以上の有限数 → そのまま
 
 ```ts
-interface StackedDataPoint<Key extends string = string> {
-  key: string;          // X 軸内のユニークキー（React key にも利用）
-  axisLabel: string;    // X 軸の短いラベル
-  tooltipLabel: string; // ツールチップ見出し用の詳細ラベル
-  values: Record<Key, number>; // 系列キーごとの値（負値は未対応 = 積み上げの前提）
+export function sanitizeStackedValue(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  if (value < 0) return 0;
+  return value;
 }
 ```
 
-`values[seriesKey]` が欠落するとランタイム NaN を生むため、consumer 側で **全系列の値を 0 で埋める** こと。
+---
 
-### 4.3 `StackedBarChartTheme`
+## 5. ツールチップ仕様（再現重点）
+
+### 5.1 基本原則
+
+- `ChartTooltip.tsx` は表示専用。
+- 座標計算は `StackedBarChart.tsx` 側のみ。
+- `activeIndex = hoverIndex ?? pinnedIndex`
+- `isPinned = pinnedIndex !== null && hoverIndex === null`
+
+### 5.2 anchor 算出
+
+- `tooltipAnchor` は「対象カラム上端中央」を使う。
+- `barCenterX` は `xScale(row.key)! + xScale.bandwidth() / 2`
+- `barTopY` は対象カラムの積み上げ合計値を `yScale(total)` した座標。
+- `tooltipAnchor = { x: barCenterX + MARGIN.left, y: barTopY + MARGIN.top }`（実装の座標系に合わせて margin オフセット）。
+
+### 5.3 本体 left clamp と矢印位置
+
+以下計算式を **そのまま** 用いる。
 
 ```ts
-interface StackedBarChartTheme {
-  background: string;    // SVG チャートエリアの背景。'transparent' で親の背景を透過
-  gridColor: string;     // グリッド線の色
-  tooltipBg: string;     // ツールチップ背景色
-  tooltipBorder: string; // ツールチップ枠線色
+const halfWidth = tooltipSize.width / 2;
+const minLeft = halfWidth + TOOLTIP_PADDING_X;
+const maxLeft = Math.max(minLeft, chartWidth - halfWidth - TOOLTIP_PADDING_X);
+const tooltipLeft = clamp(tooltipAnchor.x, minLeft, maxLeft);
+
+const tooltipLeftEdge = tooltipLeft - halfWidth;
+const rawArrowX = tooltipAnchor.x - tooltipLeftEdge;
+const arrowX = clamp(rawArrowX, TOOLTIP_ARROW_INSET, tooltipSize.width - TOOLTIP_ARROW_INSET);
+```
+
+- `tooltipLeft` は tooltip 本体中心 X。
+- `arrowX` は tooltip 左端基準の矢印 X。
+- CSS 変数 `--sbwc-tooltip-arrow-x` に `arrowX` を px で流し込む。
+
+```css
+.sbwc-tooltip-arrow {
+  margin-left: calc(var(--sbwc-tooltip-arrow-x, 90px) - 7px);
 }
 ```
 
-### 4.4 `StackedBarWindowChartProps<Key>`
+### 5.4 視覚要件
 
-| Prop | 型 | 必須 | 既定値 | 説明 |
-|---|---|---|---|---|
-| `data` | `StackedDataPoint<Key>[]` | Yes | - | 全データ点 |
-| `series` | `ReadonlyArray<StackedSeries<Key>>` | Yes | - | 系列定義（積み上げ順は配列順） |
-| `hiddenSeriesKeys` | `Set<Key>` | Yes | - | 非表示系列キー集合 |
-| `onToggleSeries` | `(key: Key) => void` | Yes | - | 凡例ボタンクリック時のコールバック |
-| `windowSize` | `number` | Yes | - | 同時表示するデータ点数 |
-| `startIndex` | `number` | Yes | - | ウィンドウ開始インデックス（自動 clamp あり） |
-| `onStartIndexChange` | `(next: number) => void` | Yes | - | スライダー / 前後ボタン操作時のコールバック |
-| `theme` | `StackedBarChartTheme` | Yes | - | テーマトークン |
-| `rangeLabel` | `string` | No | - | スライダー上に表示する文字列（例: "Apr 〜 Sep"） |
-| `animationKey` | `string` | No | `${windowSize}-${series.length}-${data.length}` | 値変化で棒アニメーション再起動 + ツールチップクリア（`startIndex` のみ変更では再起動しない） |
-| `formatValue` | `ValueFormatter` | No | `d3-format(',')` | 軸目盛・ツールチップで使う数値フォーマッタ |
-| `chartHeight` | `number` | No | `460` | チャート高さ（CSS px） |
-| `pinnableTooltip` | `boolean` | No | `false` | クリックでツールチップを固定する機能 |
-| `legendActions` | `ReactNode` | No | - | 凡例の右隣に並べる任意 UI |
-| `ariaLabels` | `StackedBarWindowAriaLabels` | No | 日本語既定値 | a11y / i18n 用ラベル |
-| `pinnedHintLabel` | `string` | No | `"クリックで固定を解除"` | ピン留め時の解除ヒント文 |
+- 左端カラム: 矢印は tooltip の左下寄り。
+- 中央カラム: 矢印は中央下。
+- 右端カラム: 矢印は右下寄り。
+- tooltip 本体は常にチャート左右にはみ出さない。
 
-`startIndex` は内部で `[0, max(0, data.length - windowSize)]` に clamp される。`windowSize` も `[1, data.length]` に clamp。
+---
 
-### 4.5 ARIA ラベル既定値
+## 6. iPad / Safari 対応（必須実装 + 禁止事項）
+
+hover 判定は以下方式を必須とする。
+
+```ts
+const rect = svg.getBoundingClientRect();
+const localX = clientX - rect.left - MARGIN.left;
+```
+
+### 禁止事項
+
+- `event.nativeEvent.offsetX` を使わない。
+- SVG の `offsetX` に依存しない。
+- pointer/touch 処理を `pointermove` だけに簡略化しない。
+- touch 用 `onPointerDown` を削除しない。
+- touch 時の `onPointerLeave` 特別処理を削除しない。
+- 外部クリックで閉じる `document pointerdown` を削除しない。
+
+---
+
+## 7. インタラクション状態遷移
+
+前提状態:
+
+- `activeIndex = hoverIndex ?? pinnedIndex`
+- `isPinned = pinnedIndex !== null && hoverIndex === null`
+
+| 操作 | hoverIndex | pinnedIndex | 補足 |
+|---|---|---|---|
+| マウス移動 | 対象 column index に更新 | 変更なし | active は hover 優先。 |
+| マウスでチャート外へ出る | `null` | 変更なし | pinned は維持。 |
+| タッチ開始 | 対象 column index に更新 | 変更なし | `onPointerDown` 必須。 |
+| タッチ終了 / `pointerleave` | `null` または実装規約値 | `pinnableTooltip=true` なら最終 hover を反映 | iPad/Safari 互換の特別処理を残す。 |
+| クリック same column | 変更なし/`null` | 解除して `null` | `pinnableTooltip=true` 時。 |
+| クリック another column | 対象 index | 対象 index へ更新 | `pinnableTooltip=true` 時。 |
+| チャート外クリック | `null` | `null` | `document pointerdown` で解除。 |
+| `animationKey` 変更 | `null` | `null` | 再アニメに合わせて状態初期化。 |
+| 凡例 ON/OFF | 必要に応じ再計算 | 維持（対象が消える場合は安全に解除） | visible series が変わる。 |
+| スライダー移動 | 視認対象外なら解除可 | 維持/解除は実装整合 | `startIndex` 変更だけで再アニメしない。 |
+
+---
+
+## 8. 合計値表示オプション（tooltip）
+
+- `showTooltipTotal=false` が既定。
+- `showTooltipTotal=true` の場合だけ合計行を表示。
+- `tooltipTotalLabel` 既定値は `合計`。
+- `tooltipTotalMode` 既定値は `visible`。
+- `visible`: `hiddenSeriesKeys` を除外して合計。
+- `all`: `hiddenSeriesKeys` を無視して全系列合計。
+- 合計値は `sanitizeStackedValue` 後の値で計算。
+- 合計行は **タイトルの下、系列一覧の上** に表示。
+
+```ts
+const tooltipTotal = showTooltipTotal
+  ? series.reduce((sum, item) => {
+      if (tooltipTotalMode === 'visible' && hiddenSeriesKeys.has(item.key)) {
+        return sum;
+      }
+      return sum + sanitizeStackedValue(row.values[item.key]);
+    }, 0)
+  : null;
+```
+
+---
+
+## 9. CSS 仕様（クラス責務 + 変数）
+
+### 9.1 クラス責務
+
+- `.sbwc-root`: 全体コンテナ。
+- `.sbwc-legend-row`: 凡例行レイアウト。
+- `.sbwc-legend`: 凡例リスト。
+- `.sbwc-legend-item`: 凡例ボタン単位。
+- `.sbwc-chart-host`: SVG と tooltip の位置基準。
+- `.sbwc-svg`: SVG 本体。
+- `.sbwc-bars`: 棒グループ。
+- `.sbwc-bar`: 個別セグメント + アニメ適用。
+- `.sbwc-column-highlight`: hover/pinned 列ハイライト。
+- `.sbwc-tooltip-positioner`: tooltip 絶対配置ラッパ。
+- `.sbwc-tooltip`: tooltip 本体。
+- `.sbwc-tooltip-arrow`: tooltip 矢印。
+- `.sbwc-tooltip-total`: 合計行。
+- `.sbwc-controls`: 下部操作行。
+- `.sbwc-nav-button`: 前後ボタン。
+- `.sbwc-slider-root`: slider ルート。
+- `.sbwc-empty`: 空状態表示。
+
+### 9.2 CSS 変数
+
+- `--bar-delay`: 棒アニメ遅延。
+- `--sbwc-tooltip-fill`: tooltip 矢印塗り。
+- `--sbwc-tooltip-border`: tooltip 矢印枠線。
+- `--sbwc-tooltip-arrow-x`: tooltip 矢印の X 位置。
+
+矢印位置は以下を必須利用。
+
+```css
+.sbwc-tooltip-arrow {
+  margin-left: calc(var(--sbwc-tooltip-arrow-x, 90px) - 7px);
+}
+```
+
+---
+
+## 10. アクセシビリティ仕様
+
+- `svg` は `role="img"` を持ち、`aria-label` は `ariaLabels.chart` を使う。
+- 凡例コンテナは `role="group"`。
+- 凡例ボタンは `aria-pressed` を持つ。
+- スライダー操作領域は `role="group"`。
+- 空状態は `role="status"` + `aria-live="polite"`。
+- pinnedBadge は `aria-label` を持つ。
+
+既定ラベル:
 
 ```ts
 {
@@ -143,21 +328,87 @@ interface StackedBarChartTheme {
 
 ---
 
-## 5. 利用例
+## 11. アニメーション仕様
+
+- 棒は CSS keyframes で `scaleY(0) → scaleY(1)`。
+- `animationKey` が変わると `<g key={animationKey}>` 再マウントで再アニメーション。
+- `startIndex` のみ変更では `animationKey` は変えない設計とし、再アニメーションしない。
+- `prefers-reduced-motion: reduce` ではアニメーションを抑制する。
+
+---
+
+## 12. 実装メモ（再現時の判断固定）
+
+- `StackedBarWindowChart.tsx` で `data` と `series` の空判定を行い、空状態を返す。
+- `visibleSeries = series.filter((s) => !hiddenSeriesKeys.has(s.key))` を基本とする。
+- `maxStartIndex = Math.max(0, data.length - windowSize)`。
+- `startIndex` は常に clamp 後の値を利用。
+- 合計・積み上げ・y-domain 計算は sanitize 後数値で行う。
+
+---
+
+## 13. 受け入れ条件（実装者チェックリスト）
+
+1. `npm run build` が成功する。
+2. `offsetX` を使っていない。
+3. iPad / Safari でタップして tooltip が出る。
+4. 左端・右端で tooltip 本体がはみ出さない。
+5. 左端・右端で矢印が棒方向を指す。
+6. `showTooltipTotal` 未指定では合計が出ない。
+7. `showTooltipTotal=true` で合計が出る。
+8. `tooltipTotalMode=visible` で hidden 系列を除外する。
+9. `tooltipTotalMode=all` で hidden 系列も含める。
+10. `data=[]` または `series=[]` で空状態を表示する。
+11. `null / undefined / NaN / Infinity / 負値` で描画が壊れない。
+12. 凡例 ON/OFF が機能する。
+13. スライダー移動で表示窓が変わる。
+14. スライダー移動だけでは再アニメーションしない。
+15. `prefers-reduced-motion` でアニメーションが抑制される。
+
+---
+
+## 14. 禁止事項
+
+- SPEC.md の詳細仕様を削って短縮しない。
+- `ChartTooltip` に座標計算を持たせない。
+- `StackedBarChart` の hover/touch/pinned 処理を簡略化しない。
+- `offsetX` を使わない。
+- tooltip arrow の CSS 変数名を変更しない。
+- `showTooltipTotal` を既定 true にしない。
+- 合計値を常時表示にしない。
+- ドメイン固有語彙（売上、金額、通貨など）を feature 内に入れない。
+
+
+---
+
+## 15. 利用例
 
 ```tsx
 import { useState } from 'react';
 import { StackedBarWindowChart } from '@/features/stacked-bar-window-chart';
+import type { StackedDataPoint, StackedSeries } from '@/features/stacked-bar-window-chart';
 
-const series = [
-  { key: 'a', label: 'Alpha', color: '#4e79a7' },
-  { key: 'b', label: 'Beta',  color: '#f28e2b' },
-] as const;
+type SeriesKey = 'alpha' | 'beta' | 'gamma';
 
-const data = [
-  { key: '2024-01', axisLabel: 'Jan', tooltipLabel: 'Jan 2024', values: { a: 30, b: 12 } },
-  { key: '2024-02', axisLabel: 'Feb', tooltipLabel: 'Feb 2024', values: { a: 28, b: 15 } },
-  // ... N 件
+const series: StackedSeries<SeriesKey>[] = [
+  { key: 'alpha', label: 'Alpha', color: '#4e79a7' },
+  { key: 'beta', label: 'Beta', color: '#f28e2b' },
+  { key: 'gamma', label: 'Gamma', color: '#59a14f' },
+];
+
+const data: StackedDataPoint<SeriesKey>[] = [
+  {
+    key: '2026-01',
+    axisLabel: '1月',
+    tooltipLabel: '2026年1月',
+    values: { alpha: 30, beta: 12, gamma: 8 },
+  },
+  {
+    key: '2026-02',
+    axisLabel: '2月',
+    tooltipLabel: '2026年2月',
+    values: { alpha: 28, beta: 15, gamma: 10 },
+  },
 ];
 
 const theme = {
@@ -167,171 +418,116 @@ const theme = {
   tooltipBorder: 'var(--border)',
 };
 
-function Demo() {
-  const [hidden, setHidden] = useState<Set<'a' | 'b'>>(new Set());
-  const [start, setStart] = useState(0);
+export function Demo() {
+  const [hidden, setHidden] = useState<Set<SeriesKey>>(new Set());
+  const [startIndex, setStartIndex] = useState(0);
+
+  const handleToggleSeries = (key: SeriesKey) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
+
   return (
     <StackedBarWindowChart
       data={data}
       series={series}
       hiddenSeriesKeys={hidden}
-      onToggleSeries={(key) => {
-        const next = new Set(hidden);
-        next.has(key) ? next.delete(key) : next.add(key);
-        setHidden(next);
-      }}
+      onToggleSeries={handleToggleSeries}
       windowSize={6}
-      startIndex={start}
-      onStartIndexChange={setStart}
+      startIndex={startIndex}
+      onStartIndexChange={setStartIndex}
       theme={theme}
+      showTooltipTotal
+      tooltipTotalMode="visible"
+      tooltipTotalLabel="合計"
+      pinnableTooltip
     />
   );
 }
 ```
 
+- ドメイン固有語彙は呼び出し側で持つ。
+- feature 内には売上、金額、通貨などの語を入れない。
+- 表示値の単位やフォーマットは `formatValue` で注入する。
+
 ---
 
-## 6. レイアウト
+## 16. 依存パッケージ
 
-`StackedBarWindowChart` は次の縦 3 段構成（`.sbwc-root` の grid）。
+| パッケージ | バージョン目安 | 用途 |
+|---|---|---|
+| `react` / `react-dom` | `^19.x` | コンポーネント・hooks |
+| `d3-array` | `^3.x` | max / 集計補助 |
+| `d3-format` | `^3.x` | 既定の数値フォーマッタ |
+| `d3-scale` | `^4.x` | scaleBand / scaleLinear |
+| `@radix-ui/react-slider` | `^1.x` | ウィンドウ移動スライダー |
 
-```
+- `@types/d3-*` が必要になる場合がある。
+- この機能は Recharts に依存しない。
+- SVG + d3-scale + Radix Slider の構成である。
+
+---
+
+## 17. レイアウト図
+
+```text
 ┌──────────────────────────────────────────────────────────┐
-│ Legend (凡例 + legendActions)                             │
+│ Legend: 系列の表示切り替え + legendActions                │
 ├──────────────────────────────────────────────────────────┤
-│ SVG Chart (積み上げ棒 + 軸 + グリッド + ツールチップ)     │
+│ SVG Chart: 積み上げ棒 + X/Y軸 + グリッド + Tooltip         │
 ├──────────────────────────────────────────────────────────┤
-│ ◀  rangeLabel + Slider                              ▶    │
+│ Window Controls: ◀ rangeLabel + Slider ▶                 │
 └──────────────────────────────────────────────────────────┘
 ```
 
-各段の DOM 構造とクラス名:
-
-| 段 | 要素 | クラス |
-|---|---|---|
-| Legend | `<div role="group">` > `<ul>` > `<li>` > `<button>` | `.sbwc-legend-row`, `.sbwc-legend`, `.sbwc-legend-item` |
-| Chart | `<div>` > `<svg>` | `.sbwc-chart-host`, `.sbwc-svg` |
-| Window | `<div role="group">` > `<button>` + `<Slider.Root>` + `<button>` | `.sbwc-controls`, `.sbwc-nav-button`, `.sbwc-slider-*` |
+- Legend は `ChartLegend`。
+- SVG Chart は `StackedBarChart`。
+- Window Controls は `WindowSlider`。
+- `StackedBarWindowChart` がこれらを縦に合成する。
 
 ---
 
-## 7. 描画仕様（StackedBarChart）
+## 18. テーマ設計
 
-### 7.1 レイアウト定数
+- `theme` は背景、グリッド、tooltip 背景、tooltip 枠線のみを持つ。
+- 系列色は `theme` ではなく `series[i].color` が持つ。
+- 色テーマと系列定義の責務を分ける。
+- CSS 変数を使うことでライト/ダークテーマに対応しやすい。
+- `theme.background='transparent'` で親カード背景を透過できる。
 
 ```ts
-const MARGIN = { top: 8, right: 24, bottom: 32, left: 56 };
-const STAGGER_WINDOW_MS = 480; // 系列ごとの登場ずらし合計時間
+const lightTheme = {
+  background: 'transparent',
+  gridColor: 'var(--border)',
+  tooltipBg: 'var(--bg)',
+  tooltipBorder: 'var(--border)',
+};
+
+const darkTheme = {
+  background: 'transparent',
+  gridColor: 'var(--border)',
+  tooltipBg: 'var(--bg)',
+  tooltipBorder: 'var(--border)',
+};
 ```
 
-`chartHeight` は外部から受け取る（既定 460）。`innerWidth` は `ResizeObserver` で `.sbwc-chart-host` の幅を購読し、`chartWidth - MARGIN.left - MARGIN.right` で算出する。`chartWidth === 0` の間は SVG ではなく `.sbwc-svg-placeholder` を出してレイアウトシフトを防ぐ。
-
-### 7.2 SVG 描画順（`translate(MARGIN.left, MARGIN.top)` 内）
-
-1. チャート背景 `<rect fill={theme.background} rx={4}>`（`'transparent'` でも常に描画）
-2. `<YAxis>`（水平グリッド + Y ラベル）
-3. `<XAxis>`（垂直グリッド + X ラベル）
-4. ピン留め列ハイライト `<rect class="sbwc-column-highlight is-pinned">`（`pinnedIndex !== null && hoverIndex !== pinnedIndex`）
-5. ホバー列ハイライト `<rect class="sbwc-column-highlight">`（`hoverIndex !== null`）
-6. 棒セグメント `<g key={animationKey} class="sbwc-bars">`
-7. ホバーレイヤー `<rect class="sbwc-hover-layer">`（透明、`pointerEvents="all"`）
-
-### 7.3 積み上げセグメント計算
-
-```ts
-const cumulative = new Array(chartData.length).fill(0);
-visibleSeries.forEach((item, seriesIndex) => {
-  chartData.forEach((row, rowIndex) => {
-    const v = row.values[item.key];
-    const yTop    = yScale(cumulative[rowIndex] + v);
-    const yBottom = yScale(cumulative[rowIndex]);
-    push({ x: xScale(row.key), y: yTop, height: yBottom - yTop, ... });
-    cumulative[rowIndex] += v;
-  });
-});
-```
-
-### 7.4 棒登場アニメーション
-
-- CSS クラス `.sbwc-bar` に `transform: scaleY(0) → scaleY(1)` のキーフレーム（700ms ease-out）
-- `transformOrigin` は棒の底辺中央を inline style で指定（`${x + width/2}px ${innerHeight}px`）
-- `--bar-delay` を inline style で注入してスタッガー（系列ごとに `STAGGER_WINDOW_MS / (visibleSeries.length - 1)` ms 遅延）
-- `<g key={animationKey}>` により `animationKey` 変化時に DOM 再マウント → アニメ再実行
-
-### 7.5 スケール（`chart/scales.ts`）
-
-- **xScale**: `scaleBand<string>().paddingInner(0.2).paddingOuter(0.1)`
-- **yScale**: `scaleLinear().domain([0, max(stack)]).nice(5)`。max が 0 のときは `[0, 1]` に置換
-
-### 7.6 軸・グリッド（`chart/axes.tsx`）
-
-- Y 軸: `yScale.ticks(5)` を使い、各 tick に **水平グリッド線** + ラベルを描画。ラベルは `formatValue` で整形
-- X 軸: `xScale.bandwidth() >= 28` のときのみ全ラベル表示、それ未満は偶数 index のみ。フォントサイズは bandwidth 36/24px 境界で 13/12/11px に切替。各ラベルに **垂直グリッド線**（同じ間引き条件）
-
-### 7.7 ツールチップ
-
-- 棒上端中央に吸着（`.sbwc-tooltip-positioner` を `transform: translateX(-50%) translateY(-100%)`）
-- ツールチップ本体の横位置はチャート幅内に clamp する（`padding=8px`、実測 `tooltipWidth` ベース）
-- 矢印の横位置は CSS 変数 `--sbwc-tooltip-arrow-x` で補正し、常に棒中心方向を指す
-  - 通常時は中央下付近
-  - 左端付近では左下寄り
-  - 右端付近では右下寄り
-- 状態: `hoverIndex` / `pinnedIndex`
-- 派生: `activeIndex = hoverIndex ?? pinnedIndex`、`isPinned = pinnedIndex !== null && hoverIndex === null`
-- インタラクション:
-
-  | 操作 | 動作 |
-  |---|---|
-  | ポインタ移動 | `hoverIndex` を更新 |
-  | マウスでチャート外へ | `hoverIndex = null`（`pinnedIndex` は保持） |
-  | タッチで指離す | hover 維持。`pinnableTooltip=true` なら `pinnedIndex = hoverIndex` に転写 |
-  | クリック（同列） | `pinnedIndex` をクリア（`pinnableTooltip=true` 時） |
-  | クリック（別列） | `pinnedIndex` を移動（`pinnableTooltip=true` 時） |
-  | `animationKey` 変化 | render 中に検知して両方クリア |
-  | チャート外 `pointerdown` | `document` リスナーで両方クリア |
-
-- hover 判定は iPad / Safari 互換性を優先し、`clientX + getBoundingClientRect()` を維持する
-- `offsetX` は使用しない
-
-### 7.8 `animationKey` による状態リセット
-
-React 19 推奨パターン: 専用 state `prevAnimationKey` を持ち、render 中に props と比較。
-
-```tsx
-const [prevAnimationKey, setPrevAnimationKey] = useState(animationKey);
-if (prevAnimationKey !== animationKey) {
-  setPrevAnimationKey(animationKey);
-  setHoverIndex(null);
-  setPinnedIndex(null);
-}
-```
-
-`useEffect` 内 `setState` は新しい React lint で禁止されるため、この形を使う。
+`series.color` は consumer 側でテーマに応じて差し替えてよい。  
+ただし feature 内では色パレットを固定しない。
 
 ---
 
-## 8. WindowSlider 仕様
+## 19. 他リポジトリへの移植手順
 
-- 3 列 grid（`36px 1fr 36px`）。左 `‹`、中央スライダー、右 `›`
-- `startIndex === 0` で左ボタン disabled、`startIndex === maxStartIndex` で右ボタン disabled
-- `rangeLabel` を渡すとスライダー上にラベル表示、`aria-valuetext` にも反映
-- 内部で `clamp(startIndex, 0, maxStartIndex)` 済みの値を `Slider.Root` の `value` に渡す
-- スライダー操作 / ボタン押下のいずれも `onStartIndexChange(next)` で外部に委譲
-
----
-
-## 9. テーマ設計
-
-- `theme` プロップは **4 トークン** のみ。系列色は `series[i].color` 側で持つ（テーマと系列の責務分離）
-- consumer 側でテーマ配列を定義し、`theme.colors` を `series[i].color` に上書きするユーティリティを書くのが推奨パターン
-- `theme.background = 'transparent'` でカード背景を透過、`'#ffffff'` などで白背景固定にもできる
-- ダークモード対応は `gridColor: 'var(--border)'` のように **CSS 変数** を渡す。feature 自体は色をハードコードしない
-
----
-
-## 10. CSS 依存
-
-`styles.css` は次の **CSS カスタムプロパティ** を親プロジェクト側で定義することを前提とする。
+1. `src/features/stacked-bar-window-chart/` 一式をコピーする。
+2. `index.ts` を import できるようにパス設定を確認する。
+3. CSS カスタムプロパティを親プロジェクトで定義する。
+4. 必要な依存パッケージをインストールする。
+5. 呼び出し側で `series / data / theme / callbacks` を用意する。
+6. build する。
+7. iPad / Safari と左右端 tooltip を確認する。
 
 ```css
 :root {
@@ -341,86 +537,23 @@ if (prevAnimationKey !== animationKey) {
   --border: #e0e0e0;
   --accent: #646cff;
 }
-@media (prefers-color-scheme: dark) {
-  :root { /* ダーク版を上書き */ }
-}
 ```
 
-未定義の場合、ボタン枠線・スライダー軌道・ツールチップ背景などが意図せず透明・無色になる。
-
-### 主要 CSS クラス
-
-| クラス | 役割 |
-|---|---|
-| `.sbwc-root` | コンテナ grid（gap: 12px） |
-| `.sbwc-legend-row` / `.sbwc-legend` / `.sbwc-legend-item` | 凡例 |
-| `.sbwc-legend-item.is-hidden` | 非表示系列のフェード + 打消し線 |
-| `.sbwc-chart-host` | SVG コンテナ（`position: relative`、ツールチップ位置基準） |
-| `.sbwc-svg` | SVG 本体（`width: 100%`） |
-| `.sbwc-svg-placeholder` | 幅計測前のプレースホルダー（高さのみ確保） |
-| `.sbwc-bars .sbwc-bar` | 棒 + 登場アニメーション |
-| `.sbwc-column-highlight` / `.is-pinned` | ホバー / ピン列ハイライト |
-| `.sbwc-tooltip-positioner` | ツールチップ位置（`transform: translateX(-50%) translateY(-100%)`） |
-| `.sbwc-tooltip` / `.sbwc-tooltip-arrow` | ツールチップ本体・矢印 |
-| `.sbwc-tooltip-pin-badge` / `.sbwc-tooltip-pin-hint` | ピン留めバッジ・解除ヒント |
-| `.sbwc-controls` | スライダー段の grid |
-| `.sbwc-nav-button` | 36×36px 円形ナビボタン |
-| `.sbwc-slider-*` | Radix Slider スタイル |
-
-CSS 変数 `--bar-delay`（棒アニメ遅延）、`--sbwc-tooltip-fill` / `--sbwc-tooltip-border`（矢印色）は JS 側から inline style で注入する。
-
 ---
 
-## 11. 状態管理ポリシー
-
-- `hoverIndex` / `pinnedIndex` / `prevAnimationKey` / `chartWidth` は **feature 内部で完結**
-- `hiddenSeriesKeys` / `startIndex` / `windowSize` は **consumer が制御**（controlled component）
-- これにより consumer 側で URL クエリ同期・モード切替時の状態保持などが容易
-
----
-
-## 12. パフォーマンス考慮
-
-- `ResizeObserver` で幅を購読、`Math.floor` で整数化してから `setState`
-- 積み上げセグメント・スケールは `useMemo` でメモ化（依存: `chartData`, `visibleSeries`, `innerWidth`, `innerHeight`）
-- ホバー判定は `clientX + getBoundingClientRect()` から線形探索（O(N)、N=windowSize）。iPad / Safari 互換性のため `offsetX` は使わない
-
----
-
-## 13. 既知の制約
-
-- 負値は積み上げの性質上未対応（`yScale` が `[0, max]` 固定）
-- データ点数 0 のとき `<XAxis>` は何も描画しない
-- `series.length === 0` のときツールチップは出ない（`tooltipAnchor === null`）
-- `formatValue` は **同じ関数を毎回渡すこと**（インライン定義は再 render を増やす可能性）
-
----
-
-## 14. 拡張ポイント
+## 20. 将来拡張ポイント
 
 | 拡張 | 実装方針 |
 |---|---|
-| 折れ線併用 | `stackSegments` 計算後に `<path>` を追加描画する renderer 層を新設 |
-| 値ラベル表示 | 各セグメントの中央に `<text>` を出すオプション prop（例: `showValueLabels`） |
-| ウィンドウ範囲スライダー（両端ハンドル） | `WindowSlider` の `Slider.Root` を `value={[start, end]}` の 2 thumb に拡張 |
-| 凡例配置の切替 | `StackedBarWindowChart` に `legendPosition?: 'top' \| 'bottom' \| 'none'` を追加 |
-| 値の formatter を tooltip / axis で別指定 | `formatValue` を `{ axis, tooltip }` のオブジェクトに拡張 |
-| サーバ側プロップ駆動アニメ | `animationKey` を URL クエリと同期するだけで OK（既に prop 化済） |
+| 値ラベル表示 | 各セグメント中央、または棒上端に `<text>` を追加する。 |
+| 構成比表示 | tooltip 行に percentage を追加する。既定OFFにする。 |
+| formatter分離 | `formatValue` を axis / tooltip / total 別に分ける。 |
+| 折れ線併用 | `stackSegments` 計算後に `<path>` renderer を追加する。 |
+| legendPosition | `top` / `bottom` / `none` を選べるようにする。 |
+| 範囲スライダー | Radix Slider を2 thumb化して start/end を扱う。 |
+| 上下方向 tooltip placement | 上に出せない場合だけ下に出す。 |
+| compact layout | chartWidth に応じて margin / height / label密度を切り替える。 |
 
----
-
-## 15. 他リポジトリへの移植手順
-
-1. 上記 `src/features/stacked-bar-window-chart/` 一式をそのまま該当パスにコピー
-2. `src/features/stacked-bar-window-chart/index.ts` を `import` できるパスを通す（Vite / Next / Webpack 設定）
-3. § 10 の CSS カスタムプロパティを `:root` に定義（未定義でも動作はするがビジュアルが崩れる）
-4. 依存 `npm install d3-array d3-format d3-scale @radix-ui/react-slider` および `@types/d3-*`
-5. `import { StackedBarWindowChart } from '@/features/stacked-bar-window-chart'` で使用
-
-ドメイン固有のラベルや色テーマは consumer 側で定義し、`series` / `theme` / `rangeLabel` / `ariaLabels` / `formatValue` を props で注入する。feature 自身は通貨・金額・月などの語を一切持たないため、売上・トラフィック・在庫など任意の積み上げデータに転用可能。
-> 補足（現行実装）  
-> 本仕様の基本設計は維持しつつ、以下の改善を適用している。
-> - `sanitizeStackedValue` により `null / undefined / NaN / Infinity / 負値` を 0 として扱う
-> - `prefers-reduced-motion: reduce` 時は主要アニメーションを抑制する
-> - 既定の ARIA ラベルとピン留めヒント文は日本語
-> - `data=[]` または `series=[]` の場合は空データメッセージを表示する
+- 拡張は既定OFFを基本とする。
+- 汎用性を壊すドメイン固有機能は入れない。
+- 既存の iPad / Safari 対応、tooltip clamp、arrowX 補正を壊さない。

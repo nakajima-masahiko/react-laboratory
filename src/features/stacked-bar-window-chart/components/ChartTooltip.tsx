@@ -1,6 +1,6 @@
 import type { CSSProperties, Ref } from 'react';
 import { sanitizeStackedValue } from '../chart/sanitize';
-import type { StackedDataPoint, StackedSeries, ValueFormatter } from '../types';
+import type { StackedDataPoint, StackedSeries, TooltipTotalMode, ValueFormatter } from '../types';
 
 interface ChartTooltipProps<Key extends string> {
   row: StackedDataPoint<Key>;
@@ -11,6 +11,9 @@ interface ChartTooltipProps<Key extends string> {
   tooltipBg: string;
   tooltipBorder: string;
   formatValue: ValueFormatter;
+  showTooltipTotal: boolean;
+  tooltipTotalLabel: string;
+  tooltipTotalMode: TooltipTotalMode;
   pinnedBadgeLabel: string;
   pinnedHintLabel: string;
   tooltipRef?: Ref<HTMLDivElement>;
@@ -25,10 +28,23 @@ export function ChartTooltip<Key extends string>({
   tooltipBg,
   tooltipBorder,
   formatValue,
+  showTooltipTotal,
+  tooltipTotalLabel,
+  tooltipTotalMode,
   pinnedBadgeLabel,
   pinnedHintLabel,
   tooltipRef,
 }: ChartTooltipProps<Key>) {
+
+  const tooltipTotal = showTooltipTotal
+    ? series.reduce((sum, item) => {
+        if (tooltipTotalMode === 'visible' && hiddenSeriesKeys.has(item.key)) {
+          return sum;
+        }
+        return sum + sanitizeStackedValue(row.values[item.key]);
+      }, 0)
+    : null;
+
   const style = {
     background: tooltipBg,
     borderColor: tooltipBorder,
@@ -47,6 +63,12 @@ export function ChartTooltip<Key extends string>({
             </span>
           )}
         </div>
+        {showTooltipTotal && tooltipTotal !== null && (
+          <div className="sbwc-tooltip-total">
+            <span className="sbwc-tooltip-total-label">{tooltipTotalLabel}</span>
+            <span className="sbwc-tooltip-total-value">{formatValue(tooltipTotal)}</span>
+          </div>
+        )}
         <ul className="sbwc-tooltip-list">
           {series.map((item) => {
             if (hiddenSeriesKeys.has(item.key)) return null;

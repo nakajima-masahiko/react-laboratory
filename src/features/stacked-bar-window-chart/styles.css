@@ -149,6 +149,25 @@
   text-align: center;
 }
 
+.sbwc-tooltip-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.sbwc-tooltip-total-label {
+  color: var(--text);
+}
+
+.sbwc-tooltip-total-value {
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
 .sbwc-tooltip-list {
   list-style: none;
   margin: 0;

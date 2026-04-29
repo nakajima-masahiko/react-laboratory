@@ -20,7 +20,6 @@ export interface StackedDataPoint<Key extends string = string> {
   values: Record<Key, number | null | undefined>;
 }
 
-export type StackedBarAnimationMode = 'none' | 'initial' | 'data-change' | 'always';
 
 /**
  * チャートが必要とする色トークン一式。consumer 側で複数テーマを定義し props 経由で差し替える。
@@ -54,3 +53,6 @@ export interface StackedBarWindowAriaLabels {
   windowControls?: string;
   pinnedBadge?: string;
 }
+
+
+export type TooltipTotalMode = 'visible' | 'all';
