@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, Ref } from 'react';
 import { sanitizeStackedValue } from '../chart/sanitize';
 import type { StackedDataPoint, StackedSeries, ValueFormatter } from '../types';
 
@@ -13,6 +13,7 @@ interface ChartTooltipProps<Key extends string> {
   formatValue: ValueFormatter;
   pinnedBadgeLabel: string;
   pinnedHintLabel: string;
+  tooltipRef?: Ref<HTMLDivElement>;
 }
 
 export function ChartTooltip<Key extends string>({
@@ -26,6 +27,7 @@ export function ChartTooltip<Key extends string>({
   formatValue,
   pinnedBadgeLabel,
   pinnedHintLabel,
+  tooltipRef,
 }: ChartTooltipProps<Key>) {
   const style = {
     background: tooltipBg,
@@ -36,7 +38,7 @@ export function ChartTooltip<Key extends string>({
 
   return (
     <>
-      <div className="sbwc-tooltip" style={style}>
+      <div ref={tooltipRef} className="sbwc-tooltip" style={style}>
         <div className="sbwc-tooltip-title">
           {row.tooltipLabel}
           {pinnableTooltip && isPinned && (

@@ -119,7 +119,8 @@
   display: block;
   fill: var(--sbwc-tooltip-fill, var(--bg));
   filter: drop-shadow(0 1px 0 var(--sbwc-tooltip-border, var(--border)));
-  margin: -1px auto 0;
+  margin-top: -1px;
+  margin-left: calc(var(--sbwc-tooltip-arrow-x, 90px) - 7px);
 }
 
 .sbwc-tooltip-title {

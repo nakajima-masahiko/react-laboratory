@@ -8,6 +8,11 @@ import { ChartTooltip } from './ChartTooltip';
 
 const MARGIN = { top: 8, right: 24, bottom: 32, left: 56 } as const;
 const STAGGER_WINDOW_MS = 480;
+const DEFAULT_TOOLTIP_SIZE = { width: 180, height: 80 } as const;
+const TOOLTIP_PADDING_X = 8;
+const TOOLTIP_ARROW_INSET = 14;
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 interface StackedBarChartProps<Key extends string> {
   chartData: StackedDataPoint<Key>[];
@@ -39,7 +44,9 @@ export function StackedBarChart<Key extends string>({
 }: StackedBarChartProps<Key>) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
+  const [tooltipSize, setTooltipSize] = useState<TooltipSize>(DEFAULT_TOOLTIP_SIZE);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [pinnedIndex, setPinnedIndex] = useState<number | null>(null);
   const [prevAnimationKey, setPrevAnimationKey] = useState(animationKey);
@@ -210,6 +217,33 @@ export function StackedBarChart<Key extends string>({
     return { row, x: barCenterX, y: barTopY };
   }, [activeIndex, chartData, scales, stackSegments, visibleSeries.length]);
 
+  useEffect(() => {
+    if (!tooltipAnchor || !tooltipRef.current) {
+      return;
+    }
+    const { width, height } = tooltipRef.current.getBoundingClientRect();
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+    setTooltipSize((prev) =>
+      prev.width === width && prev.height === height ? prev : { width, height },
+    );
+  }, [tooltipAnchor, isPinned, hiddenSeriesKeys, series]);
+
+  const tooltipLayout = useMemo(() => {
+    if (!tooltipAnchor || chartWidth <= 0) {
+      return null;
+    }
+    const halfWidth = tooltipSize.width / 2;
+    const minLeft = halfWidth + TOOLTIP_PADDING_X;
+    const maxLeft = Math.max(minLeft, chartWidth - halfWidth - TOOLTIP_PADDING_X);
+    const tooltipLeft = clamp(tooltipAnchor.x, minLeft, maxLeft);
+    const tooltipLeftEdge = tooltipLeft - halfWidth;
+    const rawArrowX = tooltipAnchor.x - tooltipLeftEdge;
+    const arrowX = clamp(rawArrowX, TOOLTIP_ARROW_INSET, tooltipSize.width - TOOLTIP_ARROW_INSET);
+    return { left: tooltipLeft, top: tooltipAnchor.y, arrowX };
+  }, [chartWidth, tooltipAnchor, tooltipSize.width]);
+
   const ready = chartWidth > 0 && innerWidth > 0;
 
   return (
@@ -316,12 +350,19 @@ export function StackedBarChart<Key extends string>({
         <div className="sbwc-svg-placeholder" style={{ height }} aria-hidden="true" />
       )}
 
-      {tooltipAnchor && (
+      {tooltipAnchor && tooltipLayout && (
         <div
           className="sbwc-tooltip-positioner"
-          style={{ left: tooltipAnchor.x, top: tooltipAnchor.y }}
+          style={
+            {
+              left: tooltipLayout.left,
+              top: tooltipLayout.top,
+              '--sbwc-tooltip-arrow-x': `${tooltipLayout.arrowX}px`,
+            } as CSSProperties
+          }
         >
           <ChartTooltip
+            tooltipRef={tooltipRef}
             row={tooltipAnchor.row}
             series={series}
             hiddenSeriesKeys={hiddenSeriesKeys}
@@ -338,3 +379,4 @@ export function StackedBarChart<Key extends string>({
     </div>
   );
 }
+type TooltipSize = { width: number; height: number };
