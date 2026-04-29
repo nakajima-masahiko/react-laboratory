@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useMemo, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   CheckIcon,
@@ -13,6 +7,25 @@ import {
   ResetIcon,
   Pencil2Icon,
 } from '@radix-ui/react-icons';
+import {
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import './styles.css';
 
 type Item = {
@@ -29,42 +42,100 @@ const INITIAL_ITEMS: Item[] = [
   { id: 'item-5', label: 'アクセス監査', hint: '操作ログのレビュー' },
 ];
 
-function moveItem(items: Item[], fromId: string, toId: string): Item[] {
-  const fromIndex = items.findIndex((item) => item.id === fromId);
-  const toIndex = items.findIndex((item) => item.id === toId);
+type SortableRowProps = {
+  item: Item;
+  index: number;
+  isAnyDragging: boolean;
+};
 
-  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
-    return items;
-  }
+function SortableRow({ item, index, isAnyDragging }: SortableRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
 
-  const next = [...items];
-  const [moved] = next.splice(fromIndex, 1);
-  next.splice(toIndex, 0, moved);
-  return next;
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      data-item-id={item.id}
+      data-dragging={isDragging || undefined}
+      data-drag-state={
+        isDragging ? 'active' : isAnyDragging ? 'idle' : undefined
+      }
+      className="sdl-item"
+    >
+      <span className="sdl-index" aria-hidden>
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <div className="sdl-text">
+        <span className="sdl-label">{item.label}</span>
+        <span className="sdl-hint">{item.hint}</span>
+      </div>
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        className="sdl-handle"
+        aria-label={`${item.label} を並び替え`}
+        {...attributes}
+        {...listeners}
+      >
+        <DragHandleDots2Icon aria-hidden />
+      </button>
+    </li>
+  );
 }
 
-function swapByOffset(items: Item[], id: string, offset: number): Item[] {
-  const index = items.findIndex((item) => item.id === id);
-  const target = index + offset;
-  if (index < 0 || target < 0 || target >= items.length) return items;
-  const next = [...items];
-  [next[index], next[target]] = [next[target], next[index]];
-  return next;
+type DragPreviewProps = {
+  item: Item;
+  index: number;
+};
+
+function DragPreview({ item, index }: DragPreviewProps) {
+  return (
+    <li
+      className="sdl-item"
+      data-dragging
+      data-drag-overlay
+      style={{ listStyle: 'none' }}
+    >
+      <span className="sdl-index" aria-hidden>
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <div className="sdl-text">
+        <span className="sdl-label">{item.label}</span>
+        <span className="sdl-hint">{item.hint}</span>
+      </div>
+      <span className="sdl-handle" aria-hidden>
+        <DragHandleDots2Icon aria-hidden />
+      </span>
+    </li>
+  );
 }
 
 function SortableDialogLab() {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Item[]>(INITIAL_ITEMS);
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const listRef = useRef<HTMLUListElement | null>(null);
-  const dragPointerYRef = useRef<number | null>(null);
-  const dragPrevPointerYRef = useRef<number | null>(null);
-  const dragRafRef = useRef<number | null>(null);
-  const flipRafRef = useRef<number | null>(null);
-  const draggedIdRef = useRef<string | null>(null);
-  const itemNodesRef = useRef<Map<string, HTMLLIElement>>(new Map());
-  const beforeReorderRectsRef = useRef<Map<string, DOMRect>>(new Map());
-  const shouldRunFlipRef = useRef(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 4 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   const orderedLabels = useMemo(() => items.map((item) => item.label), [items]);
   const isDirty = useMemo(
@@ -72,168 +143,34 @@ function SortableDialogLab() {
     [items],
   );
 
-  const findSwapTargetByMidline = (
-    pointerY: number,
-    direction: -1 | 1,
-    draggedId: string,
-  ): string | null => {
-    const list = listRef.current;
-    if (!list) return null;
+  const itemIds = useMemo(() => items.map((item) => item.id), [items]);
 
-    const elements = Array.from(list.querySelectorAll<HTMLLIElement>('[data-item-id]'));
-    const draggedIndex = elements.findIndex((el) => el.dataset.itemId === draggedId);
-    if (draggedIndex < 0) return null;
+  const activeItem = activeId
+    ? items.find((item) => item.id === activeId) ?? null
+    : null;
+  const activeIndex = activeId
+    ? items.findIndex((item) => item.id === activeId)
+    : -1;
 
-    const neighborIndex = draggedIndex + direction;
-    const neighbor = elements[neighborIndex];
-    if (!neighbor) return null;
-
-    const neighborId = neighbor.dataset.itemId ?? null;
-    if (!neighborId) return null;
-
-    const rect = neighbor.getBoundingClientRect();
-    const midline = rect.top + rect.height / 2;
-
-    // 隣接要素の中央線を超えたときだけ並び替えることで、過敏な入れ替えを防ぐ。
-    if (direction > 0 && pointerY >= midline) return neighborId;
-    if (direction < 0 && pointerY <= midline) return neighborId;
-    return null;
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
   };
 
-  const handlePointerDown = (
-    event: React.PointerEvent<HTMLButtonElement>,
-    id: string,
-  ) => {
-    if (event.button !== 0 && event.pointerType === 'mouse') return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    draggedIdRef.current = id;
-    setDraggingId(id);
-    dragPointerYRef.current = event.clientY;
-    dragPrevPointerYRef.current = event.clientY;
-  };
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+    if (!over || active.id === over.id) return;
 
-  const processDragFrame = () => {
-    dragRafRef.current = null;
-    const draggedId = draggedIdRef.current;
-    const pointerY = dragPointerYRef.current;
-    const prevPointerY = dragPrevPointerYRef.current;
-    if (!draggedId || pointerY == null || prevPointerY == null || pointerY === prevPointerY) return;
-
-    const direction: -1 | 1 = pointerY > prevPointerY ? 1 : -1;
-    const targetId = findSwapTargetByMidline(pointerY, direction, draggedId);
-    dragPrevPointerYRef.current = pointerY;
-    if (!targetId) return;
-
-    beforeReorderRectsRef.current = new Map(
-      Array.from(itemNodesRef.current.entries()).map(([id, node]) => [id, node.getBoundingClientRect()]),
-    );
-    shouldRunFlipRef.current = true;
-
-    setItems((current) => moveItem(current, draggedId, targetId));
-  };
-
-  const handlePointerMove = (
-    event: React.PointerEvent<HTMLButtonElement>,
-    id: string,
-  ) => {
-    if (draggingId !== id) return;
-    dragPointerYRef.current = event.clientY;
-    if (dragRafRef.current == null) {
-      dragRafRef.current = requestAnimationFrame(processDragFrame);
-    }
-  };
-
-  const endDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    if (dragRafRef.current != null) {
-      cancelAnimationFrame(dragRafRef.current);
-      dragRafRef.current = null;
-    }
-    dragPointerYRef.current = null;
-    dragPrevPointerYRef.current = null;
-    draggedIdRef.current = null;
-    setDraggingId(null);
-  };
-
-  useEffect(
-    () => () => {
-      if (dragRafRef.current != null) {
-        cancelAnimationFrame(dragRafRef.current);
-      }
-      if (flipRafRef.current != null) {
-        cancelAnimationFrame(flipRafRef.current);
-      }
-    },
-    [],
-  );
-
-
-  const setItemNode = (id: string, node: HTMLLIElement | null) => {
-    if (node) {
-      itemNodesRef.current.set(id, node);
-      return;
-    }
-    itemNodesRef.current.delete(id);
-  };
-
-  useLayoutEffect(() => {
-    if (!shouldRunFlipRef.current) return;
-    shouldRunFlipRef.current = false;
-
-    const beforeRects = beforeReorderRectsRef.current;
-    const nodes = itemNodesRef.current;
-    const animatedNodes: HTMLLIElement[] = [];
-
-    nodes.forEach((node, id) => {
-      if (id === draggedIdRef.current) return;
-      const prev = beforeRects.get(id);
-      if (!prev) return;
-      const next = node.getBoundingClientRect();
-      const deltaY = prev.top - next.top;
-      if (Math.abs(deltaY) < 0.5) return;
-
-      node.style.transition = 'none';
-      node.style.setProperty('--sdl-flip-y', `${deltaY}px`);
-      // reflow to ensure inversion transform is applied before play phase
-      node.getBoundingClientRect();
-      animatedNodes.push(node);
+    setItems((current) => {
+      const fromIndex = current.findIndex((item) => item.id === active.id);
+      const toIndex = current.findIndex((item) => item.id === over.id);
+      if (fromIndex < 0 || toIndex < 0) return current;
+      return arrayMove(current, fromIndex, toIndex);
     });
+  };
 
-    if (animatedNodes.length === 0) return;
-    if (flipRafRef.current != null) {
-      cancelAnimationFrame(flipRafRef.current);
-    }
-    flipRafRef.current = requestAnimationFrame(() => {
-      animatedNodes.forEach((node) => {
-        node.style.transition = '';
-        node.style.setProperty('--sdl-flip-y', '0px');
-      });
-    });
-  }, [items]);
-
-  useEffect(() => {
-    if (!draggingId) return;
-    const previousUserSelect = document.body.style.userSelect;
-    document.body.style.userSelect = 'none';
-    return () => {
-      document.body.style.userSelect = previousUserSelect;
-    };
-  }, [draggingId]);
-
-  const handleHandleKeyDown = (
-    event: React.KeyboardEvent<HTMLButtonElement>,
-    id: string,
-  ) => {
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      setItems((current) => swapByOffset(current, id, -1));
-    } else if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      setItems((current) => swapByOffset(current, id, 1));
-    }
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
 
   return (
@@ -241,8 +178,8 @@ function SortableDialogLab() {
       <header className="sdl-header">
         <h2>Sortable Dialog Lab</h2>
         <p>
-          Radix UI Dialog 内でハンドルをドラッグして並び替えます。
-          キーボード（↑/↓）にも対応。
+          Radix UI Dialog 内で @dnd-kit を使ってハンドルをドラッグして並び替えます。
+          キーボード（Space で掴んで ↑/↓、Enter で確定、Esc で取消）にも対応。
         </p>
       </header>
 
@@ -261,7 +198,7 @@ function SortableDialogLab() {
               <div>
                 <Dialog.Title className="sdl-title">表示順を並び替え</Dialog.Title>
                 <Dialog.Description id="sdl-description" className="sdl-description">
-                  ハンドルをドラッグするか、ハンドルにフォーカス中に ↑ / ↓ で順序を変更できます。
+                  ハンドルをドラッグするか、ハンドルにフォーカス中に Space → ↑ / ↓ → Enter で順序を変更できます。
                 </Dialog.Description>
               </div>
               <Dialog.Close asChild>
@@ -271,46 +208,39 @@ function SortableDialogLab() {
               </Dialog.Close>
             </div>
 
-            <ul
-              ref={listRef}
-              className="sdl-list"
-              data-drag-active={draggingId ? 'true' : undefined}
-              aria-label="並び替え対象リスト"
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
             >
-              {items.map((item, index) => {
-                const isDragging = draggingId === item.id;
-                return (
-                  <li
-                    key={item.id}
-                    data-item-id={item.id}
-                    data-dragging={isDragging || undefined}
-                    data-drag-state={isDragging ? 'active' : draggingId ? 'idle' : undefined}
-                    className="sdl-item"
-                    ref={(node) => setItemNode(item.id, node)}
-                  >
-                    <span className="sdl-index" aria-hidden>
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <div className="sdl-text">
-                      <span className="sdl-label">{item.label}</span>
-                      <span className="sdl-hint">{item.hint}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="sdl-handle"
-                      aria-label={`${item.label} を並び替え`}
-                      onPointerDown={(event) => handlePointerDown(event, item.id)}
-                      onPointerMove={(event) => handlePointerMove(event, item.id)}
-                      onPointerUp={endDrag}
-                      onPointerCancel={endDrag}
-                      onKeyDown={(event) => handleHandleKeyDown(event, item.id)}
-                    >
-                      <DragHandleDots2Icon aria-hidden />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+              <SortableContext
+                items={itemIds}
+                strategy={verticalListSortingStrategy}
+              >
+                <ul
+                  className="sdl-list"
+                  data-drag-active={activeId ? 'true' : undefined}
+                  aria-label="並び替え対象リスト"
+                >
+                  {items.map((item, index) => (
+                    <SortableRow
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      isAnyDragging={activeId !== null}
+                    />
+                  ))}
+                </ul>
+              </SortableContext>
+
+              <DragOverlay>
+                {activeItem ? (
+                  <DragPreview item={activeItem} index={activeIndex} />
+                ) : null}
+              </DragOverlay>
+            </DndContext>
 
             <footer className="sdl-actions">
               <button

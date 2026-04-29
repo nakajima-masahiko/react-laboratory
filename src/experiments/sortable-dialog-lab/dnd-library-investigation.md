@@ -1,33 +1,47 @@
-# dnd ライブラリ導入調査メモ（更新: 2026-04-26）
+# dnd ライブラリ導入記録（更新: 2026-04-29）
 
-## ユーザー課題
-`src/experiments/sortable-dialog-lab` の並び替え UI を、より滑らかなドラッグ体験に改善したい。
+## 経緯
+- 当初は npm の egress 制限で `@dnd-kit/*` の追加が `E403 Forbidden` で失敗していた。
+- 2026-04-29 時点で再試行したところインストール可能になっていたため、`sortable-dialog-lab`
+  をネイティブ Pointer Events 実装から `@dnd-kit` ベースの実装に置き換えた。
 
-## 再調査で実行したコマンド
+## 採用パッケージ
 ```bash
 npm i @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
-npm i sortablejs react-sortablejs
 ```
+- `@dnd-kit/core`: `DndContext` / `DragOverlay` / `PointerSensor` / `KeyboardSensor`
+- `@dnd-kit/sortable`: `SortableContext` / `useSortable` / `arrayMove` /
+  `verticalListSortingStrategy` / `sortableKeyboardCoordinates`
+- `@dnd-kit/utilities`: `CSS.Transform.toString` でインライン transform を生成
 
-## 調査結果
-- 両コマンドとも `E403 403 Forbidden - GET https://registry.npmjs.org/...` で失敗。
-- 現在の環境では、新規 npm パッケージ追加自体がセキュリティポリシーで制限されている可能性が高い。
-- したがって、**現時点ではライブラリ導入によるドラッグ体験改善は実行不可**。
+## 設計上のポイント
+1. **センサー構成**
+   - `PointerSensor` には `activationConstraint: { distance: 4 }` を指定。
+     ハンドルがボタンとしてフォーカス可能なまま、4px 以上のドラッグでだけ並び替えが開始される。
+   - `KeyboardSensor` に `sortableKeyboardCoordinates` を渡すことで、
+     `Space` で掴む → `↑/↓` で移動 → `Enter` で確定 / `Esc` で取消 のフローを得る。
+2. **レイアウト**
+   - 各行の transform は `useSortable` の戻り値からインラインで適用するため、
+     旧実装の手書き FLIP（`--sdl-flip-y` / `requestAnimationFrame`）は撤去。
+   - `transition` も `useSortable` から提供されるため CSS 側では transform 系を持たない。
+3. **DragOverlay**
+   - ドラッグ中のプレビューは `DragOverlay` で描画し、元の行は半透明＋破線で「掴まれている穴」を表現。
+   - プレビュー側は `data-drag-overlay` 属性で別系統のスタイルを当てる。
+4. **アクセシビリティ**
+   - `useSortable` の `attributes` / `listeners` をハンドル `<button>` に展開しているので、
+     `aria-roledescription` 等の必要属性は dnd-kit が付与する。
 
-## いま取れる改善方針（Plan）
-1. 既存のネイティブ Pointer Events 実装を維持したまま、操作感を改善。
-   - `requestAnimationFrame` を使って並び替え計算を間引きし、ガタつきを減らす。
-   - ドラッグ中のプレビュー表現（透明度・影・スケール）を調整して「掴んでいる感」を強化。
-2. レンダリング負荷の低減。
-   - `findItemIdAt` の呼び出し頻度を制御し、不要な `setItems` を抑制。
-3. ライブラリ導入の再開条件を明文化。
-   - npm allowlist/egress policy が更新され次第、`dnd-kit` を第一候補として再検証。
+## 旧実装からの差分メモ
+- 削除した手書きロジック
+  - `findSwapTargetByMidline` / `processDragFrame` などの中央線判定
+  - `useLayoutEffect` ベースの FLIP アニメーション
+  - `pointer capture` 周りの手動管理
+  - `swapByOffset` を使った `↑/↓` キーハンドラ（`KeyboardSensor` で代替）
+- 残した責務
+  - Radix Dialog 内に閉じ込めた UI 構造
+  - 「現在の順序」プレビューと初期化ボタン
 
-## ライブラリ導入再開時の具体ステップ
-1. `npm i @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities` を再実行。
-2. `PointerSensor` + `KeyboardSensor` + `sortableKeyboardCoordinates` を構成。
-3. `DragOverlay` を使ってドラッグ中の視覚追従を改善。
-4. 現行のキーボード並び替え（↑/↓）を dnd-kit のアクセシビリティ API に統合。
-
-## 補足
-過去の調査時点でも dnd-kit の導入は失敗しており、今回も同様の制約が継続している。
+## 今後の改善余地
+- モディファイア（`@dnd-kit/modifiers`）を入れると、ドラッグ軸を縦に固定したり
+  リスト境界を超えたドラッグを抑制できる。挙動を厳密にしたくなったら追加する。
+- `announcements` をカスタマイズすればスクリーンリーダー読み上げを日本語化できる。
