@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { XAxis, YAxis } from '../chart/axes';
 import { sanitizeStackedValue } from '../chart/sanitize';
 import { buildScales } from '../chart/scales';
-import type { StackedBarChartTheme, StackedDataPoint, StackedSeries, ValueFormatter } from '../types';
+import type { StackedBarChartTheme, StackedDataPoint, StackedSeries, TooltipTotalMode, ValueFormatter } from '../types';
 import { ChartTooltip } from './ChartTooltip';
 
 const MARGIN = { top: 8, right: 24, bottom: 32, left: 56 } as const;
@@ -24,6 +24,9 @@ interface StackedBarChartProps<Key extends string> {
   height: number;
   /** クリックでツールチップを固定する機能を有効にする */
   pinnableTooltip: boolean;
+  showTooltipTotal: boolean;
+  tooltipTotalLabel: string;
+  tooltipTotalMode: TooltipTotalMode;
   ariaLabel: string;
   pinnedBadgeLabel: string;
   pinnedHintLabel: string;
@@ -38,6 +41,9 @@ export function StackedBarChart<Key extends string>({
   formatValue,
   height,
   pinnableTooltip,
+  showTooltipTotal,
+  tooltipTotalLabel,
+  tooltipTotalMode,
   ariaLabel,
   pinnedBadgeLabel,
   pinnedHintLabel,
@@ -371,6 +377,9 @@ export function StackedBarChart<Key extends string>({
             tooltipBg={theme.tooltipBg}
             tooltipBorder={theme.tooltipBorder}
             formatValue={formatValue}
+            showTooltipTotal={showTooltipTotal}
+            tooltipTotalLabel={tooltipTotalLabel}
+            tooltipTotalMode={tooltipTotalMode}
             pinnedBadgeLabel={pinnedBadgeLabel}
             pinnedHintLabel={pinnedHintLabel}
           />

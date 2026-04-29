@@ -121,11 +121,24 @@ interface StackedBarChartTheme {
 | `formatValue` | `ValueFormatter` | No | `d3-format(',')` | 軸目盛・ツールチップで使う数値フォーマッタ |
 | `chartHeight` | `number` | No | `460` | チャート高さ（CSS px） |
 | `pinnableTooltip` | `boolean` | No | `false` | クリックでツールチップを固定する機能 |
+| `showTooltipTotal` | `boolean` | No | `false` | ツールチップに合計値を表示するか |
+| `tooltipTotalLabel` | `string` | No | `'合計'` | 合計値行のラベル |
+| `tooltipTotalMode` | `'visible' \| 'all'` | No | `'visible'` | 合計計算対象（`visible`: 表示中系列のみ / `all`: 非表示系列も含む） |
 | `legendActions` | `ReactNode` | No | - | 凡例の右隣に並べる任意 UI |
 | `ariaLabels` | `StackedBarWindowAriaLabels` | No | 日本語既定値 | a11y / i18n 用ラベル |
 | `pinnedHintLabel` | `string` | No | `"クリックで固定を解除"` | ピン留め時の解除ヒント文 |
 
 `startIndex` は内部で `[0, max(0, data.length - windowSize)]` に clamp される。`windowSize` も `[1, data.length]` に clamp。
+
+
+### 4.6 ツールチップ合計値オプション
+
+- `showTooltipTotal` が `true` のときのみ、ツールチップのタイトル直下に合計値行を表示する。
+- `tooltipTotalLabel` は合計値行のラベル文字列（既定値: `合計`）。
+- `tooltipTotalMode` は合計値の計算対象を制御する（既定値: `visible`）。
+  - `visible`: `hiddenSeriesKeys` に含まれない表示中系列のみ合計する。
+  - `all`: 非表示系列も含めて全系列を合計する。
+- 合計値は `sanitizeStackedValue` 後の値を使って計算する。
 
 ### 4.5 ARIA ラベル既定値
 

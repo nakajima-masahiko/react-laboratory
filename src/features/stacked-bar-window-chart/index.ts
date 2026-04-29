@@ -7,5 +7,6 @@ export type {
   StackedBarWindowAriaLabels,
   StackedDataPoint,
   StackedSeries,
+  TooltipTotalMode,
   ValueFormatter,
 } from './types';
