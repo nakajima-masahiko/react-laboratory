@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { sanitizeStackedValue } from '../chart/sanitize';
 import type { StackedDataPoint, StackedSeries, ValueFormatter } from '../types';
 
 interface ChartTooltipProps<Key extends string> {
@@ -55,7 +56,7 @@ export function ChartTooltip<Key extends string>({
                   aria-hidden="true"
                 />
                 <span className="sbwc-tooltip-name">{item.label}</span>
-                <span className="sbwc-tooltip-value">{formatValue(row.values[item.key])}</span>
+                <span className="sbwc-tooltip-value">{formatValue(sanitizeStackedValue(row.values[item.key]))}</span>
               </li>
             );
           })}

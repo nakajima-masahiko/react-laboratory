@@ -17,8 +17,10 @@ export interface StackedDataPoint<Key extends string = string> {
   key: string;
   axisLabel: string;
   tooltipLabel: string;
-  values: Record<Key, number>;
+  values: Record<Key, number | null | undefined>;
 }
+
+export type StackedBarAnimationMode = 'none' | 'initial' | 'data-change' | 'always';
 
 /**
  * チャートが必要とする色トークン一式。consumer 側で複数テーマを定義し props 経由で差し替える。
@@ -41,7 +43,7 @@ export interface StackedBarChartTheme {
 export type ValueFormatter = (value: number) => string;
 
 /**
- * a11y / i18n のためのラベル差し替え。未指定キーは英語の既定値が使われる。
+ * a11y / i18n のためのラベル差し替え。未指定キーは既定値が使われる。
  */
 export interface StackedBarWindowAriaLabels {
   chart?: string;
