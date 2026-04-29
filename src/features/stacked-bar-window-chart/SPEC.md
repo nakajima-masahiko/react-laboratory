@@ -61,13 +61,13 @@ export interface StackedBarChartTheme {
 }
 
 export interface StackedBarWindowAriaLabels {
-  chart: string;
-  legend: string;
-  slider: string;
-  prevButton: string;
-  nextButton: string;
-  windowControls: string;
-  pinnedBadge: string;
+  chart?: string;
+  legend?: string;
+  slider?: string;
+  prevButton?: string;
+  nextButton?: string;
+  windowControls?: string;
+  pinnedBadge?: string;
 }
 
 export type TooltipTotalMode = 'visible' | 'all';
@@ -90,7 +90,7 @@ export interface StackedBarWindowChartProps<Key extends string = string> {
   tooltipTotalLabel?: string;
   tooltipTotalMode?: TooltipTotalMode;
   legendActions?: ReactNode;
-  ariaLabels?: Partial<StackedBarWindowAriaLabels>;
+  ariaLabels?: StackedBarWindowAriaLabels;
   pinnedHintLabel?: string;
   emptyMessage?: string;
 }
@@ -119,7 +119,7 @@ export interface StackedBarWindowChartProps<Key extends string = string> {
 | `tooltipTotalLabel` | `string` | 任意 | `'合計'` | 合計行ラベル | 合計値の前に表示。 |
 | `tooltipTotalMode` | `TooltipTotalMode` | 任意 | `'visible'` | 合計計算対象制御 | `visible`/`all` の挙動を厳守。 |
 | `legendActions` | `ReactNode` | 任意 | `undefined` | 凡例右側拡張領域 | 任意操作 UI を差し込む。 |
-| `ariaLabels` | `Partial<StackedBarWindowAriaLabels>` | 任意 | 日本語既定値 | a11y 文言上書き | 未指定項目は既定値で補完。 |
+| `ariaLabels` | `StackedBarWindowAriaLabels` | 任意 | 日本語既定値 | a11y 文言上書き | 未指定項目は既定値で補完。 |
 | `pinnedHintLabel` | `string` | 任意 | `'クリックで固定を解除'` | pinned 時ヒント | tooltip 内表示。 |
 | `emptyMessage` | `string` | 任意 | `'表示できるデータがありません'` | 空状態文言 | `role=status` 領域で表示。 |
 
@@ -378,3 +378,182 @@ const tooltipTotal = showTooltipTotal
 - 合計値を常時表示にしない。
 - ドメイン固有語彙（売上、金額、通貨など）を feature 内に入れない。
 
+
+---
+
+## 15. 利用例
+
+```tsx
+import { useState } from 'react';
+import { StackedBarWindowChart } from '@/features/stacked-bar-window-chart';
+import type { StackedDataPoint, StackedSeries } from '@/features/stacked-bar-window-chart';
+
+type SeriesKey = 'alpha' | 'beta' | 'gamma';
+
+const series: StackedSeries<SeriesKey>[] = [
+  { key: 'alpha', label: 'Alpha', color: '#4e79a7' },
+  { key: 'beta', label: 'Beta', color: '#f28e2b' },
+  { key: 'gamma', label: 'Gamma', color: '#59a14f' },
+];
+
+const data: StackedDataPoint<SeriesKey>[] = [
+  {
+    key: '2026-01',
+    axisLabel: '1月',
+    tooltipLabel: '2026年1月',
+    values: { alpha: 30, beta: 12, gamma: 8 },
+  },
+  {
+    key: '2026-02',
+    axisLabel: '2月',
+    tooltipLabel: '2026年2月',
+    values: { alpha: 28, beta: 15, gamma: 10 },
+  },
+];
+
+const theme = {
+  background: 'transparent',
+  gridColor: 'var(--border)',
+  tooltipBg: 'var(--bg)',
+  tooltipBorder: 'var(--border)',
+};
+
+export function Demo() {
+  const [hidden, setHidden] = useState<Set<SeriesKey>>(new Set());
+  const [startIndex, setStartIndex] = useState(0);
+
+  const handleToggleSeries = (key: SeriesKey) => {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  };
+
+  return (
+    <StackedBarWindowChart
+      data={data}
+      series={series}
+      hiddenSeriesKeys={hidden}
+      onToggleSeries={handleToggleSeries}
+      windowSize={6}
+      startIndex={startIndex}
+      onStartIndexChange={setStartIndex}
+      theme={theme}
+      showTooltipTotal
+      tooltipTotalMode="visible"
+      tooltipTotalLabel="合計"
+      pinnableTooltip
+    />
+  );
+}
+```
+
+- ドメイン固有語彙は呼び出し側で持つ。
+- feature 内には売上、金額、通貨などの語を入れない。
+- 表示値の単位やフォーマットは `formatValue` で注入する。
+
+---
+
+## 16. 依存パッケージ
+
+| パッケージ | バージョン目安 | 用途 |
+|---|---|---|
+| `react` / `react-dom` | `^19.x` | コンポーネント・hooks |
+| `d3-array` | `^3.x` | max / 集計補助 |
+| `d3-format` | `^3.x` | 既定の数値フォーマッタ |
+| `d3-scale` | `^4.x` | scaleBand / scaleLinear |
+| `@radix-ui/react-slider` | `^1.x` | ウィンドウ移動スライダー |
+
+- `@types/d3-*` が必要になる場合がある。
+- この機能は Recharts に依存しない。
+- SVG + d3-scale + Radix Slider の構成である。
+
+---
+
+## 17. レイアウト図
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│ Legend: 系列の表示切り替え + legendActions                │
+├──────────────────────────────────────────────────────────┤
+│ SVG Chart: 積み上げ棒 + X/Y軸 + グリッド + Tooltip         │
+├──────────────────────────────────────────────────────────┤
+│ Window Controls: ◀ rangeLabel + Slider ▶                 │
+└──────────────────────────────────────────────────────────┘
+```
+
+- Legend は `ChartLegend`。
+- SVG Chart は `StackedBarChart`。
+- Window Controls は `WindowSlider`。
+- `StackedBarWindowChart` がこれらを縦に合成する。
+
+---
+
+## 18. テーマ設計
+
+- `theme` は背景、グリッド、tooltip 背景、tooltip 枠線のみを持つ。
+- 系列色は `theme` ではなく `series[i].color` が持つ。
+- 色テーマと系列定義の責務を分ける。
+- CSS 変数を使うことでライト/ダークテーマに対応しやすい。
+- `theme.background='transparent'` で親カード背景を透過できる。
+
+```ts
+const lightTheme = {
+  background: 'transparent',
+  gridColor: 'var(--border)',
+  tooltipBg: 'var(--bg)',
+  tooltipBorder: 'var(--border)',
+};
+
+const darkTheme = {
+  background: 'transparent',
+  gridColor: 'var(--border)',
+  tooltipBg: 'var(--bg)',
+  tooltipBorder: 'var(--border)',
+};
+```
+
+`series.color` は consumer 側でテーマに応じて差し替えてよい。  
+ただし feature 内では色パレットを固定しない。
+
+---
+
+## 19. 他リポジトリへの移植手順
+
+1. `src/features/stacked-bar-window-chart/` 一式をコピーする。
+2. `index.ts` を import できるようにパス設定を確認する。
+3. CSS カスタムプロパティを親プロジェクトで定義する。
+4. 必要な依存パッケージをインストールする。
+5. 呼び出し側で `series / data / theme / callbacks` を用意する。
+6. build する。
+7. iPad / Safari と左右端 tooltip を確認する。
+
+```css
+:root {
+  --text: #333;
+  --text-h: #111;
+  --bg: #fff;
+  --border: #e0e0e0;
+  --accent: #646cff;
+}
+```
+
+---
+
+## 20. 将来拡張ポイント
+
+| 拡張 | 実装方針 |
+|---|---|
+| 値ラベル表示 | 各セグメント中央、または棒上端に `<text>` を追加する。 |
+| 構成比表示 | tooltip 行に percentage を追加する。既定OFFにする。 |
+| formatter分離 | `formatValue` を axis / tooltip / total 別に分ける。 |
+| 折れ線併用 | `stackSegments` 計算後に `<path>` renderer を追加する。 |
+| legendPosition | `top` / `bottom` / `none` を選べるようにする。 |
+| 範囲スライダー | Radix Slider を2 thumb化して start/end を扱う。 |
+| 上下方向 tooltip placement | 上に出せない場合だけ下に出す。 |
+| compact layout | chartWidth に応じて margin / height / label密度を切り替える。 |
+
+- 拡張は既定OFFを基本とする。
+- 汎用性を壊すドメイン固有機能は入れない。
+- 既存の iPad / Safari 対応、tooltip clamp、arrowX 補正を壊さない。
