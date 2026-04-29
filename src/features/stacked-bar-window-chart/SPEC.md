@@ -271,6 +271,11 @@ visibleSeries.forEach((item, seriesIndex) => {
 ### 7.7 ツールチップ
 
 - 棒上端中央に吸着（`.sbwc-tooltip-positioner` を `transform: translateX(-50%) translateY(-100%)`）
+- ツールチップ本体の横位置はチャート幅内に clamp する（`padding=8px`、実測 `tooltipWidth` ベース）
+- 矢印の横位置は CSS 変数 `--sbwc-tooltip-arrow-x` で補正し、常に棒中心方向を指す
+  - 通常時は中央下付近
+  - 左端付近では左下寄り
+  - 右端付近では右下寄り
 - 状態: `hoverIndex` / `pinnedIndex`
 - 派生: `activeIndex = hoverIndex ?? pinnedIndex`、`isPinned = pinnedIndex !== null && hoverIndex === null`
 - インタラクション:
@@ -284,6 +289,9 @@ visibleSeries.forEach((item, seriesIndex) => {
   | クリック（別列） | `pinnedIndex` を移動（`pinnableTooltip=true` 時） |
   | `animationKey` 変化 | render 中に検知して両方クリア |
   | チャート外 `pointerdown` | `document` リスナーで両方クリア |
+
+- hover 判定は iPad / Safari 互換性を優先し、`clientX + getBoundingClientRect()` を維持する
+- `offsetX` は使用しない
 
 ### 7.8 `animationKey` による状態リセット
 
@@ -375,7 +383,7 @@ CSS 変数 `--bar-delay`（棒アニメ遅延）、`--sbwc-tooltip-fill` / `--sb
 
 - `ResizeObserver` で幅を購読、`Math.floor` で整数化してから `setState`
 - 積み上げセグメント・スケールは `useMemo` でメモ化（依存: `chartData`, `visibleSeries`, `innerWidth`, `innerHeight`）
-- ホバー判定は `MouseEvent.clientX` から線形探索（O(N)、N=windowSize）。windowSize <= 100 想定で十分
+- ホバー判定は `clientX + getBoundingClientRect()` から線形探索（O(N)、N=windowSize）。iPad / Safari 互換性のため `offsetX` は使わない
 
 ---
 
