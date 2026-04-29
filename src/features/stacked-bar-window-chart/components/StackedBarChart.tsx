@@ -244,6 +244,7 @@ export function StackedBarChart<Key extends string>({
               innerHeight={innerHeight}
               chartData={chartData}
               gridColor={theme.gridColor}
+              innerWidth={innerWidth}
             />
 
             {pinnedIndex !== null && hoverIndex !== pinnedIndex && chartData[pinnedIndex] && (
