@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
   CheckIcon,
@@ -235,11 +236,14 @@ function SortableDialogLab() {
                 </ul>
               </SortableContext>
 
-              <DragOverlay>
-                {activeItem ? (
-                  <DragPreview item={activeItem} index={activeIndex} />
-                ) : null}
-              </DragOverlay>
+              {createPortal(
+                <DragOverlay>
+                  {activeItem ? (
+                    <DragPreview item={activeItem} index={activeIndex} />
+                  ) : null}
+                </DragOverlay>,
+                document.body,
+              )}
             </DndContext>
 
             <footer className="sdl-actions">
