@@ -105,4 +105,10 @@ export const experiments: ExperimentEntry[] = [
     description: 'Radix UI Checkbox を使った本番デプロイ前の確認チェックリスト 30 項目版',
     component: lazy(() => import('./react-tomcat-checklist')),
   },
+  {
+    id: 'sma-wasm-benchmark',
+    title: 'SMA WASM Benchmark',
+    description: 'JavaScript 版と Rust/WASM 版の単純移動平均（SMA）計算速度を比較する CPU 集約処理ベンチマーク',
+    component: lazy(() => import('./sma-wasm-benchmark')),
+  },
 ];

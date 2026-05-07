@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:wasm": "cargo build --manifest-path wasm/sma-benchmark/Cargo.toml --release --target wasm32-unknown-unknown && wasm-bindgen --target web --no-typescript --out-dir src/experiments/sma-wasm-benchmark/wasm-pkg --out-name sma_benchmark wasm/sma-benchmark/target/wasm32-unknown-unknown/release/sma_benchmark.wasm",
+    "build:wasm:check": "cargo check --manifest-path wasm/sma-benchmark/Cargo.toml --target wasm32-unknown-unknown"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
