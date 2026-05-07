@@ -1,0 +1,18 @@
+[package]
+name = "sma-benchmark"
+version = "0.1.0"
+edition = "2021"
+description = "Simple Moving Average (SMA) benchmark kernel for the React laboratory experiment."
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "=0.2.99"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
