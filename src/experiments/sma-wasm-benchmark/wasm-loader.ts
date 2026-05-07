@@ -1,8 +1,17 @@
-import init, { ready, sma_f64 } from './wasm-pkg/sma_benchmark.js';
+import init, {
+  multi_indicators_f64,
+  multi_indicators_overhead_f64,
+  num_indicator_series,
+  ready,
+  sma_f64,
+} from './wasm-pkg/sma_benchmark.js';
 import wasmUrl from './wasm-pkg/sma_benchmark_bg.wasm?url';
 
 export interface WasmModule {
   smaF64(prices: Float64Array, window: number): Float64Array;
+  multiIndicatorsF64(prices: Float64Array): Float64Array;
+  multiIndicatorsOverheadF64(prices: Float64Array): Float64Array;
+  numIndicatorSeries(): number;
   ready(): boolean;
 }
 
@@ -41,6 +50,9 @@ export function loadWasm(): Promise<LoadResult> {
 
     const module: WasmModule = {
       smaF64: sma_f64,
+      multiIndicatorsF64: multi_indicators_f64,
+      multiIndicatorsOverheadF64: multi_indicators_overhead_f64,
+      numIndicatorSeries: num_indicator_series,
       ready,
     };
 

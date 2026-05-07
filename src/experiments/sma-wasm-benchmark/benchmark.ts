@@ -1,7 +1,12 @@
 import { generatePrices } from './data-generator';
 import { smaJs } from './sma-js';
 import { loadWasm } from './wasm-loader';
-import type { BenchmarkConfig, BenchmarkRun, Engine } from './types';
+import type {
+  BenchmarkConfig,
+  BenchmarkRun,
+  Engine,
+  PreparedData,
+} from './types';
 
 /**
  * Yield to the browser between heavy steps so the main thread can paint and the
@@ -84,12 +89,9 @@ export interface RunBenchmarkOptions {
   onPhase?: RunSingleEngineOptions['onPhase'];
 }
 
-export interface PreparedData {
-  prices: Float64Array;
-  generationMs: number;
-}
-
-export function prepareData(config: BenchmarkConfig): PreparedData {
+export function prepareData(
+  config: Pick<BenchmarkConfig, 'size' | 'seed'>,
+): PreparedData {
   const start = performance.now();
   const prices = generatePrices({ count: config.size, seed: config.seed });
   const generationMs = performance.now() - start;

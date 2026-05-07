@@ -51,6 +51,49 @@ export function ready() {
     return ret !== 0;
 }
 
+/**
+ * Compute 13 indicator series for the same `prices` array in a single
+ * JS↔WASM crossing. Returns a flat `Vec<f64>` of length `prices.len() *
+ * NUM_SERIES`; the JS side splits it into 13 typed-array subviews.
+ *
+ * The series order matches the `NUM_SERIES` doc above. Each block has length
+ * `prices.len()` so callers can compute `series_k = out[k*n .. (k+1)*n]`.
+ * @param {Float64Array} prices
+ * @returns {Float64Array}
+ */
+export function multi_indicators_f64(prices) {
+    const ptr0 = passArrayF64ToWasm0(prices, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.multi_indicators_f64(ptr0, len0);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+
+/**
+ * @returns {number}
+ */
+export function num_indicator_series() {
+    const ret = wasm.num_indicator_series();
+    return ret >>> 0;
+}
+
+/**
+ * Boundary-cost probe: same input / same output size as
+ * `multi_indicators_f64`, but performs no computation. Subtracting its time
+ * from the real call approximates pure compute time.
+ * @param {Float64Array} prices
+ * @returns {Float64Array}
+ */
+export function multi_indicators_overhead_f64(prices) {
+    const ptr0 = passArrayF64ToWasm0(prices, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.multi_indicators_overhead_f64(ptr0, len0);
+    var v2 = getArrayF64FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 8, 8);
+    return v2;
+}
+
 async function __wbg_load(module, imports) {
     if (typeof Response === 'function' && module instanceof Response) {
         if (typeof WebAssembly.instantiateStreaming === 'function') {
