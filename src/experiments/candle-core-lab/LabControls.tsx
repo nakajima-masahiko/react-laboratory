@@ -60,8 +60,8 @@ export function LabControls(props: LabControlsProps) {
         <button type="button" onClick={() => props.chartRef.current?.fitContent()}>Fit Content</button>
         <button type="button" onClick={() => props.chartRef.current?.scrollBy(-100)}>Scroll left</button>
         <button type="button" onClick={() => props.chartRef.current?.scrollBy(100)}>Scroll right</button>
-        <button type="button" onClick={() => props.chartRef.current?.zoom(1.25)}>Zoom in</button>
-        <button type="button" onClick={() => props.chartRef.current?.zoom(0.8)}>Zoom out</button>
+        <button type="button" onClick={() => props.chartRef.current?.zoomIn()}>Zoom in</button>
+        <button type="button" onClick={() => props.chartRef.current?.zoomOut()}>Zoom out</button>
         <button type="button" onClick={props.appendCandle}>Append one candle</button>
         <button type="button" onClick={() => props.sendTick(false)}>Same-bucket tick</button>
         <button type="button" onClick={() => props.sendTick(true)}>New-bucket tick</button>
