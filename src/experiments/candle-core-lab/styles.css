@@ -9,7 +9,7 @@
 .ccl-scenarios h3, .ccl-panel h3, .ccl-diagnostics h3 { margin: 0 0 9px; font-size: .82rem; }
 .ccl-scenarios p { margin: 9px 0 0; color: var(--text); opacity: .8; font-size: .78rem; }
 .ccl-button-row { display: flex; flex-wrap: wrap; gap: 7px; }
-.ccl-lab button, .ccl-lab select { min-height: 34px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-h); font: inherit; font-size: .76rem; font-weight: 650; }
+.ccl-lab button, .ccl-lab select, .ccl-lab input { min-height: 34px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text-h); font: inherit; font-size: .76rem; font-weight: 650; }
 .ccl-lab button { cursor: pointer; }
 .ccl-lab button:hover:not(:disabled), .ccl-lab select:hover { border-color: var(--accent); }
 .ccl-lab button:disabled { cursor: wait; opacity: .5; }
@@ -20,6 +20,9 @@
 .ccl-panel h3 { flex-basis: 100%; }
 .ccl-field { display: flex; align-items: center; gap: 7px; font-size: .76rem; }
 .ccl-operations, .ccl-indicators { grid-column: 1 / -1; }
+.ccl-control-group { display: inline-flex; flex-wrap: wrap; gap: 7px; }
+.ccl-guidance { flex-basis: 100%; margin: 2px 0 0; color: var(--text); opacity: .8; font-size: .72rem; line-height: 1.45; }
+.ccl-field input { width: 92px; }
 .ccl-indicators { display: grid; grid-template-columns: 1fr 1fr; }
 .ccl-indicators h3 { grid-column: 1 / -1; }
 

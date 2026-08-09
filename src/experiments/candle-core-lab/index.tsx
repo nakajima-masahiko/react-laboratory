@@ -20,6 +20,9 @@ function CandleCoreLab() {
           <button type="button" onClick={() => void lab.runScenario('c')} disabled={lab.isBusy}>C · realtime stress</button>
           <button type="button" onClick={() => void lab.runScenario('d-base')} disabled={lab.isBusy}>D1 · Base only</button>
           <button type="button" onClick={() => void lab.runScenario('d-all')} disabled={lab.isBusy}>D2 · All visible</button>
+          <button type="button" onClick={() => void lab.runScenario('e')} disabled={lab.isBusy}>E · 1M Navigator</button>
+          <button type="button" onClick={() => void lab.runScenario('f')} disabled={lab.isBusy}>F · Inspect</button>
+          <button type="button" onClick={() => void lab.runScenario('g')} disabled={lab.isBusy}>G · Range sync</button>
         </div>
         <p>{lab.scenarioNote}</p>
       </section>
