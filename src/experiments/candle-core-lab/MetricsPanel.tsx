@@ -14,7 +14,7 @@ export function MetricsPanel({ datasetSize, metrics, visible }: MetricsPanelProp
   const renderStats = metrics.renderStats ? Object.entries(metrics.renderStats) : [];
   const range = metrics.visibleRange;
   const formatTime = (time: number | undefined) => time == null ? '—' : new Date(time).toISOString();
-  const visibleBars = range ? Math.max(1, Math.round((range.to - range.from) / 60_000) + 1) : null;
+  const visibleBars = range ? Math.max(1, Math.round((range.end - range.start) / 60_000) + 1) : null;
   return (
     <>
       <section className="ccl-metrics" aria-label="Performance metrics">
@@ -27,8 +27,8 @@ export function MetricsPanel({ datasetSize, metrics, visible }: MetricsPanelProp
         <Metric label="Effective ticks/sec" value={formatMetric(metrics.effectiveTicksPerSecond, 0)} />
         <Metric label="Bars" value={metrics.barCount.toLocaleString()} />
         <Metric label="Latest spread" value={formatMetric(metrics.spread, 4)} />
-        <Metric label="Range start" value={formatTime(range?.from)} />
-        <Metric label="Range end" value={formatTime(range?.to)} />
+        <Metric label="Range start" value={formatTime(range?.start)} />
+        <Metric label="Range end" value={formatTime(range?.end)} />
         <Metric label="Approx. visible bars" value={visibleBars?.toLocaleString() ?? '—'} />
       </section>
       <section className="ccl-diagnostics" aria-labelledby="ccl-diagnostics-heading">
