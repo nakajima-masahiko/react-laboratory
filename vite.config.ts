@@ -10,10 +10,9 @@ export default defineConfig({
   plugins: [react()],
   base: '/react-laboratory/',
   resolve: {
-    // candle-core is consumed from GitHub source (dist may be absent).
-    // Point the package entry at its TypeScript source for Vite.
     alias: {
-      'candle-core': path.resolve(__dirname, 'node_modules/candle-core/src/index.ts'),
+      // Prefer vendored TypeScript sources (CI / local sync).
+      'candle-core': path.resolve(__dirname, 'vendor/candle-core/src/index.ts'),
     },
   },
   optimizeDeps: {

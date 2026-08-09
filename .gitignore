@@ -12,10 +12,6 @@ dist
 dist-ssr
 *.local
 
-# Rust / WASM build artifacts (the regenerated wasm-pkg/ output is checked in)
-wasm/**/target/
-wasm/**/Cargo.lock
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -26,3 +22,7 @@ wasm/**/Cargo.lock
 *.njsproj
 *.sln
 *.sw?
+
+# candle-core sync scratch / checked-out sources (keep package.json + README)
+.tmp-candle-core/
+vendor/candle-core/src/

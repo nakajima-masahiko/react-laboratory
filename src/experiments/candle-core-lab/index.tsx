@@ -225,9 +225,9 @@ function CandleCoreLab() {
       </div>
 
       <div className="ccl-note">
-        依存: <code>candle-core</code>（GitHub: <code>nakajima-masahiko/candle-core</code>）。
-        初回は <code>npm install</code> が必要です。private リポジトリの場合は GitHub 認証付きで取得してください。
-        Vite は <code>candle-core/src</code> を直接解決します。
+        GitHub Pages では CI が <code>vendor/candle-core</code> にソースを同期してビルドします。
+        ローカルでは <code>npm run sync:candle-core</code> のあと <code>npm run dev</code> を実行してください。
+        公開 URL: <code>/react-laboratory/#/experiment/candle-core-lab</code>
       </div>
     </div>
   );
