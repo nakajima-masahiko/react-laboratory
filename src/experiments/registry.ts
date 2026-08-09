@@ -51,6 +51,13 @@ export const experiments: ExperimentEntry[] = [
     component: lazy(() => import('./fx-chart-lab')),
   },
   {
+    id: 'candle-core-lab',
+    title: 'CandleCore Lab',
+    description:
+      'candle-core（Canvas / TypeScript）で USD/JPY ダミーローソク足を描画し、指標トグルとリアルタイム tick を試す実験',
+    component: lazy(() => import('./candle-core-lab')),
+  },
+  {
     id: 'timer-progress-toast',
     title: 'Timer Progress Toast',
     description: 'Radix UI Progress でプログレスバー付きタイマーを表示し、終了を Toast で通知する実験',

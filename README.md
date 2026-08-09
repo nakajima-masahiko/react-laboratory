@@ -12,6 +12,7 @@ React のさまざまなパターンやライブラリを試す実験場です�
 | **Paginated List Laboratory** | 固定サイズ・ページサイズ切り替え・検索＆ソート付きのページング一覧表 |
 | **Toggle Shape Drawing** | Radix UI Toggle Group で丸・三角・四角を選んでキャンバスに描画する実験 |
 | **FX Chart Lab** | Recharts で FX ダミーデータをローソク足 / ライン切り替え、3カラーテーマ対応で描画する実験 |
+| **CandleCore Lab** | `candle-core`（Canvas / TypeScript）で USD/JPY ダミーローソク足を描画し、指標トグルとリアルタイム tick を試す実験 |
 | **Timer Progress Toast** | Radix UI Progress でプログレスバー付きタイマーを表示し、終了を Toast で通知する実験 |
 | **Toast Notifications** | 登録フォームの成功・入力エラー・通信エラーに加え、お知らせや警告など代表的なトースト通知を試す実験 |
 | **SMA WASM Benchmark** | JavaScript 版と Rust/WASM 版の計算速度比較。単一 SMA に加え、SMA / EMA / RSI / Bollinger Bands / 移動最小最大の 13 系列を 1 回の WASM 呼び出しでまとめて計算するマルチインジケータベンチも内蔵 |
@@ -23,15 +24,19 @@ React のさまざまなパターンやライブラリを試す実験場です�
 - **React Router v7** — クライアントサイドルーティング（HashRouter）
 - **Radix UI** — アクセシブルな UI プリミティブ（Dialog / Progress / Toast / Toggle Group）
 - **Recharts** — コンポーザブルなチャートライブラリ
+- **CandleCore** — Canvas ベースの FX ローソク足チャート（GitHub 依存）
 
 ## クイックスタート
 
 ```bash
 # 前提: Node.js 20 以上、npm 10 以上
+# candle-core は private の場合 GitHub 認証が必要です
 
 npm install
 npm run dev      # http://localhost:5173/react-laboratory/ で起動
 ```
+
+CandleCore Lab は `/#/experiment/candle-core-lab` から開けます。
 
 ## スクリプト
 
@@ -60,6 +65,7 @@ react-laboratory/
 │   │   └── ExperimentCard.tsx     # ホーム画面の実験カード
 │   ├── experiments/
 │   │   ├── registry.ts            # 実験の一覧（唯一の情報源）
+│   │   ├── candle-core-lab/       # CandleCore 描画サンプル
 │   │   ├── counter/
 │   │   ├── daypicker-laboratory/
 │   │   ├── dialog-laboratory/
@@ -101,3 +107,5 @@ react-laboratory/
 
 `main` ブランチへの push をトリガーに GitHub Actions が自動でビルド・デプロイします。
 Vite の `base` は `/react-laboratory/` に設定されているため、GitHub Pages のサブパスで正しく動作します。
+
+> **Note:** CandleCore Lab は private な `candle-core` に依存します。GitHub Pages の CI でビルドする場合は、Actions に private リポジトリ読取権限（または deploy key / PAT）が必要です。
