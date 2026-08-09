@@ -24,17 +24,17 @@ export interface LabMetrics {
   setDataMs: number;
   spread: number | null;
   ticksSent: number;
-  visibleRange: { from: number; to: number } | null;
+  visibleRange: { start: number; end: number } | null;
 }
 
 const INITIAL_SIZE: DatasetSize = 180;
 const INITIAL_SEED = 7;
 const INITIAL_NAVIGATOR = { visible: true, height: 72, maxOverviewPoints: 1600 };
 
-function readVisibleRange(chart: CandleChart): { from: number; to: number } | null {
+function readVisibleRange(chart: CandleChart): { start: number; end: number } | null {
   const range = chart.getVisibleRange();
   if (!range) return null;
-  return { from: range.from, to: range.to };
+  return { start: range.start, end: range.end };
 }
 
 export function useCandleCoreLab() {
@@ -106,7 +106,7 @@ export function useCandleCoreLab() {
     const maxStart = Math.max(0, candles.length - windowSize);
     const startIndex = preset === 'first' ? 0 : preset === 'last' ? maxStart : Math.floor(maxStart / 2);
     const endIndex = Math.min(candles.length - 1, startIndex + windowSize - 1);
-    chart.setVisibleRange({ from: candles[startIndex].time, to: candles[endIndex].time });
+    chart.setVisibleRange({ start: candles[startIndex].time, end: candles[endIndex].time });
   }, []);
 
   const applyIndicatorVisibility = useCallback((next: IndicatorVisibility) => {
