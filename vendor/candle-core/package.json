@@ -1,0 +1,16 @@
+{
+  "name": "candle-core",
+  "version": "0.2.0-beta-prep",
+  "private": true,
+  "description": "Vendored / CI-checked-out snapshot entry for react-laboratory builds",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  }
+}

@@ -31,8 +31,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Sync candle-core into vendor/
+        env:
+          # PAT with read access to nakajima-masahiko/candle-core (required while private).
+          # Repository secret name: CANDLE_CORE_READ_TOKEN
+          CANDLE_CORE_READ_TOKEN: ${{ secrets.CANDLE_CORE_READ_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/sync-candle-core.mjs
+
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build
         run: npm run build
