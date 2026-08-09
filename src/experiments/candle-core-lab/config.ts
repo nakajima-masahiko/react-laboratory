@@ -2,6 +2,8 @@ export const DATASET_SIZES = [180, 10_000, 100_000, 500_000, 1_000_000] as const
 export type DatasetSize = (typeof DATASET_SIZES)[number];
 
 export type RealtimeMode = 'off' | '1' | '10' | '60';
+export type InteractionMode = 'pan' | 'inspect';
+export type RangePreset = 'first' | 'middle' | 'last';
 export type IndicatorKey = 'sma' | 'ema' | 'bollingerBands' | 'rsi' | 'macd' | 'bidAskOverlay';
 export type IndicatorPreset = 'base' | 'trend' | 'momentum' | 'all';
 export type IndicatorVisibility = Record<IndicatorKey, boolean>;

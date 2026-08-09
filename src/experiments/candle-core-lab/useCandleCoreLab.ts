@@ -6,6 +6,8 @@ import {
   type IndicatorKey,
   type IndicatorPreset,
   type IndicatorVisibility,
+  type InteractionMode,
+  type RangePreset,
   type RealtimeMode,
 } from './config';
 import { createSeededRandom, makeCandles, makeNextCandle, TIMEFRAME_MS } from './data';
@@ -22,10 +24,18 @@ export interface LabMetrics {
   setDataMs: number;
   spread: number | null;
   ticksSent: number;
+  visibleRange: { from: number; to: number } | null;
 }
 
 const INITIAL_SIZE: DatasetSize = 180;
 const INITIAL_SEED = 7;
+const INITIAL_NAVIGATOR = { visible: true, height: 72, maxOverviewPoints: 1600 };
+
+function readVisibleRange(chart: CandleChart): { from: number; to: number } | null {
+  const range = chart.getVisibleRange();
+  if (!range) return null;
+  return { from: range.from, to: range.to };
+}
 
 export function useCandleCoreLab() {
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -39,9 +49,13 @@ export function useCandleCoreLab() {
   const burstRunRef = useRef(0);
   const mountedRef = useRef(false);
   const visibilityRef = useRef<IndicatorVisibility>(INDICATOR_PRESETS.all);
+  const interactionModeRef = useRef<InteractionMode>('pan');
+  const navigatorRef = useRef(INITIAL_NAVIGATOR);
 
   const [datasetSize, setDatasetSize] = useState<DatasetSize>(INITIAL_SIZE);
   const [realtimeMode, setRealtimeMode] = useState<RealtimeMode>('off');
+  const [interactionMode, setInteractionModeState] = useState<InteractionMode>('pan');
+  const [navigator, setNavigator] = useState(INITIAL_NAVIGATOR);
   const [visible, setVisible] = useState<IndicatorVisibility>(INDICATOR_PRESETS.all);
   const [isBusy, setIsBusy] = useState(false);
   const [scenarioNote, setScenarioNote] = useState('Choose a scenario or configure the console manually.');
@@ -55,7 +69,45 @@ export function useCandleCoreLab() {
     setDataMs: 0,
     spread: null,
     ticksSent: 0,
+    visibleRange: null,
   });
+
+  const setInteractionMode = useCallback((mode: InteractionMode) => {
+    interactionModeRef.current = mode;
+    setInteractionModeState(mode);
+    chartRef.current?.applyOptions({ interaction: { dragMode: mode } });
+  }, []);
+
+  const applyNavigator = useCallback((next: typeof INITIAL_NAVIGATOR) => {
+    navigatorRef.current = next;
+    setNavigator(next);
+    chartRef.current?.applyOptions({ navigator: next });
+  }, []);
+
+  const setNavigatorVisible = useCallback((visible: boolean) => {
+    applyNavigator({ ...navigatorRef.current, visible });
+  }, [applyNavigator]);
+
+  const setNavigatorHeight = useCallback((height: number) => {
+    if (!Number.isFinite(height)) return;
+    applyNavigator({ ...navigatorRef.current, height: Math.min(160, Math.max(48, height)) });
+  }, [applyNavigator]);
+
+  const setNavigatorMaxOverviewPoints = useCallback((maxOverviewPoints: number) => {
+    if (!Number.isFinite(maxOverviewPoints)) return;
+    applyNavigator({ ...navigatorRef.current, maxOverviewPoints: Math.min(5000, Math.max(200, maxOverviewPoints)) });
+  }, [applyNavigator]);
+
+  const showRangePreset = useCallback((preset: RangePreset) => {
+    const chart = chartRef.current;
+    const candles = candlesRef.current;
+    if (!chart || candles.length === 0) return;
+    const windowSize = Math.max(1, Math.ceil(candles.length * 0.1));
+    const maxStart = Math.max(0, candles.length - windowSize);
+    const startIndex = preset === 'first' ? 0 : preset === 'last' ? maxStart : Math.floor(maxStart / 2);
+    const endIndex = Math.min(candles.length - 1, startIndex + windowSize - 1);
+    chart.setVisibleRange({ from: candles[startIndex].time, to: candles[endIndex].time });
+  }, []);
 
   const applyIndicatorVisibility = useCallback((next: IndicatorVisibility) => {
     visibilityRef.current = next;
@@ -186,6 +238,7 @@ export function useCandleCoreLab() {
     const setDataMs = performance.now() - startedAt;
     chart.fitContent();
     applyIndicatorVisibility(visibilityRef.current);
+    chart.applyOptions({ interaction: { dragMode: interactionModeRef.current }, navigator: navigatorRef.current });
     setMetrics(previous => ({ ...previous, setDataMs }));
 
     const observer = new ResizeObserver(() => chart.resize(host.clientWidth, host.clientHeight));
@@ -198,6 +251,7 @@ export function useCandleCoreLab() {
         renderStats: chart.getRenderStats(),
         spread: chart.getLatestSpread(),
         ticksSent: ticksSentRef.current,
+        visibleRange: readVisibleRange(chart),
       }));
     }, 300);
     return () => {
@@ -239,7 +293,7 @@ export function useCandleCoreLab() {
     tickBucketRef.current = next.time;
   };
 
-  const runScenario = async (scenario: 'a' | 'b' | 'c' | 'd-base' | 'd-all') => {
+  const runScenario = async (scenario: 'a' | 'b' | 'c' | 'd-base' | 'd-all' | 'e' | 'f' | 'g') => {
     setRealtimeMode('off');
     if (scenario === 'a') {
       setPreset('base'); setScenarioNote('Scenario A: 1M initial load, Base only.'); await loadDataset(1_000_000, true);
@@ -249,6 +303,19 @@ export function useCandleCoreLab() {
       setPreset('trend'); setScenarioNote('Scenario C: 10k Trend dataset followed by a chunked 1,000 tick burst.');
       await loadDataset(10_000, true);
       await runBurst();
+    } else if (scenario === 'e') {
+      setPreset('base'); setNavigatorVisible(true); setInteractionMode('pan');
+      setScenarioNote('Scenario E: 1M Navigator. Narrow the handles, then drag the selection across history.');
+      await loadDataset(1_000_000, true);
+    } else if (scenario === 'f') {
+      setInteractionMode('inspect');
+      setScenarioNote('Scenario F: Inspect. Press and drag in the plot, release to pin, then press outside the plot to clear.');
+      await loadDataset(10_000, true);
+    } else if (scenario === 'g') {
+      setNavigatorVisible(true); setInteractionMode('pan');
+      setScenarioNote('Scenario G: Range synchronization. Pan, zoom, fit, and toggle Navigator after using the middle 10% preset.');
+      await loadDataset(10_000, true);
+      showRangePreset('middle');
     } else {
       const preset = scenario === 'd-base' ? 'base' : 'all';
       setPreset(preset); setScenarioNote(`Scenario D: ${preset === 'base' ? 'Base only' : 'All visible'} on the current dataset.`);
@@ -257,8 +324,9 @@ export function useCandleCoreLab() {
   };
 
   return {
-    appendCandle, chartRef, datasetSize, hostRef, isBusy, loadDataset, metrics, realtimeMode, reseed,
+    appendCandle, chartRef, datasetSize, hostRef, interactionMode, isBusy, loadDataset, metrics, navigator, realtimeMode, reseed,
     runBurst, runScenario, scenarioNote, sendTick, setDatasetSize, setPreset, setRealtimeMode,
-    toggleIndicator, visible,
+    setInteractionMode, setNavigatorHeight, setNavigatorMaxOverviewPoints, setNavigatorVisible,
+    showRangePreset, toggleIndicator, visible,
   };
 }

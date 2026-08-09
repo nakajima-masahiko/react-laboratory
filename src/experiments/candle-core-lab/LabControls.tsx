@@ -7,6 +7,8 @@ import {
   type IndicatorKey,
   type IndicatorPreset,
   type IndicatorVisibility,
+  type InteractionMode,
+  type RangePreset,
   type RealtimeMode,
   formatDatasetSize,
 } from './config';
@@ -16,14 +18,21 @@ interface LabControlsProps {
   chartRef: RefObject<CandleChart | null>;
   datasetSize: DatasetSize;
   isBusy: boolean;
+  interactionMode: InteractionMode;
   loadDataset: (size: DatasetSize, fit?: boolean) => Promise<void>;
   realtimeMode: RealtimeMode;
+  navigator: { visible: boolean; height: number; maxOverviewPoints: number };
   reseed: () => void;
   runBurst: () => void;
   sendTick: (newBucket?: boolean) => void;
   setDatasetSize: (size: DatasetSize) => void;
   setPreset: (preset: IndicatorPreset) => void;
   setRealtimeMode: (mode: RealtimeMode) => void;
+  setInteractionMode: (mode: InteractionMode) => void;
+  setNavigatorHeight: (height: number) => void;
+  setNavigatorMaxOverviewPoints: (value: number) => void;
+  setNavigatorVisible: (visible: boolean) => void;
+  showRangePreset: (preset: RangePreset) => void;
   toggleIndicator: (key: IndicatorKey) => void;
   visible: IndicatorVisibility;
 }
@@ -65,6 +74,36 @@ export function LabControls(props: LabControlsProps) {
         <button type="button" onClick={props.appendCandle}>Append one candle</button>
         <button type="button" onClick={() => props.sendTick(false)}>Same-bucket tick</button>
         <button type="button" onClick={() => props.sendTick(true)}>New-bucket tick</button>
+        <span className="ccl-control-group" aria-label="Visible range presets">
+          <button type="button" onClick={() => props.showRangePreset('first')}>First 10%</button>
+          <button type="button" onClick={() => props.showRangePreset('middle')}>Middle 10%</button>
+          <button type="button" onClick={() => props.showRangePreset('last')}>Last 10%</button>
+        </span>
+      </section>
+
+      <section className="ccl-panel" aria-labelledby="ccl-interaction-heading">
+        <h3 id="ccl-interaction-heading">Interaction mode</h3>
+        <div className="ccl-button-row">
+          {(['pan', 'inspect'] as const).map(mode => (
+            <button key={mode} type="button" aria-pressed={props.interactionMode === mode}
+              data-active={props.interactionMode === mode} onClick={() => props.setInteractionMode(mode)}>
+              {mode === 'pan' ? 'Pan' : 'Inspect'}
+            </button>
+          ))}
+        </div>
+        <p className="ccl-guidance">In Inspect, press in the plot to pin the nearest candle, drag candle-by-candle, and release to keep it pinned. Press outside the plot to clear it.</p>
+      </section>
+
+      <section className="ccl-panel" aria-labelledby="ccl-navigator-heading">
+        <h3 id="ccl-navigator-heading">Data View Navigator</h3>
+        <button type="button" aria-pressed={props.navigator.visible} data-active={props.navigator.visible}
+          onClick={() => props.setNavigatorVisible(!props.navigator.visible)}>
+          {props.navigator.visible ? 'Visible' : 'Hidden'}
+        </button>
+        <label className="ccl-field"><span>Height</span><input type="number" min="48" max="160" step="4"
+          value={props.navigator.height} onChange={event => props.setNavigatorHeight(event.currentTarget.valueAsNumber)} /></label>
+        <label className="ccl-field"><span>Overview points</span><input type="number" min="200" max="5000" step="100"
+          value={props.navigator.maxOverviewPoints} onChange={event => props.setNavigatorMaxOverviewPoints(event.currentTarget.valueAsNumber)} /></label>
       </section>
 
       <section className="ccl-panel ccl-indicators" aria-labelledby="ccl-indicators-heading">
