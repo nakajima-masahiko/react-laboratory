@@ -19,8 +19,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout react-laboratory
         uses: actions/checkout@v4
+
+      - name: Checkout candle-core into vendor/
+        uses: actions/checkout@v4
+        with:
+          repository: nakajima-masahiko/candle-core
+          path: vendor/candle-core
+          # Required while candle-core is private.
+          # Create a fine-grained PAT with Contents: Read on candle-core only,
+          # or a classic PAT with repo scope, then add repository secret:
+          #   Name: CANDLE_CORE_READ_TOKEN
+          token: ${{ secrets.CANDLE_CORE_READ_TOKEN }}
+
+      - name: Ensure vendor package.json for source entry
+        run: |
+          cat > vendor/candle-core/package.json <<'EOF'
+          {
+            "name": "candle-core",
+            "version": "0.2.0-beta-prep",
+            "private": true,
+            "type": "module",
+            "main": "./src/index.ts",
+            "module": "./src/index.ts",
+            "types": "./src/index.ts",
+            "exports": {
+              ".": {
+                "import": "./src/index.ts",
+                "types": "./src/index.ts"
+              }
+            }
+          }
+          EOF
+          test -f vendor/candle-core/src/index.ts
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,14 +62,6 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
-      - name: Sync candle-core into vendor/
-        env:
-          # PAT with read access to nakajima-masahiko/candle-core (required while private).
-          # Repository secret name: CANDLE_CORE_READ_TOKEN
-          CANDLE_CORE_READ_TOKEN: ${{ secrets.CANDLE_CORE_READ_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/sync-candle-core.mjs
 
       - name: Install dependencies
         run: npm install
