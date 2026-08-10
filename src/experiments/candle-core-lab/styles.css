@@ -1,8 +1,20 @@
 .ccl-lab { max-width: 1120px; margin: 0 auto; padding: 24px 16px 40px; font-family: inherit; }
 .ccl-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
 .ccl-header h2 { margin: 0; font-size: 1.65rem; }
+.ccl-header-badges { display: flex; align-items: center; gap: 8px; }
 .ccl-eyebrow { margin: 0 0 2px; color: var(--text); opacity: .7; font-size: .76rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .ccl-busy { padding: 5px 10px; border-radius: 999px; background: var(--accent-light); color: var(--text-h); font-size: .78rem; font-weight: 700; }
+.ccl-fps-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid transparent;
+}
+.ccl-fps-badge--good { background: rgba(38, 166, 154, 0.18); color: #0d7a6f; border-color: rgba(38, 166, 154, 0.45); }
+.ccl-fps-badge--ok { background: rgba(245, 166, 35, 0.18); color: #9a6b00; border-color: rgba(245, 166, 35, 0.45); }
+.ccl-fps-badge--low { background: rgba(239, 83, 80, 0.18); color: #b71c1c; border-color: rgba(239, 83, 80, 0.45); }
 
 .ccl-scenarios, .ccl-panel, .ccl-diagnostics, .ccl-note { border: 1px solid var(--border); border-radius: 10px; background: var(--accent-light); }
 .ccl-scenarios { padding: 14px; margin-bottom: 14px; }
@@ -31,6 +43,10 @@
 .ccl-metric span, .ccl-metric strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ccl-metric span { color: var(--text); opacity: .68; font-size: .68rem; }
 .ccl-metric strong { color: var(--text-h); font-size: .92rem; font-variant-numeric: tabular-nums; }
+.ccl-metric--emphasize strong { font-size: 1.15rem; }
+.ccl-metric--good { border-color: rgba(38, 166, 154, 0.55); background: rgba(38, 166, 154, 0.08); }
+.ccl-metric--ok { border-color: rgba(245, 166, 35, 0.55); background: rgba(245, 166, 35, 0.08); }
+.ccl-metric--low { border-color: rgba(239, 83, 80, 0.55); background: rgba(239, 83, 80, 0.08); }
 
 .ccl-chart-shell { width: 100%; height: min(62vh, 560px); min-height: 420px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--bg); }
 .ccl-chart { width: 100%; height: 100%; }

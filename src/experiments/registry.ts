@@ -54,7 +54,7 @@ export const experiments: ExperimentEntry[] = [
     id: 'candle-core-lab',
     title: 'CandleCore Lab',
     description:
-      'candle-core（Canvas / TypeScript）で USD/JPY ダミーローソク足を描画し、指標トグルとリアルタイム tick を試す実験',
+      'candle-core（Canvas / TypeScript）で大規模データ（5k〜1M）・高頻度 tick・FPS監視を試す高速チャート実験。Scenario H で 50k + 60tps ストレスを一発起動',
     component: lazy(() => import('./candle-core-lab')),
   },
   {

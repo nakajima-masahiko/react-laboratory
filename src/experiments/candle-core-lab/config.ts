@@ -1,7 +1,8 @@
-export const DATASET_SIZES = [180, 10_000, 100_000, 500_000, 1_000_000] as const;
+export const DATASET_SIZES = [180, 5_000, 10_000, 50_000, 100_000, 500_000, 1_000_000] as const;
 export type DatasetSize = (typeof DATASET_SIZES)[number];
 
-export type RealtimeMode = 'off' | '1' | '10' | '60';
+/** Realtime tick rates used by the Lab console. Higher rates stress updateTick path. */
+export type RealtimeMode = 'off' | '1' | '10' | '60' | '120' | '200';
 export type InteractionMode = 'pan' | 'inspect';
 export type RangePreset = 'first' | 'middle' | 'last';
 export type IndicatorKey = 'sma' | 'ema' | 'bollingerBands' | 'rsi' | 'macd' | 'bidAskOverlay';
@@ -35,3 +36,10 @@ export const INDICATOR_PRESETS: Record<IndicatorPreset, IndicatorVisibility> = {
 
 export const formatDatasetSize = (size: number) =>
   size >= 1_000_000 ? `${size / 1_000_000}M` : size >= 1_000 ? `${size / 1_000}k` : String(size);
+
+/** FPS badge tone for the live header indicator. */
+export function fpsTone(fps: number): 'good' | 'ok' | 'low' {
+  if (fps >= 50) return 'good';
+  if (fps >= 30) return 'ok';
+  return 'low';
+}

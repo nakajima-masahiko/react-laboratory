@@ -5,8 +5,14 @@
 - Synthetic generation and `CandleChart.setData()` are timed separately. `setData duration` is the synchronous API-call duration, not render completion.
 - Candle arrays live in `useRef`, never React state. Only small counters and sampled diagnostics enter state.
 - Realtime metrics are sampled every 300 ms, while ticks are sent directly to CandleCore.
+- FPS **min / avg** use a rolling window of 20 samples (~6 s at 300 ms interval). Dataset reloads reset the window.
 - The effective visible range is read from `getVisibleRange()` in that same 300 ms sample. Pointer movement never causes a React update.
 - The 1,000-tick burst yields to the browser after each 50-tick chunk and is cancelled by an incrementing run id on unmount.
+
+## Dataset sizes and realtime rates
+
+- Dataset sizes: **180 / 5k / 10k / 50k / 100k / 500k / 1M** (5k and 50k align with candle-core updateTick baseline scenarios).
+- Continuous realtime rates: **1 / 10 / 60 / 120 / 200** ticks per second (plus Off).
 
 ## Public API surface used
 
@@ -43,6 +49,13 @@ This Lab is an integration and performance verification surface, not only a visu
 1. Run **G · Range sync** to enable Navigator and apply the middle 10% range through `setVisibleRange()`.
 2. Pan, zoom, and fit the main chart; confirm the Navigator selection and effective range metrics remain synchronized.
 3. Toggle Navigator off and on repeatedly and confirm the viewport remains intact.
+
+### Scenario H — Perf stress (50k + 60 tps)
+
+1. Run **H · Perf stress 50k+60tps**.
+2. Confirm 50k candles load with Trend overlays (SMA / EMA / Bollinger) and continuous 60 ticks/sec starts automatically.
+3. Watch the header **FPS** badge and metrics panel **FPS min / avg** while panning and zooming.
+4. Optionally raise the rate to 120 or 200 ticks/sec and observe FPS tone changes (good ≥50 / ok ≥30 / low <30).
 
 ## Local dependency constraint
 
