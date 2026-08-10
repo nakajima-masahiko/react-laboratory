@@ -19,6 +19,8 @@ export interface LabMetrics {
   burstElapsedMs: number | null;
   effectiveTicksPerSecond: number | null;
   fps: number;
+  fpsAvg: number | null;
+  fpsMin: number | null;
   generationMs: number;
   renderStats: RenderStats | null;
   setDataMs: number;
@@ -30,6 +32,8 @@ export interface LabMetrics {
 const INITIAL_SIZE: DatasetSize = 180;
 const INITIAL_SEED = 7;
 const INITIAL_NAVIGATOR = { visible: true, height: 72, maxOverviewPoints: 1600 };
+/** Rolling window length for FPS min/avg (sampled every 300 ms → ~6 s). */
+const FPS_SAMPLE_WINDOW = 20;
 
 function readVisibleRange(chart: CandleChart): { start: number; end: number } | null {
   const range = chart.getVisibleRange();
@@ -51,6 +55,7 @@ export function useCandleCoreLab() {
   const visibilityRef = useRef<IndicatorVisibility>(INDICATOR_PRESETS.all);
   const interactionModeRef = useRef<InteractionMode>('pan');
   const navigatorRef = useRef(INITIAL_NAVIGATOR);
+  const fpsSamplesRef = useRef<number[]>([]);
 
   const [datasetSize, setDatasetSize] = useState<DatasetSize>(INITIAL_SIZE);
   const [realtimeMode, setRealtimeMode] = useState<RealtimeMode>('off');
@@ -64,6 +69,8 @@ export function useCandleCoreLab() {
     burstElapsedMs: null,
     effectiveTicksPerSecond: null,
     fps: 0,
+    fpsAvg: null,
+    fpsMin: null,
     generationMs: 0,
     renderStats: null,
     setDataMs: 0,
@@ -168,6 +175,7 @@ export function useCandleCoreLab() {
     const chart = chartRef.current;
     if (!chart) return Promise.resolve();
     setIsBusy(true);
+    fpsSamplesRef.current = [];
     return new Promise(resolve => window.setTimeout(() => {
       if (!mountedRef.current || !chartRef.current) { resolve(); return; }
       const generationStart = performance.now();
@@ -181,7 +189,14 @@ export function useCandleCoreLab() {
       tickBucketRef.current = next.at(-1)?.time ?? 0;
       if (fit) chart.fitContent();
       setDatasetSize(size);
-      setMetrics(previous => ({ ...previous, barCount: size, generationMs, setDataMs }));
+      setMetrics(previous => ({
+        ...previous,
+        barCount: size,
+        generationMs,
+        setDataMs,
+        fpsMin: null,
+        fpsAvg: null,
+      }));
       setIsBusy(false);
       resolve();
     }, 0));
@@ -244,10 +259,20 @@ export function useCandleCoreLab() {
     const observer = new ResizeObserver(() => chart.resize(host.clientWidth, host.clientHeight));
     observer.observe(host);
     const statsTimer = window.setInterval(() => {
+      const fps = Math.round(chart.getFPS());
+      const samples = fpsSamplesRef.current;
+      samples.push(fps);
+      if (samples.length > FPS_SAMPLE_WINDOW) samples.shift();
+      const fpsMin = samples.length ? Math.min(...samples) : null;
+      const fpsAvg = samples.length
+        ? Math.round(samples.reduce((sum, value) => sum + value, 0) / samples.length)
+        : null;
       setMetrics(previous => ({
         ...previous,
         barCount: chart.getData().length,
-        fps: Math.round(chart.getFPS()),
+        fps,
+        fpsMin,
+        fpsAvg,
         renderStats: chart.getRenderStats(),
         spread: chart.getLatestSpread(),
         ticksSent: ticksSentRef.current,
@@ -293,18 +318,27 @@ export function useCandleCoreLab() {
     tickBucketRef.current = next.time;
   };
 
-  const runScenario = async (scenario: 'a' | 'b' | 'c' | 'd-base' | 'd-all' | 'e' | 'f' | 'g') => {
+  const runScenario = async (
+    scenario: 'a' | 'b' | 'c' | 'd-base' | 'd-all' | 'e' | 'f' | 'g' | 'h',
+  ) => {
     setRealtimeMode('off');
     if (scenario === 'a') {
-      setPreset('base'); setScenarioNote('Scenario A: 1M initial load, Base only.'); await loadDataset(1_000_000, true);
+      setPreset('base');
+      setScenarioNote('Scenario A: 1M initial load, Base only. Watch setData duration and FPS after fit.');
+      await loadDataset(1_000_000, true);
     } else if (scenario === 'b') {
-      setPreset('all'); setScenarioNote('Scenario B: 100k dataset, all indicators visible.'); await loadDataset(100_000, true);
+      setPreset('all');
+      setScenarioNote('Scenario B: 100k dataset, all indicators visible.');
+      await loadDataset(100_000, true);
     } else if (scenario === 'c') {
-      setPreset('trend'); setScenarioNote('Scenario C: 10k Trend dataset followed by a chunked 1,000 tick burst.');
+      setPreset('trend');
+      setScenarioNote('Scenario C: 10k Trend dataset followed by a chunked 1,000 tick burst.');
       await loadDataset(10_000, true);
       await runBurst();
     } else if (scenario === 'e') {
-      setPreset('base'); setNavigatorVisible(true); setInteractionMode('pan');
+      setPreset('base');
+      setNavigatorVisible(true);
+      setInteractionMode('pan');
       setScenarioNote('Scenario E: 1M Navigator. Narrow the handles, then drag the selection across history.');
       await loadDataset(1_000_000, true);
     } else if (scenario === 'f') {
@@ -312,13 +346,24 @@ export function useCandleCoreLab() {
       setScenarioNote('Scenario F: Inspect. Press and drag in the plot, release to pin, then press outside the plot to clear.');
       await loadDataset(10_000, true);
     } else if (scenario === 'g') {
-      setNavigatorVisible(true); setInteractionMode('pan');
+      setNavigatorVisible(true);
+      setInteractionMode('pan');
       setScenarioNote('Scenario G: Range synchronization. Pan, zoom, fit, and toggle Navigator after using the middle 10% preset.');
       await loadDataset(10_000, true);
       showRangePreset('middle');
+    } else if (scenario === 'h') {
+      setPreset('trend');
+      setNavigatorVisible(true);
+      setInteractionMode('pan');
+      setScenarioNote(
+        'Scenario H: Perf stress — 50k candles + Trend overlays + continuous 60 ticks/sec. Watch FPS live / min / avg while panning.',
+      );
+      await loadDataset(50_000, true);
+      setRealtimeMode('60');
     } else {
       const preset = scenario === 'd-base' ? 'base' : 'all';
-      setPreset(preset); setScenarioNote(`Scenario D: ${preset === 'base' ? 'Base only' : 'All visible'} on the current dataset.`);
+      setPreset(preset);
+      setScenarioNote(`Scenario D: ${preset === 'base' ? 'Base only' : 'All visible'} on the current dataset.`);
       await loadDataset(datasetSize, false);
     }
   };
