@@ -218,6 +218,58 @@ the deployed provenance JSON, and then execute H–L in that deployment. The nex
 task remains completion of deployed validation, not stable-API or high-density
 series-policy design, until this block is removed.
 
+## GitHub Actions browser validation (Request 008)
+
+The earlier Request 004/007 `BLOCKED` entries above describe attempts from the
+Codex host; they are retained as history, but private-repository and browser
+validation is now designed to run inside GitHub Actions instead. Dispatch
+**Full Range LOD browser validation** with either the exact 40-character
+CandleCore SHA in `candle_core_ref`, or the repository variable
+`CANDLE_CORE_VALIDATION_REF` set to that SHA. A branch name is rejected so a
+moving revision cannot be reported as pinned evidence. The checkout continues
+to use `CANDLE_CORE_READ_TOKEN`.
+
+The workflow preserves the **BUILT PACKAGE BOUNDARY**: CandleCore is checked out
+and runs its own locked install/build first; only then is its consumer manifest
+prepared, React Laboratory runs `npm ci`, and the production application is
+built. The workflow also fails if the built package exposes implementation
+TypeScript, if the experimental constructor flag is missing from JavaScript, or
+if that flag appears in public declarations. No stable CandleCore API is changed.
+
+The focused Chromium suite automates deterministic parts of Scenarios H–L:
+
+- H compares the bounded full-history request with exact experimental history,
+  returns to bounded mode, and repeats recreation to expose stale canvas or
+  console/lifecycle errors.
+- I loads one million candles, exercises full history, scroll, zoom, derived
+  direct/LOD density, and viewport resize without imposing an invented FPS gate.
+- J exercises the existing canvas Navigator and verifies effective-range
+  read-back remains available after drag and resize.
+- K exercises Inspect at high and lower density and its return to Pan. Because
+  the tooltip is rendered into CandleCore's canvas and no stable diagnostic API
+  exposes its selected source identity, aggregate-vs-canonical identity remains
+  an explicit human visual check rather than a fabricated DOM assertion.
+- L switches through base, Trend, Momentum, all built-ins, and Bid/Ask while
+  retaining interaction smoke checks. Volume has no independent Lab toggle, so
+  the suite does not claim a separate Volume-only configuration or width-bounded
+  complexity for any non-candle series.
+
+Every run uploads one artifact containing representative screenshots, retained
+Playwright traces/screenshots for failures, the HTML report, per-scenario JSON,
+combined `results.json`, and `candle-core-validation-build.json`. The combined
+result records both repository SHAs, workflow run provenance, dataset/mode,
+effective range, approximate canonical count, plot width, density/derived LOD,
+and available timing/FPS samples.
+
+The deterministic result must be paired with a short human review of the saved
+screenshots/traces (or the same pinned Pages build): pan/zoom smoothness,
+direct↔LOD visual continuity, canonical Inspect tooltip identity, isolated spike
+and endpoint-direction preservation, and series rendering artifacts. Passing
+automation validates the experimental Lab integration only; it does not approve
+stable API promotion. Until an authenticated run supplies its two SHAs and
+artifacts, the infrastructure is implemented but no new Scenario H–L outcome is
+claimed in this document.
+
 ## Local dependency constraint
 
 `candle-core` is private and its complete package checkout is injected into

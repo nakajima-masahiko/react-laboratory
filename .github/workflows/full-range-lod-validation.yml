@@ -1,0 +1,93 @@
+name: Full Range LOD browser validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      candle_core_ref:
+        description: Exact 40-character CandleCore commit SHA (defaults to CANDLE_CORE_VALIDATION_REF)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CANDLE_CORE_REF: ${{ inputs.candle_core_ref || vars.CANDLE_CORE_VALIDATION_REF }}
+    steps:
+      - name: Require pinned CandleCore revision
+        run: |
+          if ! printf '%s' "${CANDLE_CORE_REF}" | grep -Eq '^[0-9a-fA-F]{40}$'; then
+            echo '::error::Set candle_core_ref or CANDLE_CORE_VALIDATION_REF to an exact 40-character commit SHA.'
+            exit 1
+          fi
+
+      - name: Checkout react-laboratory
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned candle-core into vendor
+        uses: actions/checkout@v4
+        with:
+          repository: nakajima-masahiko/candle-core
+          path: vendor/candle-core
+          ref: ${{ env.CANDLE_CORE_REF }}
+          token: ${{ secrets.CANDLE_CORE_READ_TOKEN }}
+
+      - name: Verify and record exact provenance
+        id: provenance
+        run: |
+          CANDLE_CORE_SHA="$(git -C vendor/candle-core rev-parse HEAD)"
+          test "${CANDLE_CORE_SHA}" = "${CANDLE_CORE_REF,,}"
+          test -f vendor/candle-core/package-lock.json
+          rg -q '__experimentalFullRangeLod' vendor/candle-core/src
+          echo "candle_core_sha=${CANDLE_CORE_SHA}" >> "${GITHUB_OUTPUT}"
+          mkdir -p public validation-artifacts
+          printf '{\n  "reactLaboratorySha": "%s",\n  "candleCoreSha": "%s",\n  "workflowRunId": "%s"\n}\n' \
+            "${GITHUB_SHA}" "${CANDLE_CORE_SHA}" "${GITHUB_RUN_ID}" | tee public/candle-core-validation-build.json validation-artifacts/candle-core-validation-build.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Build CandleCore with its own toolchain
+        run: npm run build:candle-core
+
+      - name: Install React Laboratory consumer dependencies
+        run: npm ci
+
+      - name: Verify built package boundary and build application
+        run: |
+          test "$(node -p "require('./vendor/candle-core/package.json').reactLaboratoryConsumerPackage")" = true
+          ! rg -q '__experimentalFullRangeLod' vendor/candle-core --glob '*.d.ts'
+          npm run build
+
+      - name: Install focused Playwright browser dependency
+        run: |
+          # Kept outside the application lock boundary: this validation-only
+          # runner must not affect the built CandleCore consumer package.
+          npm install --no-save --no-package-lock @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Run Scenario H-L browser validation
+        run: npm run test:browser:full-range-lod
+
+      - name: Collect machine-readable result
+        if: always()
+        env:
+          REACT_LABORATORY_SHA: ${{ github.sha }}
+          CANDLE_CORE_SHA: ${{ steps.provenance.outputs.candle_core_sha }}
+        run: npm run collect:browser-validation
+
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-range-lod-validation-${{ github.run_id }}
+          path: validation-artifacts
+          if-no-files-found: error
+          retention-days: 30
