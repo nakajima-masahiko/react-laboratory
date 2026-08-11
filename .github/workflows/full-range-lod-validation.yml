@@ -42,7 +42,7 @@ jobs:
           CANDLE_CORE_SHA="$(git -C vendor/candle-core rev-parse HEAD)"
           test "${CANDLE_CORE_SHA}" = "${CANDLE_CORE_REF,,}"
           test -f vendor/candle-core/package-lock.json
-          rg -q '__experimentalFullRangeLod' vendor/candle-core/src
+          grep -R -q '__experimentalFullRangeLod' vendor/candle-core/src
           echo "candle_core_sha=${CANDLE_CORE_SHA}" >> "${GITHUB_OUTPUT}"
           mkdir -p public validation-artifacts
           printf '{\n  "reactLaboratorySha": "%s",\n  "candleCoreSha": "%s",\n  "workflowRunId": "%s"\n}\n' \
@@ -63,7 +63,7 @@ jobs:
       - name: Verify built package boundary and build application
         run: |
           test "$(node -p "require('./vendor/candle-core/package.json').reactLaboratoryConsumerPackage")" = true
-          ! rg -q '__experimentalFullRangeLod' vendor/candle-core --glob '*.d.ts'
+          ! grep -R --include='*.d.ts' -q '__experimentalFullRangeLod' vendor/candle-core
           npm run build
 
       - name: Install focused Playwright browser dependency
