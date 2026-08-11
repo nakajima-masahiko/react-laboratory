@@ -3,6 +3,7 @@ import { CandleChart, type Candle } from 'candle-core';
 import {
   INDICATOR_PRESETS,
   type DatasetSize,
+  type DetailMode,
   type IndicatorKey,
   type IndicatorPreset,
   type IndicatorVisibility,
@@ -11,6 +12,7 @@ import {
   type RealtimeMode,
 } from './config';
 import { createSeededRandom, makeCandles, makeNextCandle, TIMEFRAME_MS } from './data';
+import { createLabCandleChart } from './experimentalFullRangeAdapter';
 
 type RenderStats = ReturnType<CandleChart['getRenderStats']>;
 
@@ -22,11 +24,13 @@ export interface LabMetrics {
   fpsAvg: number | null;
   fpsMin: number | null;
   generationMs: number;
+  chartRecreationMs: number | null;
   renderStats: RenderStats | null;
   setDataMs: number;
   spread: number | null;
   ticksSent: number;
   visibleRange: { start: number; end: number } | null;
+  plotCssWidth: number;
 }
 
 const INITIAL_SIZE: DatasetSize = 180;
@@ -56,8 +60,11 @@ export function useCandleCoreLab() {
   const interactionModeRef = useRef<InteractionMode>('pan');
   const navigatorRef = useRef(INITIAL_NAVIGATOR);
   const fpsSamplesRef = useRef<number[]>([]);
+  const initialChartRef = useRef(true);
+  const viewportBeforeRecreationRef = useRef<{ start: number; end: number } | null>(null);
 
   const [datasetSize, setDatasetSize] = useState<DatasetSize>(INITIAL_SIZE);
+  const [detailMode, setDetailMode] = useState<DetailMode>('bounded');
   const [realtimeMode, setRealtimeMode] = useState<RealtimeMode>('off');
   const [interactionMode, setInteractionModeState] = useState<InteractionMode>('pan');
   const [navigator, setNavigator] = useState(INITIAL_NAVIGATOR);
@@ -72,11 +79,13 @@ export function useCandleCoreLab() {
     fpsAvg: null,
     fpsMin: null,
     generationMs: 0,
+    chartRecreationMs: null,
     renderStats: null,
     setDataMs: 0,
     spread: null,
     ticksSent: 0,
     visibleRange: null,
+    plotCssWidth: 0,
   });
 
   const setInteractionMode = useCallback((mode: InteractionMode) => {
@@ -114,6 +123,15 @@ export function useCandleCoreLab() {
     const startIndex = preset === 'first' ? 0 : preset === 'last' ? maxStart : Math.floor(maxStart / 2);
     const endIndex = Math.min(candles.length - 1, startIndex + windowSize - 1);
     chart.setVisibleRange({ start: candles[startIndex].time, end: candles[endIndex].time });
+  }, []);
+
+  const showFullHistory = useCallback(() => {
+    const chart = chartRef.current;
+    const candles = candlesRef.current;
+    const first = candles[0];
+    const last = candles.at(-1);
+    if (!chart || !first || !last) return;
+    chart.setVisibleRange({ start: first.time, end: last.time });
   }, []);
 
   const applyIndicatorVisibility = useCallback((next: IndicatorVisibility) => {
@@ -172,12 +190,12 @@ export function useCandleCoreLab() {
   }, [applyIndicatorVisibility]);
 
   const loadDataset = useCallback((size: DatasetSize, fit = false): Promise<void> => {
-    const chart = chartRef.current;
-    if (!chart) return Promise.resolve();
+    if (!chartRef.current) return Promise.resolve();
     setIsBusy(true);
     fpsSamplesRef.current = [];
     return new Promise(resolve => window.setTimeout(() => {
-      if (!mountedRef.current || !chartRef.current) { resolve(); return; }
+      const chart = chartRef.current;
+      if (!mountedRef.current || !chart) { resolve(); return; }
       const generationStart = performance.now();
       const next = makeCandles(size, seedRef.current);
       const generationMs = performance.now() - generationStart;
@@ -243,18 +261,30 @@ export function useCandleCoreLab() {
     const host = hostRef.current;
     if (!host) return;
     mountedRef.current = true;
-    const chart = new CandleChart(host, {
+    const recreationStart = performance.now();
+    const chart = createLabCandleChart(host, {
       symbol: 'USD/JPY', timeframe: '1m', autoSize: true,
       width: host.clientWidth || 900, height: host.clientHeight || 480,
-    });
+    }, detailMode === 'experimental-full-range');
     chartRef.current = chart;
     const startedAt = performance.now();
     chart.setData(candlesRef.current);
     const setDataMs = performance.now() - startedAt;
-    chart.fitContent();
+    if (viewportBeforeRecreationRef.current) {
+      chart.setVisibleRange(viewportBeforeRecreationRef.current);
+      viewportBeforeRecreationRef.current = null;
+    } else {
+      chart.fitContent();
+    }
     applyIndicatorVisibility(visibilityRef.current);
     chart.applyOptions({ interaction: { dragMode: interactionModeRef.current }, navigator: navigatorRef.current });
-    setMetrics(previous => ({ ...previous, setDataMs }));
+    const chartRecreationMs = performance.now() - recreationStart;
+    setMetrics(previous => ({
+      ...previous,
+      setDataMs,
+      chartRecreationMs: initialChartRef.current ? null : chartRecreationMs,
+    }));
+    initialChartRef.current = false;
 
     const observer = new ResizeObserver(() => chart.resize(host.clientWidth, host.clientHeight));
     observer.observe(host);
@@ -277,6 +307,7 @@ export function useCandleCoreLab() {
         spread: chart.getLatestSpread(),
         ticksSent: ticksSentRef.current,
         visibleRange: readVisibleRange(chart),
+        plotCssWidth: host.clientWidth,
       }));
     }, 300);
     return () => {
@@ -284,10 +315,11 @@ export function useCandleCoreLab() {
       burstRunRef.current += 1;
       window.clearInterval(statsTimer);
       observer.disconnect();
+      viewportBeforeRecreationRef.current = readVisibleRange(chart);
       chart.destroy();
       chartRef.current = null;
     };
-  }, [applyIndicatorVisibility]);
+  }, [applyIndicatorVisibility, detailMode]);
 
   useEffect(() => {
     const rate = Number(realtimeMode);
@@ -319,7 +351,7 @@ export function useCandleCoreLab() {
   };
 
   const runScenario = async (
-    scenario: 'a' | 'b' | 'c' | 'd-base' | 'd-all' | 'e' | 'f' | 'g' | 'h',
+    scenario: 'a' | 'b' | 'c' | 'd-base' | 'd-all' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l',
   ) => {
     setRealtimeMode('off');
     if (scenario === 'a') {
@@ -352,14 +384,36 @@ export function useCandleCoreLab() {
       await loadDataset(10_000, true);
       showRangePreset('middle');
     } else if (scenario === 'h') {
+      setDetailMode('bounded');
+      setPreset('base');
+      setScenarioNote('Scenario H: 100k comparison. Show full history, then switch between bounded and experimental modes.');
+      await loadDataset(100_000, false);
+    } else if (scenario === 'i') {
+      setDetailMode('experimental-full-range');
+      setPreset('base');
+      setScenarioNote('Scenario I: 1M Full Range LOD. Show full history, pan/zoom, resize, and watch the LOD transition.');
+      await loadDataset(1_000_000, false);
+    } else if (scenario === 'j') {
+      setDetailMode('experimental-full-range');
+      setPreset('base');
+      setNavigatorVisible(true);
+      setScenarioNote('Scenario J: Navigator + Full Range. Expand and drag the Navigator selection; compare its read-back with effective range.');
+      await loadDataset(100_000, false);
+    } else if (scenario === 'k') {
+      setDetailMode('experimental-full-range');
+      setPreset('base');
+      setInteractionMode('inspect');
+      setScenarioNote('Scenario K: Inspect + Full Range. Verify aggregated rendering still inspects canonical source candles.');
+      await loadDataset(100_000, false);
+    } else if (scenario === 'l') {
+      setDetailMode('experimental-full-range');
       setPreset('trend');
       setNavigatorVisible(true);
       setInteractionMode('pan');
       setScenarioNote(
-        'Scenario H: Perf stress — 50k candles + Trend overlays + continuous 60 ticks/sec. Watch FPS live / min / avg while panning.',
+        'Scenario L: Series stress matrix. Use Base, Trend, Momentum, All, and individual Bid/Ask controls at full range.',
       );
-      await loadDataset(50_000, true);
-      setRealtimeMode('60');
+      await loadDataset(100_000, false);
     } else {
       const preset = scenario === 'd-base' ? 'base' : 'all';
       setPreset(preset);
@@ -369,9 +423,9 @@ export function useCandleCoreLab() {
   };
 
   return {
-    appendCandle, chartRef, datasetSize, hostRef, interactionMode, isBusy, loadDataset, metrics, navigator, realtimeMode, reseed,
+    appendCandle, chartRef, datasetSize, detailMode, hostRef, interactionMode, isBusy, loadDataset, metrics, navigator, realtimeMode, reseed,
     runBurst, runScenario, scenarioNote, sendTick, setDatasetSize, setPreset, setRealtimeMode,
     setInteractionMode, setNavigatorHeight, setNavigatorMaxOverviewPoints, setNavigatorVisible,
-    showRangePreset, toggleIndicator, visible,
+    setDetailMode, showFullHistory, showRangePreset, toggleIndicator, visible,
   };
 }

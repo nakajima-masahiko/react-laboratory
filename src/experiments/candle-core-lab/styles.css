@@ -32,6 +32,8 @@
 .ccl-panel h3 { flex-basis: 100%; }
 .ccl-field { display: flex; align-items: center; gap: 7px; font-size: .76rem; }
 .ccl-operations, .ccl-indicators { grid-column: 1 / -1; }
+.ccl-experimental { grid-column: 1 / -1; }
+.ccl-experimental-label { color: var(--text-h); font-size: .74rem; }
 .ccl-control-group { display: inline-flex; flex-wrap: wrap; gap: 7px; }
 .ccl-guidance { flex-basis: 100%; margin: 2px 0 0; color: var(--text); opacity: .8; font-size: .72rem; line-height: 1.45; }
 .ccl-field input { width: 92px; }
