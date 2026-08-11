@@ -36,9 +36,21 @@ The Lab consumes CandleCore's **built package**, not `vendor/candle-core/src/ind
 Synchronization places a complete pinned checkout in `vendor/candle-core`; then
 `scripts/build-candle-core.mjs` runs CandleCore's own `npm ci` and `npm run build`
 and verifies that its root package export resolves to JavaScript plus declarations.
+Only after that build succeeds, the script replaces the development manifest with
+a consumer-only manifest containing the package identity, module format, root
+JavaScript/declaration exports, and no development dependencies. The source and
+lockfile stay in place, while a marker makes repeated `prebuild` execution verify
+the already-prepared package instead of trying to install with the consumer manifest.
 Only after that does React Laboratory type-check and bundle against the normal
 `candle-core` package export. CandleCore therefore owns implementation checking,
 while React Laboratory retains `erasableSyntaxOnly` for its own application code.
+
+This post-build manifest mutation is intentionally smaller than maintaining a
+second staged copy of the package. Root `npm ci` sees the lightweight consumer
+contract, so CandleCore's Vitest, Rollup, jsdom, coverage, and TypeScript tooling
+does not enter React Laboratory's lock boundary. CandleCore currently has no
+external runtime dependencies; the preparation step fails explicitly if that
+changes so the root lockfile can be reviewed and regenerated intentionally.
 
 The source-level TS1294 failures were caused by non-erasable TypeScript parameter
 properties in `CandleRenderer.ts`, `ExperimentalFullRangeLod.ts`, and
@@ -124,7 +136,7 @@ This Lab is an integration and performance verification surface, not only a visu
 ## GitHub Pages verification
 
 1. Confirm the Pages workflow checks out CandleCore containing Requests 023–027 (including Request 027 and later browser-harness fixes) into `vendor/candle-core`.
-2. Confirm `npm run build:candle-core` succeeds with CandleCore's own configuration, followed by React Laboratory's `npm ci` and `npm run build` against the built package export.
+2. Confirm `npm run build:candle-core` succeeds with CandleCore's own configuration, prepares the consumer-only manifest, and is followed by React Laboratory's `npm ci` and `npm run build` against the built package export.
 3. Open `/#/experiment/candle-core-lab`, run Scenarios H–L, reload the hash route directly, and repeat a bounded → experimental → bounded switch.
 4. Record the CandleCore checkout SHA from the Pages workflow log alongside observations. The Lab repository cannot manufacture this revision when the private source/token is unavailable locally.
 

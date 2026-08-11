@@ -64,10 +64,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Build CandleCore package
+      - name: Build and prepare CandleCore consumer package
         run: npm run build:candle-core
 
-      - name: Install dependencies
+      - name: Install React Laboratory dependencies
         run: npm ci
 
       - name: Build
