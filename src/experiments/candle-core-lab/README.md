@@ -30,6 +30,29 @@ Use **Fit / show full history** to request the exact first-to-last timestamp ran
 
 LOD OHLC render buckets are non-canonical. CandleCore Crosshair/Inspect is expected to retain source-candle identity, so the Lab deliberately does not create a React tooltip or expose aggregate identity.
 
+### TypeScript and package boundary
+
+The Lab consumes CandleCore's **built package**, not `vendor/candle-core/src/index.ts`.
+Synchronization places a complete pinned checkout in `vendor/candle-core`; then
+`scripts/build-candle-core.mjs` runs CandleCore's own `npm ci` and `npm run build`
+and verifies that its root package export resolves to JavaScript plus declarations.
+Only after that does React Laboratory type-check and bundle against the normal
+`candle-core` package export. CandleCore therefore owns implementation checking,
+while React Laboratory retains `erasableSyntaxOnly` for its own application code.
+
+The source-level TS1294 failures were caused by non-erasable TypeScript parameter
+properties in `CandleRenderer.ts`, `ExperimentalFullRangeLod.ts`, and
+`CoarseOhlcExtremaPyramidPrototype.ts`. Rewriting those library internals would be
+a consumer-specific workaround rather than a prerequisite of CandleCore's normal
+compiled contract. Future CandleCore implementation syntax consequently cannot
+become part of the Lab compiler unit by accident.
+
+The private constructor flag still crosses exactly one boundary: the Lab adapter
+normalizes an omitted public options argument to `{}` only in experimental mode,
+then adds `__experimentalFullRangeLod: true`. Bounded mode passes the original
+options unchanged and never adds the property. No stable CandleCore declaration
+is augmented.
+
 ## Inspect, Navigator, and visible ranges
 
 - **Pan** preserves the normal drag-to-scroll behavior. **Inspect** applies `interaction.dragMode: 'inspect'` to the existing chart: press in the plot to pin the nearest candle, drag to inspect candle-by-candle, and release to retain the canvas crosshair and OHLCV tooltip. Press outside the plot to clear the pin. Switching modes never recreates the chart.
@@ -101,7 +124,7 @@ This Lab is an integration and performance verification surface, not only a visu
 ## GitHub Pages verification
 
 1. Confirm the Pages workflow checks out CandleCore containing Requests 023–027 (including Request 027 and later browser-harness fixes) into `vendor/candle-core`.
-2. Confirm `npm run build` succeeds against that synchronized source with no stable CandleCore type edits.
+2. Confirm `npm run build:candle-core` succeeds with CandleCore's own configuration, followed by React Laboratory's `npm ci` and `npm run build` against the built package export.
 3. Open `/#/experiment/candle-core-lab`, run Scenarios H–L, reload the hash route directly, and repeat a bounded → experimental → bounded switch.
 4. Record the CandleCore checkout SHA from the Pages workflow log alongside observations. The Lab repository cannot manufacture this revision when the private source/token is unavailable locally.
 
@@ -110,6 +133,11 @@ as a commit SHA, verifies that the synchronized source contains the private
 constructor flag, and publishes `candle-core-validation-build.json` beside the
 application. That file records both deployed revisions, so a browser-validation
 report can be tied to the exact inputs rather than a moving branch.
+
+This is a **BUILT PACKAGE BOUNDARY** decision. It is preferable to disabling
+`erasableSyntaxOnly` because it preserves the Lab's application policy and makes
+CandleCore's compiler—not an unrelated consumer—responsible for accepting and
+emitting CandleCore implementation syntax.
 
 ## Request 004 validation outcome (2026-08-11)
 
@@ -136,4 +164,10 @@ must only be assigned after that validation passes.
 
 ## Local dependency constraint
 
-`candle-core` is private and its source is injected into `vendor/candle-core/src` by CI or `npm run sync:candle-core`. The synchronized snapshot must include Inspect, Navigator, visible-range APIs, and Request 027's experimental constructor integration. In an environment without `CANDLE_CORE_READ_TOKEN`, a clean checkout cannot type-check or run this experiment because the vendored source is absent. Do not add a mock implementation to the repository; validate against the synchronized package types instead.
+`candle-core` is private and its complete package checkout is injected into
+`vendor/candle-core` by CI or `npm run sync:candle-core`. The synchronized snapshot
+must include Inspect, Navigator, visible-range APIs, and Request 027's experimental
+constructor integration. In an environment without `CANDLE_CORE_READ_TOKEN`, a
+clean checkout cannot build or run this experiment because the vendored source is
+absent. Do not add a mock implementation to the repository; build and validate
+against the synchronized package's own JavaScript and declaration output instead.

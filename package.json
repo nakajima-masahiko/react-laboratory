@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node scripts/sync-candle-core.mjs",
-    "prebuild": "node scripts/sync-candle-core.mjs",
+    "predev": "node scripts/sync-candle-core.mjs && node scripts/build-candle-core.mjs",
+    "prebuild": "node scripts/sync-candle-core.mjs && node scripts/build-candle-core.mjs",
+    "build:candle-core": "node scripts/build-candle-core.mjs",
     "sync:candle-core": "node scripts/sync-candle-core.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",

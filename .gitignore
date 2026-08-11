@@ -23,6 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# candle-core sync scratch / checked-out sources (keep package.json + README)
+# candle-core sync scratch / checked-out implementation (keep package.json + README)
 .tmp-candle-core/
 vendor/candle-core/src/
+vendor/candle-core/dist/
+vendor/candle-core/node_modules/
+vendor/candle-core/tsconfig*.json

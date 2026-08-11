@@ -37,28 +37,12 @@ jobs:
           #   Name: CANDLE_CORE_READ_TOKEN
           token: ${{ secrets.CANDLE_CORE_READ_TOKEN }}
 
-      - name: Ensure vendor package.json for source entry
+      - name: Verify synchronized CandleCore revision
         run: |
           CANDLE_CORE_SHA="$(git -C vendor/candle-core rev-parse HEAD)"
           echo "CandleCore revision: ${CANDLE_CORE_SHA}"
-          cat > vendor/candle-core/package.json <<'EOF'
-          {
-            "name": "candle-core",
-            "version": "0.2.0-beta-prep",
-            "private": true,
-            "type": "module",
-            "main": "./src/index.ts",
-            "module": "./src/index.ts",
-            "types": "./src/index.ts",
-            "exports": {
-              ".": {
-                "import": "./src/index.ts",
-                "types": "./src/index.ts"
-              }
-            }
-          }
-          EOF
           test -f vendor/candle-core/src/index.ts
+          test -f vendor/candle-core/package.json
 
           # Fail before installing when the private checkout is older than the
           # laboratory-only constructor integration required by this Lab.
@@ -79,6 +63,9 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Build CandleCore package
+        run: npm run build:candle-core
 
       - name: Install dependencies
         run: npm ci
