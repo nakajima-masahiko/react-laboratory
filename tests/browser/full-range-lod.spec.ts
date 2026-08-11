@@ -5,12 +5,16 @@ import { resolve } from 'node:path';
 type Snapshot = Record<string, string | number | boolean | null>;
 const resultsDirectory = resolve('validation-artifacts/results');
 
+function detailModeSelect(page: Page) {
+  return page.getByRole('region', { name: 'Rendering detail mode' }).locator('select');
+}
+
 async function metric(page: Page, slug: string) {
   return (await page.getByTestId(`metric-${slug}`).locator('strong').textContent())?.trim() ?? '';
 }
 
 async function snapshot(page: Page, extra: Snapshot = {}): Promise<Snapshot> {
-  const mode = await page.getByLabel('Mode').inputValue();
+  const mode = await detailModeSelect(page).inputValue();
   const density = await metric(page, 'candles-css-px');
   return {
     datasetSize: await metric(page, 'dataset-size'),
@@ -38,7 +42,7 @@ async function record(testInfo: TestInfo, scenario: string, status: 'passed' | '
 async function openLab(page: Page) {
   await page.goto('#/experiments/candle-core-lab');
   await expect(page.getByRole('heading', { name: 'CandleCore Lab' })).toBeVisible();
-  await expect(page.getByLabel('Mode')).toHaveValue('bounded');
+  await expect(detailModeSelect(page)).toHaveValue('bounded');
   await expect(page.getByRole('button', { name: 'I · 1M Full Range LOD' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Inspect', exact: true })).toBeVisible();
 }
@@ -80,16 +84,16 @@ test('Scenario H — 100k bounded versus experimental lifecycle', async ({ page 
     observations.push(await snapshot(page, { phase: 'bounded-full-request' }));
     expect(Number.parseInt(String(observations.at(-1)?.approximateVisibleCanonicalCount).replace(/,/g, ''), 10)).toBeLessThan(100_000);
 
-    await page.getByLabel('Mode').selectOption('experimental-full-range');
+    await detailModeSelect(page).selectOption('experimental-full-range');
     await showFullHistory(page);
     await expect.poll(async () => Number.parseInt((await metric(page, 'approx-visible-bars')).replace(/,/g, ''), 10)).toBeGreaterThanOrEqual(99_999);
     observations.push(await snapshot(page, { phase: 'experimental-full-history' }));
 
     for (let cycle = 0; cycle < 2; cycle += 1) {
-      await page.getByLabel('Mode').selectOption('bounded');
-      await page.getByLabel('Mode').selectOption('experimental-full-range');
+      await detailModeSelect(page).selectOption('bounded');
+      await detailModeSelect(page).selectOption('experimental-full-range');
     }
-    await page.getByLabel('Mode').selectOption('bounded');
+    await detailModeSelect(page).selectOption('bounded');
     await showFullHistory(page);
     observations.push(await snapshot(page, { phase: 'bounded-restored' }));
     await expect(page.locator('.ccl-chart canvas')).toHaveCount(initialCanvasCount);
