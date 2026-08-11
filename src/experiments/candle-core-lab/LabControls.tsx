@@ -4,6 +4,7 @@ import {
   DATASET_SIZES,
   INDICATORS,
   type DatasetSize,
+  type DetailMode,
   type IndicatorKey,
   type IndicatorPreset,
   type IndicatorVisibility,
@@ -17,6 +18,7 @@ interface LabControlsProps {
   appendCandle: () => void;
   chartRef: RefObject<CandleChart | null>;
   datasetSize: DatasetSize;
+  detailMode: DetailMode;
   isBusy: boolean;
   interactionMode: InteractionMode;
   loadDataset: (size: DatasetSize, fit?: boolean) => Promise<void>;
@@ -26,6 +28,7 @@ interface LabControlsProps {
   runBurst: () => void;
   sendTick: (newBucket?: boolean) => void;
   setDatasetSize: (size: DatasetSize) => void;
+  setDetailMode: (mode: DetailMode) => void;
   setPreset: (preset: IndicatorPreset) => void;
   setRealtimeMode: (mode: RealtimeMode) => void;
   setInteractionMode: (mode: InteractionMode) => void;
@@ -33,6 +36,7 @@ interface LabControlsProps {
   setNavigatorMaxOverviewPoints: (value: number) => void;
   setNavigatorVisible: (visible: boolean) => void;
   showRangePreset: (preset: RangePreset) => void;
+  showFullHistory: () => void;
   toggleIndicator: (key: IndicatorKey) => void;
   visible: IndicatorVisibility;
 }
@@ -40,6 +44,22 @@ interface LabControlsProps {
 export function LabControls(props: LabControlsProps) {
   return (
     <div className="ccl-console-grid">
+      <section className="ccl-panel ccl-experimental" aria-labelledby="ccl-detail-heading">
+        <h3 id="ccl-detail-heading">Rendering detail mode</h3>
+        <label className="ccl-field">
+          <span>Mode</span>
+          <select
+            value={props.detailMode}
+            disabled={props.isBusy}
+            onChange={event => props.setDetailMode(event.target.value as DetailMode)}
+          >
+            <option value="bounded">Bounded Detail (stable/default)</option>
+            <option value="experimental-full-range">Experimental Full Range LOD</option>
+          </select>
+        </label>
+        <strong className="ccl-experimental-label">Experimental—not a stable CandleCore API</strong>
+        <p className="ccl-guidance">Changing this constructor-only mode cleanly destroys and recreates the chart while retaining the dataset and Lab settings.</p>
+      </section>
       <section className="ccl-panel" aria-labelledby="ccl-dataset-heading">
         <h3 id="ccl-dataset-heading">Dataset</h3>
         <label className="ccl-field">
@@ -89,6 +109,9 @@ export function LabControls(props: LabControlsProps) {
         <button type="button" onClick={() => props.chartRef.current?.fitContent()}>
           Fit Content
         </button>
+        <button type="button" onClick={props.showFullHistory}>
+          Fit / show full history
+        </button>
         <button type="button" onClick={() => props.chartRef.current?.scrollBy(-100)}>
           Scroll left
         </button>
@@ -118,7 +141,7 @@ export function LabControls(props: LabControlsProps) {
             Middle 10%
           </button>
           <button type="button" onClick={() => props.showRangePreset('last')}>
-            Last 10%
+            Last 10% (typical zoom)
           </button>
         </span>
       </section>

@@ -55,14 +55,26 @@ function CandleCoreLab() {
             G · Range sync
           </button>
           <button type="button" onClick={() => void lab.runScenario('h')} disabled={lab.isBusy}>
-            H · Perf stress 50k+60tps
+            H · 100k comparison
+          </button>
+          <button type="button" onClick={() => void lab.runScenario('i')} disabled={lab.isBusy}>
+            I · 1M Full Range LOD
+          </button>
+          <button type="button" onClick={() => void lab.runScenario('j')} disabled={lab.isBusy}>
+            J · Navigator + Full Range
+          </button>
+          <button type="button" onClick={() => void lab.runScenario('k')} disabled={lab.isBusy}>
+            K · Inspect + Full Range
+          </button>
+          <button type="button" onClick={() => void lab.runScenario('l')} disabled={lab.isBusy}>
+            L · Series matrix
           </button>
         </div>
         <p>{lab.scenarioNote}</p>
       </section>
 
       <LabControls {...lab} />
-      <MetricsPanel datasetSize={lab.datasetSize} metrics={lab.metrics} visible={lab.visible} />
+      <MetricsPanel datasetSize={lab.datasetSize} metrics={lab.metrics} visible={lab.visible} detailMode={lab.detailMode} />
 
       <section className="ccl-chart-shell" aria-label="CandleCore chart">
         <div ref={lab.hostRef} className="ccl-chart" />
@@ -71,8 +83,8 @@ function CandleCoreLab() {
       <aside className="ccl-note">
         <strong>Measurement boundary:</strong> data generation and synchronous <code>setData()</code> duration are
         shown separately; neither metric represents render completion. Metrics are sampled every 300 ms so React does
-        not update on every tick. FPS min/avg use a rolling ~6 s window. Scenario H loads 50k + Trend overlays and keeps
-        60 ticks/sec running for continuous stress observation.
+        not update on every tick. FPS min/avg use a rolling ~6 s window. Experimental LOD status is derived from the
+        documented activation rule because CandleCore intentionally exposes no stable internal diagnostics API.
       </aside>
     </main>
   );

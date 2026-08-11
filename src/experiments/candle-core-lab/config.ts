@@ -5,6 +5,7 @@ export type DatasetSize = (typeof DATASET_SIZES)[number];
 export type RealtimeMode = 'off' | '1' | '10' | '60' | '120' | '200';
 export type InteractionMode = 'pan' | 'inspect';
 export type RangePreset = 'first' | 'middle' | 'last';
+export type DetailMode = 'bounded' | 'experimental-full-range';
 export type IndicatorKey = 'sma' | 'ema' | 'bollingerBands' | 'rsi' | 'macd' | 'bidAskOverlay';
 export type IndicatorPreset = 'base' | 'trend' | 'momentum' | 'all';
 export type IndicatorVisibility = Record<IndicatorKey, boolean>;
