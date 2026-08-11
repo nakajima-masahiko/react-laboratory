@@ -62,7 +62,10 @@ jobs:
 
           # Fail before installing when the private checkout is older than the
           # laboratory-only constructor integration required by this Lab.
-          rg '__experimentalFullRangeLod' vendor/candle-core/src
+          if ! grep -R -q '__experimentalFullRangeLod' vendor/candle-core/src; then
+            echo "::error::Synchronized CandleCore does not contain __experimentalFullRangeLod"
+            exit 1
+          fi
 
           mkdir -p public
           printf '{\n  "reactLaboratorySha": "%s",\n  "candleCoreSha": "%s"\n}\n' \
