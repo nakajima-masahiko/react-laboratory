@@ -90,6 +90,7 @@ function Metric({
 }) {
   return (
     <div
+      data-testid={`metric-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`}
       className={`ccl-metric${emphasize ? ' ccl-metric--emphasize' : ''}${tone ? ` ccl-metric--${tone}` : ''}`}
     >
       <span>{label}</span>

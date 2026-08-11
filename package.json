@@ -12,6 +12,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test:browser:full-range-lod": "playwright test tests/browser/full-range-lod.spec.ts",
+    "collect:browser-validation": "node scripts/collect-browser-validation-results.mjs",
     "build:wasm": "cargo build --manifest-path wasm/sma-benchmark/Cargo.toml --release --target wasm32-unknown-unknown && wasm-bindgen --target web --no-typescript --out-dir src/experiments/sma-wasm-benchmark/wasm-pkg --out-name sma_benchmark wasm/sma-benchmark/target/wasm32-unknown-unknown/release/sma_benchmark.wasm",
     "build:wasm:check": "cargo check --manifest-path wasm/sma-benchmark/Cargo.toml --target wasm32-unknown-unknown"
   },
