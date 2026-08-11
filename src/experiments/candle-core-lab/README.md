@@ -105,6 +105,35 @@ This Lab is an integration and performance verification surface, not only a visu
 3. Open `/#/experiment/candle-core-lab`, run Scenarios H–L, reload the hash route directly, and repeat a bounded → experimental → bounded switch.
 4. Record the CandleCore checkout SHA from the Pages workflow log alongside observations. The Lab repository cannot manufacture this revision when the private source/token is unavailable locally.
 
+The deploy workflow accepts the repository variable `CANDLE_CORE_VALIDATION_REF`
+as a commit SHA, verifies that the synchronized source contains the private
+constructor flag, and publishes `candle-core-validation-build.json` beside the
+application. That file records both deployed revisions, so a browser-validation
+report can be tied to the exact inputs rather than a moving branch.
+
+## Request 004 validation outcome (2026-08-11)
+
+- **React Laboratory candidate:** `426cea6536ff0c853d15d5137fb245ff85d411b7`
+  (the source revision inspected before adding this outcome/provenance note).
+- **CandleCore revision:** unavailable. `CANDLE_CORE_READ_TOKEN` is not present
+  in this execution environment, GitHub CLI has no authenticated session, and
+  the private source is not included in `vendor/candle-core/src`.
+- **Pages status:** not validated. Both GitHub API/Pages access from this
+  environment returned HTTP 403, so no workflow could be dispatched or
+  inspected and the deployed application could not be opened.
+- **Scenarios H–L:** not executed. They require the synchronized private source
+  and a real deployed browser; no local-only or fabricated result is substituted.
+- **Bounded regressions and lifecycle/leaks:** not evaluated for the same reason.
+- **Decision: BLOCKED.** Re-run the Pages workflow with
+  `CANDLE_CORE_VALIDATION_REF` set to the reviewed CandleCore commit containing
+  Requests 023–027 and the later browser-harness fixes. Confirm the two SHAs in
+  the published provenance file, then execute and record Scenarios H–L before
+  changing this decision.
+
+This is an environment/access block, not evidence of a CandleCore integration
+defect. The next task remains deployed browser validation; a stable-API audit
+must only be assigned after that validation passes.
+
 ## Local dependency constraint
 
 `candle-core` is private and its source is injected into `vendor/candle-core/src` by CI or `npm run sync:candle-core`. The synchronized snapshot must include Inspect, Navigator, visible-range APIs, and Request 027's experimental constructor integration. In an environment without `CANDLE_CORE_READ_TOKEN`, a clean checkout cannot type-check or run this experiment because the vendored source is absent. Do not add a mock implementation to the repository; validate against the synchronized package types instead.
