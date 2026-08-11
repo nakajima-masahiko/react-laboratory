@@ -174,6 +174,50 @@ This is an environment/access block, not evidence of a CandleCore integration
 defect. The next task remains deployed browser validation; a stable-API audit
 must only be assigned after that validation passes.
 
+## Request 007 validation outcome (2026-08-11)
+
+- **React Laboratory candidate:** `d13475cbf27de8ba74a6bc8d878c2b243530d469`
+  (the checked-out revision on which this validation attempt was made).
+- **CandleCore revision:** unavailable. The synchronized source is still absent,
+  `CANDLE_CORE_READ_TOKEN` is unset, and GitHub CLI has no authenticated session.
+  Consequently Request 027 and its browser-harness fixes could not be tied to an
+  exact CandleCore SHA.
+- **Workflow/deployment provenance:** unavailable. Anonymous access to both the
+  GitHub API and the Pages host was rejected by the execution environment with
+  HTTP 403, so no workflow run ID/URL, deployment result, or deployed
+  `candle-core-validation-build.json` could be retrieved.
+- **Built-package boundary:** static inspection still shows the intended workflow
+  ordering (private checkout, CandleCore-owned `npm ci` and build, consumer
+  manifest preparation, then root `npm ci` and build). A root `npm ci` completed
+  from the lightweight lock boundary without pulling CandleCore devDependencies.
+  End-to-end confirmation stopped at `prebuild`, where synchronization correctly
+  refused to continue without the private token. The built JavaScript/declaration
+  surface and the absence of the experimental flag from the synchronized public
+  declarations therefore could not be reverified.
+- **Deployed route and Scenarios H–L:** not executed. The actual Pages application
+  was unreachable and no complete local CandleCore package was available. This
+  includes the 100k comparison, 1M LOD run, Navigator synchronization, canonical
+  Inspect check, series stress matrix, direct↔LOD visual checks, and screenshots.
+- **Bounded regressions and lifecycle/leaks:** not evaluated. In particular, no
+  claims are made about default semantics, mode-switch cleanup, duplicate
+  handlers/canvases/timers, stale state, or memory behavior without a runnable
+  real-browser build.
+- **Local checks:** root `npm ci` passed; `npm run build` was blocked by the
+  intentionally mandatory private synchronization step; repository lint also has
+  pre-existing errors, including React ref-access diagnostics in the CandleCore
+  Lab hook. Neither failure supplies browser evidence for or against Full Range
+  LOD.
+- **Decision: BLOCKED.** External private-repository authentication and Pages/API
+  network access still prevent the required deployed validation. No product
+  defect was found and no optimization or stable API change was made.
+
+To unblock the next attempt, provide a readable CandleCore checkout/token and
+authenticated GitHub/Pages access, pin `CANDLE_CORE_VALIDATION_REF` to the reviewed
+CandleCore commit, dispatch and inspect the Pages workflow, verify both SHAs in
+the deployed provenance JSON, and then execute H–L in that deployment. The next
+task remains completion of deployed validation, not stable-API or high-density
+series-policy design, until this block is removed.
+
 ## Local dependency constraint
 
 `candle-core` is private and its complete package checkout is injected into
