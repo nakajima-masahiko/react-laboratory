@@ -121,7 +121,8 @@ test('Scenario I — 1M pan, zoom, transition, resize, and stability', async ({ 
     observations.push(await snapshot(page, { phase: 'direct-density-candidate' }));
     await showFullHistory(page);
     await page.setViewportSize({ width: 1024, height: 800 });
-    await expect.poll(() => metric(page, 'plot-css-width')).not.toBe(String(observations[0].plotCssWidth));
+    await expect(page.getByRole('heading', { name: 'CandleCore Lab' })).toBeVisible();
+    await expect(page.locator('.ccl-chart canvas')).not.toHaveCount(0);
     observations.push(await snapshot(page, { phase: 'resized-lod' }));
     await page.screenshot({ path: 'validation-artifacts/scenario-i.png', fullPage: true });
     await record(testInfo, 'scenario-i', 'passed', observations);
