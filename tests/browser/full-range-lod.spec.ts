@@ -36,7 +36,7 @@ async function record(testInfo: TestInfo, scenario: string, status: 'passed' | '
 }
 
 async function openLab(page: Page) {
-  await page.goto('#/experiment/candle-core-lab');
+  await page.goto('#/experiments/candle-core-lab');
   await expect(page.getByRole('heading', { name: 'CandleCore Lab' })).toBeVisible();
   await expect(page.getByLabel('Mode')).toHaveValue('bounded');
   await expect(page.getByRole('button', { name: 'I · 1M Full Range LOD' })).toBeVisible();
