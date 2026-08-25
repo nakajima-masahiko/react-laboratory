@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'aquarium-ux',
+    title: 'Aquarium UX — 静かな生命世界',
+    description: 'PixiJS・Boids・スクロール深度で、水面から深海までを観察する没入型水族館UX実験',
+    component: lazy(() => import('./aquarium-ux')),
+  },
+  {
     id: 'counter',
     title: 'カウンター',
     description: 'useStateの基本的な使い方を確認するシンプルなカウンター',
