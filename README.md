@@ -6,6 +6,7 @@ React のさまざまなパターンやライブラリを試す実験場です�
 
 | 実験 | 説明 |
 |------|------|
+| **Aquarium UX — 静かな生命世界** | PixiJS・Boids・スクロール深度を組み合わせ、水面・サンゴ礁・大水槽・クラゲ・深海を観察する没入型UX実験 |
 | **カウンター** | `useState` の基本的な使い方を確認するシンプルなカウンター |
 | **Date Picker Laboratory** | ネイティブ `date` input で単一・複数・期間の日付取得を試す実験室 |
 | **Dialog Laboratory** | 各種ダイアログの開閉・確認パターンを試す実験室 |
@@ -21,6 +22,8 @@ React のさまざまなパターンやライブラリを試す実験場です�
 
 - **React 19** + **TypeScript 6**
 - **Vite 8** — 開発サーバー・バンドラー
+- **PixiJS / @pixi/react** — Aquarium UX の2D/WebGL描画
+- **Motion / Howler.js** — Aquarium UX の情報UIと任意の環境音
 - **React Router v7** — クライアントサイドルーティング（HashRouter）
 - **Radix UI** — アクセシブルな UI プリミティブ（Dialog / Progress / Toast / Toggle Group）
 - **Recharts** — コンポーザブルなチャートライブラリ
