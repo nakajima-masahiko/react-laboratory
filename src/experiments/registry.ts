@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'shiro-yado',
+    title: '白の宿 — 3Dホテル案内',
+    description: '小さな3階建てホテルのチェックイン後案内。宴会場・浴場・トイレ・客室を軽量3Dで案内する実験',
+    component: lazy(() => import('./shiro-yado')),
+  },
+  {
     id: 'aquarium-ux',
     title: 'Aquarium UX — 静かな生命世界',
     description: 'PixiJS・Boids・スクロール深度で、水面から深海までを観察する没入型水族館UX実験',
@@ -91,19 +97,19 @@ export const experiments: ExperimentEntry[] = [
   {
     id: 'currency-chart-window-lab',
     title: 'Currency Chart Window Lab',
-    description: '36カ月分の通貨別保有量を積み上げ棒グラフで表示し、Toggle Groupで表示月数を切り替えつつドラッグ移動を試す実験',
+    description: '36ヶ月分の通貨別保有量を積み上げ棒グラフで表示し、Toggle Groupで表示月数を切り替えつつドラッグ移動を試す実験',
     component: lazy(() => import('./currency-chart-window-lab')),
   },
   {
     id: 'currency-chart-window-lab-scratch',
     title: '通貨別つみたて棒グラフ（自前描画版）',
-    description: 'Recharts を使わず SVG + d3-scale + Radix Slider で再構築した、36カ月の通貨別積み上げ棒グラフ実験',
+    description: 'Recharts を使わず SVG + d3-scale + Radix Slider で再構築した、36ヶ月の通貨別積み上げ棒グラフ実験',
     component: lazy(() => import('./currency-chart-window-lab-scratch')),
   },
   {
     id: 'currency-chart',
     title: 'Currency Chart',
-    description: 'Recharts の積み上げ棒グラフで12カ月分の通貨別保有量を可視化する実験',
+    description: 'Recharts の積み上げ棒グラフで12ヶ月分の通貨別保有量を可視化する実験',
     component: lazy(() => import('./currency-chart')),
   },
   {
@@ -115,7 +121,7 @@ export const experiments: ExperimentEntry[] = [
   {
     id: 'react-tomcat-checklist',
     title: 'React + Tomcat 構成確認チェックリスト',
-    description: 'Radix UI Checkbox を使った本番デプロイ前の確認チェックリスト 30 項目版',
+    description: 'Radix UI Checkbox を使った生産デプロイ前の確認チェックリスト 30 項目版',
     component: lazy(() => import('./react-tomcat-checklist')),
   },
   {
