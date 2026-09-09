@@ -53,3 +53,12 @@ onChange={(range) => {
 この方式では、両端のハンドルとボディのいずれをドラッグしてもウィンドウの幅は固定され、移動のみが反映される。
 
 参考: `src/experiments/currency-chart-window-lab/index.tsx`
+
+## Three.js / React Three Fiber（白の宿）
+
+`src/experiments/shiro-yado` でホテル案内の軽量3Dに使用。
+
+- React 19 向けに `@react-three/fiber` v9 と `@react-three/drei` v10 を使う。
+- 初回フレームが黒く残ることがあるため、`frameloop="always"` と `gl.setClearColor("#f3f0ea", 1)` を併用する。
+- テクスチャは使わず、箱・平面・マテリアル色のみ。操作は OrbitControls の回転とズームだけ。
+- 3D 本体は `HotelStage` を動的 import し、実験一覧の初期表示を重くしない。
