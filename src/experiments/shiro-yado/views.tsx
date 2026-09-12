@@ -21,7 +21,7 @@ import {
   IconMap,
   IconPin,
 } from './icons';
-import { useNav, type View } from './nav';
+import { useNav } from './nav-state';
 import { HotelPreview } from './scene/HotelPreview';
 import type { SceneId } from './scene/types';
 import { useHotelStore } from './store';
@@ -473,18 +473,4 @@ export function DestView() {
       </button>
     </div>
   );
-}
-
-export function backView(current: View): View | null {
-  if (current.v === 'home') return null;
-  if (current.v === 'guide' && current.p) return { v: 'place', p: current.p };
-  if (current.v === 'place') {
-    const place = getPlace(current.p);
-    if (place?.kind === 'room') return { v: 'floor', f: 2 };
-    if (place?.kind === 'facility') return { v: 'floor', f: 3 };
-    if (place?.floor === 1) return { v: 'floor', f: 1 };
-    return { v: 'dest' };
-  }
-  if (current.v === 'floor') return { v: 'floors' };
-  return { v: 'home' };
 }

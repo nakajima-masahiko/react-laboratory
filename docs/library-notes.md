@@ -58,7 +58,8 @@ onChange={(range) => {
 
 `src/experiments/shiro-yado` でホテル案内の軽量3Dに使用。
 
-- React 19 向けに `@react-three/fiber` v9 と `@react-three/drei` v10 を使う。
+- React 19 向けに `@react-three/fiber` は **9.4.2 に固定**する。9.5 以降は peer が `react: >=19 <19.3` となり、このラボの React 19.3 と衝突する。
+- `@react-three/drei` v10 を併用する。
 - 初回フレームが黒く残ることがあるため、`frameloop="always"` と `gl.setClearColor("#f3f0ea", 1)` を併用する。
 - テクスチャは使わず、箱・平面・マテリアル色のみ。操作は OrbitControls の回転とズームだけ。
 - 3D 本体は `HotelStage` を動的 import し、実験一覧の初期表示を重くしない。
