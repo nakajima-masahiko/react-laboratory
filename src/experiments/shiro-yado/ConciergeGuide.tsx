@@ -18,6 +18,8 @@ const ROOM_IDS: PlaceId[] = [
   'room-205',
 ];
 
+const EXTERIOR_SRC = `${import.meta.env.BASE_URL}shiro-yado/exterior.svg`;
+
 export function ConciergeGuide() {
   const fromFloor = useHotelStore((state) => state.fromFloor);
   const fromPlaceId = useHotelStore((state) => state.fromPlaceId);
@@ -69,7 +71,13 @@ export function ConciergeGuide() {
 
   return (
     <section className="shiro-yado__concierge" aria-labelledby="concierge-title">
-      <div className="shiro-yado__concierge-stage" aria-label="Hotel concierge 3D model">
+      <div
+        className="shiro-yado__concierge-stage"
+        aria-label="Hotel concierge 3D model"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgb(251 249 245 / 0.42) 0%, rgb(243 240 234 / 0.55) 45%, rgb(236 230 220 / 0.7) 100%), url(${EXTERIOR_SRC})`,
+        }}
+      >
         <ConciergeModel speaking={isSpeaking} hairColor={meta.hairColor} />
         <span className={isSpeaking ? 'shiro-yado__speaking is-active' : 'shiro-yado__speaking'}>
           {isSpeaking ? copy.speaking : copy.waiting}
