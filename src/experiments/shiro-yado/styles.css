@@ -738,7 +738,7 @@
 
 .shiro-yado__quick {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   flex-shrink: 0;
   border-top: 1px solid var(--sy-border);
   background: var(--sy-elevated);
@@ -751,8 +751,8 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  font-size: 11px;
-  letter-spacing: 0.04em;
+  font-size: 10px;
+  letter-spacing: 0.02em;
   color: var(--sy-muted);
 }
 
