@@ -1,0 +1,49 @@
+.skytree-lab {
+  --skytree-ink: #12242c;
+  --skytree-muted: #546b75;
+  --skytree-panel: color-mix(in srgb, var(--color-background, #f4f7f7) 82%, transparent);
+  --skytree-border: color-mix(in srgb, var(--color-text, #17313b) 20%, transparent);
+  color: var(--skytree-ink);
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+.skytree-lab.is-night { --skytree-ink: #edf7ff; --skytree-muted: #a9bfce; --skytree-panel: rgb(7 16 28 / 78%); --skytree-border: rgb(190 222 242 / 23%); }
+.skytree-lab__stage { position: relative; height: min(78vh, 820px); min-height: 580px; overflow: hidden; border: 1px solid var(--skytree-border); border-radius: 22px; background: var(--color-background, #eef5f7); box-shadow: 0 24px 70px rgb(13 34 45 / 15%); }
+.skytree-lab__stage canvas { display: block; touch-action: none; }
+.skytree-lab__title { position: absolute; z-index: 1; top: clamp(22px, 5vw, 64px); left: clamp(22px, 5vw, 68px); pointer-events: none; text-shadow: 0 1px 14px rgb(255 255 255 / 35%); }
+.skytree-lab__title > span { font-size: .7rem; letter-spacing: .25em; font-weight: 700; color: var(--skytree-muted); }
+.skytree-lab__title h1 { margin: .1em 0 0; font-size: clamp(5rem, 11vw, 10rem); line-height: .85; letter-spacing: -.075em; font-weight: 260; }
+.skytree-lab__title h1 small { margin-left: .1em; font-size: .2em; letter-spacing: .04em; font-weight: 650; }
+.skytree-lab__title p { margin: 1.4rem 0 0; font-family: serif; letter-spacing: .08em; color: var(--skytree-muted); }
+.skytree-lab__height { position: absolute; right: clamp(18px, 3.5vw, 48px); top: 9%; bottom: 12%; display: flex; align-items: center; gap: 12px; writing-mode: vertical-rl; color: var(--skytree-muted); font-size: .69rem; letter-spacing: .16em; pointer-events: none; }
+.skytree-lab__height i { display: block; height: 100%; border-right: 1px solid currentColor; position: relative; opacity: .65; }
+.skytree-lab__height i::before, .skytree-lab__height i::after { content: ''; position: absolute; right: -4px; width: 8px; border-top: 1px solid currentColor; }
+.skytree-lab__height i::before { top: 0; } .skytree-lab__height i::after { bottom: 0; }
+.skytree-lab__controls { position: absolute; z-index: 2; left: clamp(18px, 4vw, 54px); right: clamp(18px, 4vw, 54px); bottom: 28px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.skytree-lab__segments { display: flex; padding: 4px; border: 1px solid var(--skytree-border); border-radius: 999px; background: var(--skytree-panel); backdrop-filter: blur(14px); }
+.skytree-lab button { border: 0; color: inherit; font: inherit; cursor: pointer; }
+.skytree-lab__segments button { min-width: 72px; padding: 9px 15px; border-radius: 999px; background: transparent; font-size: .78rem; }
+.skytree-lab__segments button[aria-pressed='true'] { color: var(--color-background, #fff); background: var(--skytree-ink); }
+.skytree-lab__time { display: flex; gap: 8px; align-items: center; padding: 10px 16px; border: 1px solid var(--skytree-border) !important; border-radius: 999px; background: var(--skytree-panel); backdrop-filter: blur(14px); font-size: .78rem !important; }
+.skytree-lab__time span { font-size: 1rem; }
+.skytree-lab__hint { position: absolute; right: 50%; translate: 50% 0; bottom: 82px; margin: 0; font-size: .66rem; letter-spacing: .08em; color: var(--skytree-muted); pointer-events: none; }
+.skytree-lab__facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-top: 14px; overflow: hidden; border: 1px solid var(--skytree-border); border-radius: 14px; background: var(--skytree-border); }
+.skytree-lab__facts div { display: flex; flex-direction: column; padding: 18px 20px; background: var(--color-background, #f7f9f9); }
+.is-night .skytree-lab__facts div { background: #0d1823; }
+.skytree-lab__facts strong { font-size: 1.15rem; font-weight: 540; }
+.skytree-lab__facts span { margin-top: 4px; color: var(--skytree-muted); font-size: .72rem; }
+.skytree-lab__note { margin: 11px 4px 0; color: var(--color-text-secondary, #69777c); font-size: .7rem; }
+
+@media (max-width: 700px) {
+  .skytree-lab__stage { min-height: 620px; height: 78vh; border-radius: 14px; }
+  .skytree-lab__title h1 { font-size: 5.4rem; }
+  .skytree-lab__title p { max-width: 13rem; font-size: .8rem; }
+  .skytree-lab__controls { align-items: flex-end; }
+  .skytree-lab__segments { flex-direction: column; border-radius: 18px; }
+  .skytree-lab__segments button { min-width: 76px; padding: 7px 12px; }
+  .skytree-lab__hint { display: none; }
+  .skytree-lab__facts { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) { .skytree-lab__stage canvas { scroll-behavior: auto; } }

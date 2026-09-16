@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'skytree-visualizer',
+    title: 'Tokyo Skytree — 634m Visualizer',
+    description: 'three.jsで実寸比・三角形から円形へ移る塔体・鉄骨トラス・展望施設・昼夜照明を再現する3D実験',
+    component: lazy(() => import('./skytree-visualizer')),
+  },
+  {
     id: 'shiro-yado',
     title: '白の宿 — 3Dホテル案内',
     description: '小さな3階建てホテルのチェックイン後案内。宴会場・浴場・トイレ・客室を軽量3Dで案内する実験',
