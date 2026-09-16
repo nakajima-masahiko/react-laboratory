@@ -1,13 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { FloorId, PlaceId } from './hotel-data';
+import type { Locale } from './i18n';
 
 type HotelState = {
   myRoomId: PlaceId | null;
   fromFloor: FloorId;
   fromPlaceId: PlaceId;
+  locale: Locale;
   setMyRoom: (id: PlaceId | null) => void;
   setHere: (floor: FloorId, placeId: PlaceId) => void;
+  setLocale: (locale: Locale) => void;
 };
 
 export const useHotelStore = create<HotelState>()(
@@ -16,6 +19,7 @@ export const useHotelStore = create<HotelState>()(
       myRoomId: null,
       fromFloor: 1,
       fromPlaceId: 'lobby',
+      locale: 'ja',
       setMyRoom: (id) =>
         set({
           myRoomId: id,
@@ -27,14 +31,16 @@ export const useHotelStore = create<HotelState>()(
           fromFloor: floor,
           fromPlaceId: placeId,
         }),
+      setLocale: (locale) => set({ locale }),
     }),
     {
-      name: 'shiro-yado-v1',
+      name: 'shiro-yado-v2',
       skipHydration: true,
       partialize: (s) => ({
         myRoomId: s.myRoomId,
         fromFloor: s.fromFloor,
         fromPlaceId: s.fromPlaceId,
+        locale: s.locale,
       }),
     },
   ),
