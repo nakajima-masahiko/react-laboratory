@@ -258,7 +258,10 @@
   position: relative;
   height: 220px;
   min-height: 220px;
-  background: radial-gradient(circle at 50% 40%, var(--sy-surface), var(--sy-soft));
+  background-color: var(--sy-soft);
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
 }
 
 .shiro-yado__speaking {
