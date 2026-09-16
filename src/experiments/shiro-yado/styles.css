@@ -172,12 +172,152 @@
   gap: 10px;
 }
 
+.shiro-yado__concierge {
+  display: grid;
+  overflow: hidden;
+  background: var(--sy-elevated);
+  border: 1px solid var(--sy-border);
+  border-radius: 18px;
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__concierge-stage {
+  position: relative;
+  min-height: 360px;
+  background: radial-gradient(circle at 50% 35%, var(--sy-surface), var(--sy-soft));
+}
+
+.shiro-yado__speaking {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--sy-elevated);
+  color: var(--sy-muted);
+  box-shadow: var(--sy-shadow);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.shiro-yado__speaking.is-active {
+  background: var(--sy-accent);
+  color: var(--sy-accent-fg);
+}
+
+.shiro-yado__concierge-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.shiro-yado__concierge-content h3 {
+  margin: -8px 0 0;
+  font-size: 1.35rem;
+}
+
+.shiro-yado__concierge-copy {
+  margin: 0;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__concierge-menu {
+  display: grid;
+  gap: 8px;
+}
+
+.shiro-yado__concierge-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  text-align: left;
+}
+
+.shiro-yado__concierge-menu button.is-active,
+.shiro-yado__room-menu button.is-active {
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+}
+
+.shiro-yado__concierge-menu small {
+  color: var(--sy-muted);
+  text-align: right;
+}
+
+.shiro-yado__concierge-menu button.is-active small {
+  color: var(--sy-soft);
+}
+
+.shiro-yado__room-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.shiro-yado__room-menu button {
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--sy-soft);
+  color: var(--sy-muted);
+  font-size: 12px;
+}
+
+.shiro-yado__speech {
+  padding: 14px;
+  border-left: 3px solid var(--sy-accent);
+  background: var(--sy-soft);
+}
+
+.shiro-yado__speech p {
+  margin: 0;
+  color: var(--sy-fg);
+  line-height: 1.8;
+}
+
+.shiro-yado__speech small {
+  display: block;
+  margin-top: 8px;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__speech-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.shiro-yado__speech-actions button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--sy-elevated);
+  color: var(--sy-muted);
+  box-shadow: var(--sy-shadow);
+  font-size: 12px;
+}
+
 @media (min-width: 640px) {
   .shiro-yado__cta-row {
     grid-template-columns: 1fr 1fr;
   }
   .shiro-yado__canvas {
     height: 360px;
+  }
+
+  .shiro-yado__concierge {
+    grid-template-columns: minmax(240px, 0.82fr) minmax(320px, 1.18fr);
+  }
+
+  .shiro-yado__concierge-stage {
+    min-height: 560px;
   }
 }
 
