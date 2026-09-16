@@ -25,7 +25,10 @@ export function useConciergeSpeech(speechLang = 'ja-JP') {
   });
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const langRef = useRef(speechLang);
-  langRef.current = speechLang;
+
+  useEffect(() => {
+    langRef.current = speechLang;
+  }, [speechLang]);
 
   const stop = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {

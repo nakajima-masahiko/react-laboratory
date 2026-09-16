@@ -20,6 +20,7 @@ import {
   IconPin,
 } from './icons';
 import { getUi } from './ui-extra';
+import { getTourism } from './tourism-content';
 import { getFloorText, localizePlace } from './place-i18n';
 import { useNav } from './nav-state';
 import { HotelPreview } from './scene/HotelPreview';
@@ -39,6 +40,7 @@ export function HomeView() {
   const myRoomId = useHotelStore((s) => s.myRoomId);
   const locale = useHotelStore((s) => s.locale);
   const ui = getUi(locale);
+  const tourism = getTourism(locale);
   const myRoom = myRoomId ? localizePlace(locale, myRoomId) : null;
 
   return (
@@ -63,8 +65,8 @@ export function HomeView() {
       <button type="button" className="shiro-yado__tourism-link" onClick={() => go({ v: 'tourism' })}>
         <span>
           <small>SHIOSHIRO ISLAND</small>
-          <strong>汐白島の観光案内</strong>
-          <em>白の宿から巡る八つの景色</em>
+          <strong>{tourism.linkTitle}</strong>
+          <em>{tourism.linkSubtitle}</em>
         </span>
         <IconArrow />
       </button>

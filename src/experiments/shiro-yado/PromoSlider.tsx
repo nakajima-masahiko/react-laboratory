@@ -51,13 +51,13 @@ const PROMOS: Record<Locale, Promo[]> = {
 
 export function PromoSlider() {
   const locale = useHotelStore((s) => s.locale);
+  return <PromoSlides key={locale} locale={locale} />;
+}
+
+function PromoSlides({ locale }: { locale: Locale }) {
   const slides = PROMOS[locale] ?? PROMOS.ja;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    setIndex(0);
-  }, [locale]);
 
   useEffect(() => {
     if (paused || slides.length < 2) return;
