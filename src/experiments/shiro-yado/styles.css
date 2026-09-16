@@ -184,7 +184,9 @@
 .shiro-yado__body {
   flex: 1;
   min-height: 0;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 16px 14px 14px;
 }
 
@@ -295,7 +297,6 @@
   background: var(--sy-elevated);
   color: var(--sy-muted);
   box-shadow: var(--sy-shadow);
-  font-size: 10px;
 }
 
 .shiro-yado__speaking.is-active {
@@ -1044,15 +1045,15 @@
   line-height: 1.5;
 }
 
-/* Home: keep concierge at the top of the content area */
+/* Home: concierge sits at the top of the content and stays under the sticky header */
 .shiro-yado__stack--home {
   gap: 14px;
 }
 
 .shiro-yado__concierge-anchor {
   position: relative;
-  z-index: 5;
-  margin: -4px 0 0;
+  z-index: 12;
+  margin: 0;
 }
 
 .shiro-yado__stack--home > .shiro-yado__concierge-anchor {
@@ -1060,12 +1061,14 @@
 }
 
 .shiro-yado__body:has(.shiro-yado__stack--home) {
-  padding-top: 10px;
+  padding-top: 8px;
 }
 
+/* Stick under the app header (min-height ~64px) while scrolling home content */
 .shiro-yado__stack--home .shiro-yado__concierge {
   position: sticky;
   top: 0;
   z-index: 12;
+  background: var(--sy-elevated);
   box-shadow: var(--sy-shadow);
 }
