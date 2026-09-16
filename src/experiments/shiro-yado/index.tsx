@@ -75,10 +75,14 @@ function LangSwitcher() {
           type="button"
           className={locale === item.id ? 'is-active' : undefined}
           aria-pressed={locale === item.id}
+          aria-label={item.label}
           title={item.label}
           onClick={() => setLocale(item.id)}
         >
-          {item.short}
+          <span className="shiro-yado__lang-flag" aria-hidden>
+            {item.flag}
+          </span>
+          <span className="shiro-yado__lang-label">{item.short}</span>
         </button>
       ))}
     </div>
