@@ -6,21 +6,26 @@ type SpeechState = {
   message: string;
 };
 
-function chooseJapaneseVoice(voices: SpeechSynthesisVoice[]) {
+function chooseVoice(voices: SpeechSynthesisVoice[], lang: string) {
+  const prefix = lang.slice(0, 2).toLowerCase();
   return (
-    voices.find((voice) => voice.lang === 'ja-JP' && voice.localService) ??
-    voices.find((voice) => voice.lang.startsWith('ja')) ??
+    voices.find((voice) => voice.lang === lang && voice.localService) ??
+    voices.find((voice) => voice.lang === lang) ??
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(prefix) && voice.localService) ??
+    voices.find((voice) => voice.lang.toLowerCase().startsWith(prefix)) ??
     null
   );
 }
 
-export function useConciergeSpeech() {
+export function useConciergeSpeech(speechLang = 'ja-JP') {
   const [state, setState] = useState<SpeechState>({
     isSpeaking: false,
     isSupported: typeof window !== 'undefined' && 'speechSynthesis' in window,
     message: '',
   });
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const langRef = useRef(speechLang);
+  langRef.current = speechLang;
 
   const stop = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -38,11 +43,12 @@ export function useConciergeSpeech() {
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = 'ja-JP';
+    const lang = langRef.current;
+    utterance.lang = lang;
     utterance.rate = 0.92;
     utterance.pitch = 1.05;
     utterance.volume = 1;
-    utterance.voice = chooseJapaneseVoice(window.speechSynthesis.getVoices());
+    utterance.voice = chooseVoice(window.speechSynthesis.getVoices(), lang);
     utterance.onstart = () => {
       setState({ isSpeaking: true, isSupported: true, message });
     };
@@ -63,4 +69,3 @@ export function useConciergeSpeech() {
 
   return { ...state, speak, stop };
 }
-
