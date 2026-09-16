@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { getPlace, HOTEL_NAME, HOTEL_NAME_EN } from './hotel-data';
 import { IconBack, IconBath, IconBed, IconDoor, IconHall } from './icons';
-import { LOCALES, getUi, type Locale } from './i18n';
+import { LOCALES, type Locale } from './i18n';
 import { NavProvider } from './nav';
 import { backView, useNav, type View } from './nav-state';
 import { useHotelStore } from './store';
