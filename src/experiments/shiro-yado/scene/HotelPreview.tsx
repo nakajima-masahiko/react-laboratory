@@ -1,4 +1,6 @@
 import { useEffect, useState, type ComponentType } from 'react';
+import { getUi } from '../i18n';
+import { useHotelStore } from '../store';
 import type { SceneId } from './types';
 
 type StageProps = {
@@ -9,12 +11,15 @@ type StageProps = {
 export function HotelPreview({
   scene,
   autoRotate = false,
-  hint = 'ドラッグで回転・ピンチで拡大',
+  hint,
 }: {
   scene: SceneId;
   autoRotate?: boolean;
   hint?: string;
 }) {
+  const locale = useHotelStore((s) => s.locale);
+  const ui = getUi(locale);
+  const resolvedHint = hint ?? ui.dragHint;
   const [Stage, setStage] = useState<ComponentType<StageProps> | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -48,11 +53,11 @@ export function HotelPreview({
           <Stage scene={scene} autoRotate={autoRotate && !reduceMotion} />
         ) : (
           <div className="shiro-yado__stage-fallback">
-            {failed ? '3Dを表示できません' : '空間を読み込み中'}
+            {failed ? ui.sceneFailed : ui.loadingScene}
           </div>
         )}
       </div>
-      {hint ? <p className="shiro-yado__hint">{hint}</p> : null}
+      {resolvedHint ? <p className="shiro-yado__hint">{resolvedHint}</p> : null}
     </div>
   );
 }
