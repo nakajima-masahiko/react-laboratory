@@ -4,15 +4,16 @@ export const LOCALES: ReadonlyArray<{
   id: Locale;
   label: string;
   short: string;
+  flag: string;
   speechLang: string;
   hairColor: string;
 }> = [
-  { id: 'ja', label: '日本語', short: 'JA', speechLang: 'ja-JP', hairColor: '#5c4033' },
-  { id: 'en', label: 'English', short: 'EN', speechLang: 'en-US', hairColor: '#c4a35a' },
-  { id: 'fr', label: 'Français', short: 'FR', speechLang: 'fr-FR', hairColor: '#6b3a2a' },
-  { id: 'es', label: 'Español', short: 'ES', speechLang: 'es-ES', hairColor: '#2a1f18' },
-  { id: 'zh', label: '中文', short: '中', speechLang: 'zh-CN', hairColor: '#1a1210' },
-  { id: 'ko', label: '한국어', short: '한', speechLang: 'ko-KR', hairColor: '#3d2b1f' },
+  { id: 'ja', label: '日本語', short: 'JA', flag: '🇯🇵', speechLang: 'ja-JP', hairColor: '#5c4033' },
+  { id: 'en', label: 'English', short: 'EN', flag: '🇺🇸', speechLang: 'en-US', hairColor: '#c4a35a' },
+  { id: 'fr', label: 'Français', short: 'FR', flag: '🇫🇷', speechLang: 'fr-FR', hairColor: '#6b3a2a' },
+  { id: 'es', label: 'Español', short: 'ES', flag: '🇪🇸', speechLang: 'es-ES', hairColor: '#2a1f18' },
+  { id: 'zh', label: '中文', short: '中', flag: '🇨🇳', speechLang: 'zh-CN', hairColor: '#1a1210' },
+  { id: 'ko', label: '한국어', short: '한', flag: '🇰🇷', speechLang: 'ko-KR', hairColor: '#3d2b1f' },
 ];
 
 export function getLocaleMeta(locale: Locale) {
