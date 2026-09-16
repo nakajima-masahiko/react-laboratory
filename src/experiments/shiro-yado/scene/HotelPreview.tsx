@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { getUi } from '../i18n';
+import { getUi } from '../ui-extra';
 import { useHotelStore } from '../store';
 import type { SceneId } from './types';
 

@@ -20,7 +20,7 @@ import {
   IconMap,
   IconPin,
 } from './icons';
-import { getUi } from './i18n';
+import { getUi } from './ui-extra';
 import { getFloorText, localizePlace } from './place-i18n';
 import { useNav } from './nav-state';
 import { HotelPreview } from './scene/HotelPreview';
