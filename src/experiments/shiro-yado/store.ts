@@ -8,9 +8,11 @@ type HotelState = {
   fromFloor: FloorId;
   fromPlaceId: PlaceId;
   locale: Locale;
+  speechEnabled: boolean;
   setMyRoom: (id: PlaceId | null) => void;
   setHere: (floor: FloorId, placeId: PlaceId) => void;
   setLocale: (locale: Locale) => void;
+  setSpeechEnabled: (enabled: boolean) => void;
 };
 
 export const useHotelStore = create<HotelState>()(
@@ -20,6 +22,7 @@ export const useHotelStore = create<HotelState>()(
       fromFloor: 1,
       fromPlaceId: 'lobby',
       locale: 'ja',
+      speechEnabled: true,
       setMyRoom: (id) =>
         set({
           myRoomId: id,
@@ -32,6 +35,7 @@ export const useHotelStore = create<HotelState>()(
           fromPlaceId: placeId,
         }),
       setLocale: (locale) => set({ locale }),
+      setSpeechEnabled: (speechEnabled) => set({ speechEnabled }),
     }),
     {
       name: 'shiro-yado-v2',
@@ -41,6 +45,7 @@ export const useHotelStore = create<HotelState>()(
         fromFloor: s.fromFloor,
         fromPlaceId: s.fromPlaceId,
         locale: s.locale,
+        speechEnabled: s.speechEnabled,
       }),
     },
   ),

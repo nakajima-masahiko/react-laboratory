@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useHotelStore } from './store';
 
 type SpeechState = {
   isSpeaking: boolean;
@@ -18,6 +19,7 @@ function chooseVoice(voices: SpeechSynthesisVoice[], lang: string) {
 }
 
 export function useConciergeSpeech(speechLang = 'ja-JP') {
+  const speechEnabled = useHotelStore((state) => state.speechEnabled);
   const [state, setState] = useState<SpeechState>({
     isSpeaking: false,
     isSupported: typeof window !== 'undefined' && 'speechSynthesis' in window,
@@ -39,6 +41,10 @@ export function useConciergeSpeech(speechLang = 'ja-JP') {
   }, []);
 
   const speak = useCallback((message: string) => {
+    if (!speechEnabled) {
+      setState((current) => ({ ...current, isSpeaking: false, message }));
+      return;
+    }
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       setState({ isSpeaking: false, isSupported: false, message });
       return;
@@ -66,7 +72,7 @@ export function useConciergeSpeech(speechLang = 'ja-JP') {
     utteranceRef.current = utterance;
     setState({ isSpeaking: true, isSupported: true, message });
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [speechEnabled]);
 
   useEffect(() => stop, [stop]);
 

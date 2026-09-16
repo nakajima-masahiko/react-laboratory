@@ -58,14 +58,15 @@ function PromoSlides({ locale }: { locale: Locale }) {
   const slides = PROMOS[locale] ?? PROMOS.ja;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const reduceMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
-    if (paused || slides.length < 2) return;
+    if (paused || reduceMotion || slides.length < 2) return;
     const id = window.setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
     }, 4200);
     return () => window.clearInterval(id);
-  }, [paused, slides.length]);
+  }, [paused, reduceMotion, slides.length]);
 
   const go = (dir: -1 | 1) => {
     setIndex((i) => (i + dir + slides.length) % slides.length);

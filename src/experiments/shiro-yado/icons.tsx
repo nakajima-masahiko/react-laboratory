@@ -99,3 +99,12 @@ export function IconIsland({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconVolume({ className, muted = false }: IconProps & { muted?: boolean }) {
+  return (
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
+      <path d="M5 9v6h4l5 4V5L9 9H5Z" />
+      {muted ? <path d="m18 9 4 4m0-4-4 4" /> : <path d="M17 9.5a4 4 0 0 1 0 5M19.5 7a7 7 0 0 1 0 10" />}
+    </svg>
+  );
+}

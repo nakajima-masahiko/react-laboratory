@@ -3,6 +3,38 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import type { Group, Mesh } from 'three';
 
+let webglAvailable: boolean | undefined;
+
+function supportsWebGl() {
+  if (webglAvailable !== undefined) return webglAvailable;
+  try {
+    const canvas = document.createElement('canvas');
+    webglAvailable = Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch {
+    webglAvailable = false;
+  }
+  return webglAvailable;
+}
+
+function ConciergeFallback({ hairColor }: { hairColor: string }) {
+  return (
+    <div className="shiro-yado__concierge-fallback" role="img" aria-label="Concierge illustration">
+      <svg viewBox="0 0 240 280" aria-hidden>
+        <path d="M55 255c4-57 28-88 65-88s61 31 65 88" fill="var(--sy-elevated)" stroke="var(--sy-accent)" strokeWidth="3" />
+        <path d="M78 188c11-17 25-24 42-24s31 7 42 24l-13 67H91Z" fill="var(--sy-accent)" />
+        <path d="m104 169 16 25 16-25" fill="var(--sy-elevated)" />
+        <ellipse cx="120" cy="105" rx="53" ry="66" fill="var(--sy-skin)" />
+        <path d="M68 117c-9-55 15-91 52-91 40 0 63 36 53 94l-18-43c-25 11-49 11-73 0Z" fill={hairColor} />
+        <path d="M72 92c-9 35-7 73 9 101l19-17-5-79ZM168 92c9 35 7 73-9 101l-19-17 5-79Z" fill={hairColor} />
+        <ellipse cx="101" cy="109" rx="5" ry="7" fill="var(--sy-fg)" />
+        <ellipse cx="139" cy="109" rx="5" ry="7" fill="var(--sy-fg)" />
+        <path d="M104 137c10 8 22 8 32 0" fill="none" stroke="var(--sy-lip)" strokeWidth="4" strokeLinecap="round" />
+        <rect x="139" y="205" width="26" height="12" rx="3" fill="var(--sy-gold)" />
+      </svg>
+    </div>
+  );
+}
+
 function CuteConciergeFigure({ speaking, hairColor }: { speaking: boolean; hairColor: string }) {
   const groupRef = useRef<Group>(null);
   const lowerLipRef = useRef<Mesh>(null);
@@ -204,6 +236,8 @@ export function ConciergeModel({
   speaking: boolean;
   hairColor?: string;
 }) {
+  if (!supportsWebGl()) return <ConciergeFallback hairColor={hairColor} />;
+
   return (
     <Canvas
       dpr={[1, 1.5]}

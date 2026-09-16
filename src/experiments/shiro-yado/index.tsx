@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { getPlace, HOTEL_NAME, HOTEL_NAME_EN } from './hotel-data';
-import { IconBack, IconBath, IconBed, IconDoor, IconHall, IconHome } from './icons';
+import { IconBack, IconBed, IconHome, IconIsland, IconMap, IconVolume } from './icons';
 import { LOCALES, type Locale } from './i18n';
 import { NavProvider } from './nav';
 import { backView, useNav, type View } from './nav-state';
@@ -25,22 +25,22 @@ function QuickNav({ current }: { current: View }) {
   const locale = useHotelStore((s) => s.locale);
   const short: Record<string, Record<Locale, string>> = {
     home: { ja: 'ホーム', en: 'Home', fr: 'Accueil', es: 'Inicio', zh: '首页', ko: '홈' },
-    banquet: { ja: '宴会場', en: 'Banquet', fr: 'Banquet', es: 'Salón', zh: '宴会厅', ko: '연회장' },
-    bath: { ja: '浴場', en: 'Bath', fr: 'Bains', es: 'Baños', zh: '浴场', ko: '목욕탕' },
-    restroom: { ja: 'トイレ', en: 'WC', fr: 'WC', es: 'Aseos', zh: '卫生间', ko: '화장실' },
+    guide: { ja: '館内案内', en: 'Guide', fr: 'Guide', es: 'Guía', zh: '馆内', ko: '관내' },
+    tourism: { ja: '観光案内', en: 'Explore', fr: 'Visites', es: 'Turismo', zh: '观光', ko: '관광' },
     room: { ja: 'お部屋', en: 'Room', fr: 'Chambre', es: 'Hab.', zh: '客房', ko: '객실' },
+    floors: { ja: '館内図', en: 'Map', fr: 'Plan', es: 'Mapa', zh: '地图', ko: '지도' },
   };
   const items = [
     { key: 'home', label: short.home[locale] ?? 'Home', view: { v: 'home' as const }, icon: <IconHome /> },
-    { key: 'banquet', label: short.banquet[locale] ?? 'Banquet', view: { v: 'guide' as const, p: 'banquet' as const }, icon: <IconHall /> },
-    { key: 'bath', label: short.bath[locale] ?? 'Bath', view: { v: 'guide' as const, p: 'bath' as const }, icon: <IconBath /> },
-    { key: 'restroom', label: short.restroom[locale] ?? 'WC', view: { v: 'guide' as const, p: 'restroom' as const }, icon: <IconDoor /> },
+    { key: 'guide', label: short.guide[locale] ?? 'Guide', view: { v: 'dest' as const }, icon: <IconHome /> },
+    { key: 'tourism', label: short.tourism[locale] ?? 'Explore', view: { v: 'tourism' as const }, icon: <IconIsland /> },
     {
       key: 'room',
       label: short.room[locale] ?? 'Room',
       view: myRoomId ? { v: 'guide' as const, p: myRoomId } : { v: 'checkin' as const },
       icon: <IconBed />,
     },
+    { key: 'floors', label: short.floors[locale] ?? 'Map', view: { v: 'floors' as const }, icon: <IconMap /> },
   ];
 
   return (
@@ -49,8 +49,11 @@ function QuickNav({ current }: { current: View }) {
         const active =
           item.key === 'home'
             ? current.v === 'home'
-            : current.v === 'guide' &&
-              ((item.key === 'room' && current.p === myRoomId) || current.p === item.key);
+            : item.key === 'guide'
+              ? ['dest', 'guide', 'place'].includes(current.v) && !(current.v === 'guide' && current.p === myRoomId)
+              : item.key === 'room'
+                ? current.v === 'checkin' || (['guide', 'place'].includes(current.v) && current.p === myRoomId)
+                : current.v === item.key;
         return (
           <button
             key={item.key}
@@ -72,25 +75,15 @@ function LangSwitcher() {
   const locale = useHotelStore((s) => s.locale);
   const setLocale = useHotelStore((s) => s.setLocale);
 
+  const current = LOCALES.find((item) => item.id === locale) ?? LOCALES[0];
   return (
-    <div className="shiro-yado__lang" role="group" aria-label="Language">
-      {LOCALES.map((item) => (
-        <button
-          key={item.id}
-          type="button"
-          className={locale === item.id ? 'is-active' : undefined}
-          aria-pressed={locale === item.id}
-          aria-label={item.label}
-          title={item.label}
-          onClick={() => setLocale(item.id)}
-        >
-          <span className="shiro-yado__lang-flag" aria-hidden>
-            {item.flag}
-          </span>
-          <span className="shiro-yado__lang-label">{item.short}</span>
-        </button>
-      ))}
-    </div>
+    <label className="shiro-yado__lang">
+      <span aria-hidden>{current.flag}</span>
+      <span className="shiro-yado__sr-only">Language</span>
+      <select value={locale} aria-label="Language" onChange={(event) => setLocale(event.target.value as Locale)}>
+        {LOCALES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+      </select>
+    </label>
   );
 }
 
@@ -98,7 +91,15 @@ function Shell() {
   const { view, go } = useNav();
   const fromPlaceId = useHotelStore((s) => s.fromPlaceId);
   const here = getPlace(fromPlaceId);
+  const locale = useHotelStore((s) => s.locale);
+  const speechEnabled = useHotelStore((s) => s.speechEnabled);
+  const setSpeechEnabled = useHotelStore((s) => s.setSpeechEnabled);
   const back = backView(view);
+
+  const toggleSpeech = () => {
+    if (speechEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    setSpeechEnabled(!speechEnabled);
+  };
 
   useEffect(() => {
     void useHotelStore.persist.rehydrate();
@@ -139,9 +140,10 @@ function Shell() {
         </button>
         <div className="shiro-yado__header-right">
           <LangSwitcher />
-          <span className="shiro-yado__here" title={here ? here.name : undefined}>
-            {here ? `${here.floor}F` : ''}
-          </span>
+          <button type="button" className="shiro-yado__sound" aria-pressed={!speechEnabled} aria-label={speechEnabled ? 'Mute speech' : 'Enable speech'} onClick={toggleSpeech}>
+            <IconVolume muted={!speechEnabled} />
+          </button>
+          <span className="shiro-yado__here" title={here ? here.name : undefined}>{here ? `${locale === 'ja' ? '現在地 ' : ''}${here.floor}F` : ''}</span>
         </div>
       </header>
       <div className="shiro-yado__body">{content}</div>

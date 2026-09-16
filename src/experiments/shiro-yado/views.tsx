@@ -46,34 +46,36 @@ export function HomeView() {
 
   return (
     <div className="shiro-yado__stack">
-      <ConciergeGuide />
-      <PromoSlider />
       <section className="shiro-yado__hero">
         <p className="shiro-yado__eyebrow">{ui.homeEyebrow}</p>
         <h2 className="shiro-yado__title">{ui.hotelName}</h2>
         <p className="shiro-yado__lead">{ui.homeLead}</p>
       </section>
-      <div className="shiro-yado__cta-row">
-        <button type="button" className="shiro-yado__btn shiro-yado__btn--primary" onClick={() => go({ v: 'dest' })}>
-          {ui.chooseDest}
+      <nav className="shiro-yado__home-actions" aria-label="Main services">
+        <button type="button" className="shiro-yado__home-action" onClick={() => go({ v: 'dest' })}>
+          <span className="shiro-yado__home-action-icon"><IconMap /></span>
+          <span><small>HOTEL GUIDE</small><strong>{ui.chooseDest}</strong><em>{ui.destLead}</em></span>
           <IconArrow />
         </button>
-        <button type="button" className="shiro-yado__btn shiro-yado__btn--outline" onClick={() => go({ v: 'floors' })}>
-          {ui.chooseFloor}
-          <IconMap />
-        </button>
-      </div>
-      <button type="button" className="shiro-yado__tourism-link" onClick={() => go({ v: 'tourism' })}>
-        <span className="shiro-yado__tourism-link-main">
-          <span className="shiro-yado__tourism-link-icon"><IconIsland /></span>
-          <span>
-            <small>SHIOSHIRO ISLAND</small>
-            <strong>{tourism.linkTitle}</strong>
-            <em>{tourism.linkSubtitle}</em>
+        <button type="button" className="shiro-yado__tourism-link" onClick={() => go({ v: 'tourism' })}>
+          <span className="shiro-yado__tourism-link-main">
+            <span className="shiro-yado__tourism-link-icon"><IconIsland /></span>
+            <span>
+              <small>SHIOSHIRO ISLAND</small>
+              <strong>{tourism.linkTitle}</strong>
+              <em>{tourism.linkSubtitle}</em>
+            </span>
           </span>
-        </span>
-        <IconArrow />
-      </button>
+          <IconArrow />
+        </button>
+        <button type="button" className="shiro-yado__home-action" onClick={() => go(myRoom ? { v: 'guide', p: myRoom.id } : { v: 'checkin' })}>
+          <span className="shiro-yado__home-action-icon"><IconBed /></span>
+          <span><small>MY STAY</small><strong>{myRoom ? ui.toRoom : ui.checkIn}</strong><em>{myRoom ? `${myRoom.number} ${myRoom.typeLabel}` : ui.stayUnsetHint}</em></span>
+          <IconArrow />
+        </button>
+      </nav>
+      <ConciergeGuide />
+      <PromoSlider />
       <section className="shiro-yado__section">
         <div className="shiro-yado__section-head">
           <h3>{ui.quickTitle}</h3>
@@ -113,18 +115,6 @@ export function HomeView() {
             </span>
           </button>
         </div>
-      </section>
-      <section className="shiro-yado__card">
-        <p className="shiro-yado__eyebrow">{ui.stayTitle}</p>
-        <h3>{myRoom ? myRoom.name : ui.stayUnset}</h3>
-        <p className="shiro-yado__muted">{myRoom ? ui.staySetHint : ui.stayUnsetHint}</p>
-        <button
-          type="button"
-          className={myRoom ? 'shiro-yado__btn shiro-yado__btn--outline' : 'shiro-yado__btn shiro-yado__btn--primary'}
-          onClick={() => go({ v: 'checkin' })}
-        >
-          {myRoom ? ui.changeRoom : ui.checkIn}
-        </button>
       </section>
       <section className="shiro-yado__section">
         <h3>{ui.floors}</h3>
