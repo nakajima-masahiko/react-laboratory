@@ -46,6 +46,7 @@ export function HomeView() {
 
   return (
     <div className="shiro-yado__stack">
+      <ConciergeGuide />
       <section className="shiro-yado__hero">
         <p className="shiro-yado__eyebrow">{ui.homeEyebrow}</p>
         <h2 className="shiro-yado__title">{ui.hotelName}</h2>
@@ -74,7 +75,6 @@ export function HomeView() {
           <IconArrow />
         </button>
       </nav>
-      <ConciergeGuide />
       <PromoSlider />
       <section className="shiro-yado__section">
         <div className="shiro-yado__section-head">
@@ -418,67 +418,3 @@ export function CheckinView() {
       {myRoomId ? (
         <button type="button" className="shiro-yado__btn shiro-yado__btn--ghost" onClick={() => setMyRoom(null)}>
           {ui.clearRoom}
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
-export function DestView() {
-  const { go } = useNav();
-  const locale = useHotelStore((s) => s.locale);
-  const ui = getUi(locale);
-  return (
-    <div className="shiro-yado__stack">
-      <header className="shiro-yado__hero">
-        <p className="shiro-yado__eyebrow">DESTINATION</p>
-        <h2>{ui.destTitle}</h2>
-        <p className="shiro-yado__muted">{ui.destLead}</p>
-      </header>
-      <section className="shiro-yado__section">
-        <h3>{ui.facilities3f}</h3>
-        <div className="shiro-yado__list">
-          {FACILITY_IDS.map((id) => {
-            const place = localizePlace(locale, id);
-            return (
-              <button key={id} type="button" className="shiro-yado__row shiro-yado__row--tall" onClick={() => go({ v: 'guide', p: id })}>
-                <span>
-                  <strong>{place.name}</strong>
-                  <small>{place.summary}</small>
-                  {place.hours ? <small>{place.hours}</small> : null}
-                </span>
-                <IconArrow />
-              </button>
-            );
-          })}
-        </div>
-      </section>
-      <section className="shiro-yado__section">
-        <h3>{ui.rooms2f}</h3>
-        <div className="shiro-yado__list">
-          {ROOM_IDS.map((id) => {
-            const room = localizePlace(locale, id);
-            return (
-              <button key={id} type="button" className="shiro-yado__row" onClick={() => go({ v: 'guide', p: id })}>
-                <span>
-                  <strong>
-                    {room.number} {room.typeLabel}
-                  </strong>
-                  <small>{room.summary}</small>
-                </span>
-                <IconArrow />
-              </button>
-            );
-          })}
-        </div>
-      </section>
-      <button type="button" className="shiro-yado__row shiro-yado__tile--soft" onClick={() => go({ v: 'guide', p: 'lobby' })}>
-        <span>
-          <strong>{ui.lobbyReturn}</strong>
-          <small>{ui.lobbyReturnSub}</small>
-        </span>
-        <IconArrow />
-      </button>
-    </div>
-  );
-}
