@@ -16,6 +16,15 @@ export function IconBack({ className }: IconProps) {
   );
 }
 
+export function IconHome({ className }: IconProps) {
+  return (
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+      <path d="M4 11.5 12 5l8 6.5" />
+      <path d="M6 10.5V19h4.5v-5h3v5H18v-8.5" />
+    </svg>
+  );
+}
+
 export function IconBath({ className }: IconProps) {
   return (
     <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
