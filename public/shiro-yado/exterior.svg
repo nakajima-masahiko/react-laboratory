@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" role="img" aria-label="白の宿 exterior">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8f0f4"/>
+      <stop offset="55%" stop-color="#f2ebe3"/>
+      <stop offset="100%" stop-color="#ebe4da"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbf9f5"/>
+      <stop offset="100%" stop-color="#efe8de"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a635a"/>
+      <stop offset="100%" stop-color="#4a453f"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4a574"/>
+      <stop offset="100%" stop-color="#a8895c"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d9d0c4"/>
+      <stop offset="100%" stop-color="#c8bdb0"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d5e4ea"/>
+      <stop offset="100%" stop-color="#b8cdd6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="400" fill="url(#sky)"/>
+  <path d="M0 210 Q80 180 160 200 T320 195 T480 205 T640 190 L640 400 L0 400 Z" fill="#dfe6e2" opacity="0.55"/>
+  <path d="M0 230 Q120 205 240 225 T480 220 T640 235 L640 400 L0 400 Z" fill="#d4dcd6" opacity="0.45"/>
+
+  <rect y="300" width="640" height="100" fill="url(#ground)"/>
+  <rect y="300" width="640" height="8" fill="#c0b5a6" opacity="0.5"/>
+
+  <ellipse cx="70" cy="310" rx="48" ry="14" fill="#9aaf9a" opacity="0.55"/>
+  <ellipse cx="55" cy="300" rx="18" ry="28" fill="#7d9478"/>
+  <ellipse cx="78" cy="298" rx="14" ry="22" fill="#8aa584"/>
+  <ellipse cx="95" cy="305" rx="12" ry="18" fill="#6f856b"/>
+
+  <ellipse cx="560" cy="312" rx="55" ry="15" fill="#9aaf9a" opacity="0.5"/>
+  <ellipse cx="545" cy="300" rx="16" ry="26" fill="#7d9478"/>
+  <ellipse cx="568" cy="297" rx="13" ry="24" fill="#8aa584"/>
+  <ellipse cx="588" cy="304" rx="11" ry="16" fill="#6f856b"/>
+
+  <path d="M280 400 Q300 340 320 300 Q340 340 360 400 Z" fill="#cfc6b8" opacity="0.7"/>
+  <path d="M300 400 Q315 350 320 310 Q325 350 340 400 Z" fill="#ddd5c8" opacity="0.5"/>
+
+  <ellipse cx="320" cy="308" rx="150" ry="12" fill="#000" opacity="0.06"/>
+
+  <g transform="translate(170,70)">
+    <rect x="0" y="40" width="70" height="190" rx="2" fill="url(#wall)" stroke="#ddd5c8" stroke-width="1"/>
+    <rect x="70" y="20" width="160" height="210" rx="2" fill="url(#wall)" stroke="#ddd5c8" stroke-width="1"/>
+    <rect x="230" y="40" width="70" height="190" rx="2" fill="url(#wall)" stroke="#ddd5c8" stroke-width="1"/>
+
+    <path d="M55 20 L150 0 L245 20 Z" fill="url(#roof)"/>
+    <path d="M55 20 L150 0 L245 20 L245 28 L150 10 L55 28 Z" fill="#5a544c"/>
+    <path d="M-5 40 L35 22 L75 40 Z" fill="url(#roof)"/>
+    <path d="M-5 40 L35 22 L75 40 L75 46 L35 30 L-5 46 Z" fill="#5a544c"/>
+    <path d="M225 40 L265 22 L305 40 Z" fill="url(#roof)"/>
+    <path d="M225 40 L265 22 L305 40 L305 46 L265 30 L225 46 Z" fill="#5a544c"/>
+
+    <rect x="2" y="95" width="66" height="4" fill="url(#wood)" opacity="0.85"/>
+    <rect x="72" y="95" width="156" height="4" fill="url(#wood)" opacity="0.85"/>
+    <rect x="232" y="95" width="66" height="4" fill="url(#wood)" opacity="0.85"/>
+    <rect x="2" y="155" width="66" height="4" fill="url(#wood)" opacity="0.85"/>
+    <rect x="72" y="155" width="156" height="4" fill="url(#wood)" opacity="0.85"/>
+    <rect x="232" y="155" width="66" height="4" fill="url(#wood)" opacity="0.85"/>
+
+    <rect x="90" y="42" width="28" height="36" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="136" y="42" width="28" height="36" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="182" y="42" width="28" height="36" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <line x1="104" y1="42" x2="104" y2="78" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="90" y1="60" x2="118" y2="60" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="150" y1="42" x2="150" y2="78" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="136" y1="60" x2="164" y2="60" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="196" y1="42" x2="196" y2="78" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="182" y1="60" x2="210" y2="60" stroke="#c4b8a8" stroke-width="1"/>
+
+    <rect x="90" y="110" width="28" height="36" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="136" y="110" width="28" height="36" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="182" y="110" width="28" height="36" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <line x1="104" y1="110" x2="104" y2="146" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="90" y1="128" x2="118" y2="128" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="150" y1="110" x2="150" y2="146" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="136" y1="128" x2="164" y2="128" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="196" y1="110" x2="196" y2="146" stroke="#c4b8a8" stroke-width="1"/>
+    <line x1="182" y1="128" x2="210" y2="128" stroke="#c4b8a8" stroke-width="1"/>
+
+    <rect x="18" y="55" width="34" height="28" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="18" y="115" width="34" height="28" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="18" y="175" width="34" height="28" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="248" y="55" width="34" height="28" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="248" y="115" width="34" height="28" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+    <rect x="248" y="175" width="34" height="28" rx="2" fill="url(#glass)" stroke="#c4b8a8" stroke-width="1.5"/>
+
+    <rect x="115" y="188" width="70" height="8" rx="1" fill="url(#wood)"/>
+    <rect x="120" y="180" width="60" height="10" rx="1" fill="#b89564"/>
+    <rect x="130" y="196" width="40" height="34" rx="2" fill="#5c4a38"/>
+    <rect x="134" y="200" width="15" height="28" rx="1" fill="#4a3a2a"/>
+    <rect x="151" y="200" width="15" height="28" rx="1" fill="#4a3a2a"/>
+    <circle cx="148" cy="214" r="1.5" fill="#c9a84c"/>
+    <rect x="125" y="228" width="50" height="5" fill="#d4cbc0"/>
+    <rect x="120" y="232" width="60" height="5" fill="#c8bfb4"/>
+
+    <rect x="68" y="20" width="3" height="210" fill="#d4c4ae" opacity="0.7"/>
+    <rect x="229" y="20" width="3" height="210" fill="#d4c4ae" opacity="0.7"/>
+  </g>
+
+  <g transform="translate(290,268)">
+    <rect x="0" y="0" width="60" height="14" rx="2" fill="#8b6914"/>
+    <text x="30" y="10.5" text-anchor="middle" font-family="Hiragino Mincho ProN, Noto Serif JP, serif" font-size="9" fill="#f5f0e6" letter-spacing="1">白の宿</text>
+  </g>
+
+  <rect width="640" height="400" fill="#f8f4ee" opacity="0.12"/>
+</svg>
