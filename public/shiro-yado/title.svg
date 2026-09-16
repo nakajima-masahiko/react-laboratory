@@ -1,55 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="480" height="120" viewBox="0 0 480 120" role="img" aria-label="白の宿">
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="120" viewBox="0 0 520 120" role="img" aria-label="Shiro no Yado — a quiet white inn">
   <defs>
-    <linearGradient id="wood" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8b6914"/>
-      <stop offset="18%" stop-color="#a67c2a"/>
-      <stop offset="35%" stop-color="#c4a35a"/>
-      <stop offset="52%" stop-color="#b08940"/>
-      <stop offset="70%" stop-color="#9a7530"/>
-      <stop offset="88%" stop-color="#c9a84c"/>
-      <stop offset="100%" stop-color="#8b6914"/>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbf9f5"/>
+      <stop offset="100%" stop-color="#efe8de"/>
     </linearGradient>
-    <linearGradient id="woodEdge" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#5c4010" stop-opacity="0.35"/>
-      <stop offset="40%" stop-color="#5c4010" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#3d2808" stop-opacity="0.45"/>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8f0f4"/>
+      <stop offset="100%" stop-color="#f2ebe3"/>
     </linearGradient>
-    <filter id="grain" x="-5%" y="-5%" width="110%" height="110%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" result="noise"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.35  0 0 0 0 0.22  0 0 0 0 0.08  0 0 0 0.18 0" in="noise" result="grainColor"/>
-      <feBlend in="SourceGraphic" in2="grainColor" mode="multiply"/>
-    </filter>
-    <filter id="inkSoft">
-      <feGaussianBlur stdDeviation="0.4" result="b"/>
-      <feMerge>
-        <feMergeNode in="b"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+    <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6a635a"/>
+      <stop offset="100%" stop-color="#4a453f"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4a574"/>
+      <stop offset="100%" stop-color="#a8895c"/>
+    </linearGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f0ebe3"/>
+    </linearGradient>
   </defs>
 
-  <rect x="4" y="6" width="472" height="108" rx="6" ry="6" fill="url(#wood)" filter="url(#grain)"/>
-  <rect x="4" y="6" width="472" height="108" rx="6" ry="6" fill="url(#woodEdge)"/>
-  <rect x="10" y="12" width="460" height="96" rx="3" ry="3" fill="none" stroke="#5c4010" stroke-opacity="0.35" stroke-width="1.5"/>
-  <rect x="14" y="16" width="452" height="88" rx="2" ry="2" fill="none" stroke="#f5e6c8" stroke-opacity="0.22" stroke-width="1"/>
+  <!-- soft plaque -->
+  <rect x="2" y="4" width="516" height="112" rx="10" fill="url(#panel)" stroke="#e4ddd3" stroke-width="1.5"/>
+  <rect x="8" y="10" width="504" height="100" rx="7" fill="none" stroke="#d4cbc0" stroke-width="0.75" opacity="0.7"/>
 
-  <g stroke="#5c4010" stroke-opacity="0.12" stroke-width="0.8" fill="none">
-    <path d="M20 28 Q120 26 240 30 T460 28"/>
-    <path d="M18 48 Q140 52 280 46 T462 50"/>
-    <path d="M22 72 Q160 68 300 74 T458 70"/>
-    <path d="M20 95 Q180 98 320 92 T460 96"/>
+  <!-- left: mini hotel vignette -->
+  <g transform="translate(22,18)">
+    <rect x="0" y="0" width="96" height="84" rx="6" fill="url(#sky)"/>
+    <!-- ground -->
+    <rect x="0" y="68" width="96" height="16" fill="#d9d0c4" opacity="0.85"/>
+    <!-- building body -->
+    <rect x="22" y="28" width="52" height="44" rx="1.5" fill="url(#wall)" stroke="#ddd5c8" stroke-width="0.8"/>
+    <!-- roof -->
+    <path d="M18 30 L48 14 L78 30 Z" fill="url(#roof)"/>
+    <path d="M18 30 L48 14 L78 30 L78 34 L48 20 L18 34 Z" fill="#5a544c"/>
+    <!-- wood floor lines -->
+    <rect x="24" y="42" width="48" height="2.2" fill="url(#wood)" opacity="0.9"/>
+    <rect x="24" y="54" width="48" height="2.2" fill="url(#wood)" opacity="0.9"/>
+    <!-- windows -->
+    <rect x="28" y="32" width="10" height="8" rx="0.8" fill="#c5d6de" stroke="#c4b8a8" stroke-width="0.6"/>
+    <rect x="43" y="32" width="10" height="8" rx="0.8" fill="#c5d6de" stroke="#c4b8a8" stroke-width="0.6"/>
+    <rect x="58" y="32" width="10" height="8" rx="0.8" fill="#c5d6de" stroke="#c4b8a8" stroke-width="0.6"/>
+    <rect x="28" y="45" width="10" height="8" rx="0.8" fill="#c5d6de" stroke="#c4b8a8" stroke-width="0.6"/>
+    <rect x="43" y="45" width="10" height="8" rx="0.8" fill="#c5d6de" stroke="#c4b8a8" stroke-width="0.6"/>
+    <rect x="58" y="45" width="10" height="8" rx="0.8" fill="#c5d6de" stroke="#c4b8a8" stroke-width="0.6"/>
+    <!-- door -->
+    <rect x="42" y="58" width="12" height="14" rx="1" fill="#5c4a38"/>
+    <rect x="38" y="56" width="20" height="3" rx="0.5" fill="url(#wood)"/>
+    <!-- tiny trees -->
+    <ellipse cx="14" cy="66" rx="6" ry="9" fill="#7d9478"/>
+    <ellipse cx="82" cy="66" rx="5" ry="8" fill="#8aa584"/>
   </g>
 
-  <g filter="url(#inkSoft)" text-anchor="middle" dominant-baseline="central">
-    <text x="240" y="58" font-family="Hiragino Mincho ProN, Noto Serif JP, Yu Mincho, serif" font-size="48" font-weight="600" fill="#1a1208" opacity="0.25" letter-spacing="0.12em">白の宿</text>
-    <text x="240" y="56" font-family="Hiragino Mincho ProN, Noto Serif JP, Yu Mincho, serif" font-size="48" font-weight="600" fill="#1a1208" letter-spacing="0.12em">白の宿</text>
-  </g>
+  <!-- divider -->
+  <line x1="132" y1="28" x2="132" y2="92" stroke="#d4cbc0" stroke-width="1"/>
 
-  <g fill="none" stroke="#3d2808" stroke-opacity="0.4" stroke-width="1.2">
-    <path d="M18 22 h12 M18 22 v12"/>
-    <path d="M462 22 h-12 M462 22 v12"/>
-    <path d="M18 98 h12 M18 98 v-12"/>
-    <path d="M462 98 h-12 M462 98 v-12"/>
+  <!-- text block -->
+  <g transform="translate(148,0)">
+    <text x="0" y="42" font-family="Georgia, 'Times New Roman', 'Hiragino Mincho ProN', serif" font-size="15" fill="#938d84" letter-spacing="0.28em">A QUIET WHITE INN</text>
+    <text x="0" y="72" font-family="Georgia, 'Times New Roman', 'Hiragino Mincho ProN', serif" font-size="28" font-weight="600" fill="#2c2a27" letter-spacing="0.04em">Shiro no Yado</text>
+    <text x="0" y="96" font-family="'Hiragino Mincho ProN', 'Noto Serif JP', Georgia, serif" font-size="13" fill="#6f6a63" letter-spacing="0.35em">白 の 宿</text>
   </g>
 </svg>
