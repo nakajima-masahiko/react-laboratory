@@ -75,20 +75,38 @@
 
 .shiro-yado__brand {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   text-align: center;
+  min-width: 0;
+}
+
+.shiro-yado__title-board {
+  display: block;
+  height: 36px;
+  width: auto;
+  max-width: min(200px, 52vw);
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgb(44 42 39 / 0.12);
+}
+
+.shiro-yado__brand-en,
+.shiro-yado__brand span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--sy-subtle);
+  line-height: 1.2;
 }
 
 .shiro-yado__brand strong {
   display: block;
   font-size: 1rem;
   letter-spacing: 0.04em;
-}
-
-.shiro-yado__brand span {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  color: var(--sy-subtle);
 }
 
 .shiro-yado__here {
