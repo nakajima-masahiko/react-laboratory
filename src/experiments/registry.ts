@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'aquarium-walk',
+    title: 'Immersive Aquarium — 海を歩く',
+    description: 'three.jsによる一人称歩行型水族館。左右6基の水槽、生成AI背景、魚群・クラゲ・大型生物を鑑賞する3D実験',
+    component: lazy(() => import('./aquarium-walk')),
+  },
+  {
     id: 'skytree-visualizer',
     title: 'Tokyo Skytree — 634m Visualizer',
     description: 'three.jsで実寸比・三角形から円形へ移る塔体・鉄骨トラス・展望施設・昼夜照明を再現する3D実験',
@@ -137,3 +143,4 @@ export const experiments: ExperimentEntry[] = [
     component: lazy(() => import('./sma-wasm-benchmark')),
   },
 ];
+
