@@ -3,13 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import type { Group, Mesh } from 'three';
 
-/**
- * 白の宿コンシェルジュ — かわいい女性上半身モデル（手続き型）
- * - 上半身のみ
- * - speaking に連動して口パク
- * - GLB不要・軽量
- */
-function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
+function CuteConciergeFigure({ speaking, hairColor }: { speaking: boolean; hairColor: string }) {
   const groupRef = useRef<Group>(null);
   const lowerLipRef = useRef<Mesh>(null);
   const mouthInnerRef = useRef<Mesh>(null);
@@ -37,7 +31,7 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
   });
 
   const SKIN = '#f8d5c8';
-  const HAIR = '#5c4033';
+  const HAIR = hairColor;
   const BLUSH = '#f0a090';
   const LIP = '#e07878';
   const EYE_W = '#fffaf6';
@@ -48,28 +42,23 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
 
   return (
     <group ref={groupRef} position={[0, -0.42, 0]} scale={0.95}>
-      {/* 頭 */}
       <mesh position={[0, 0.38, 0]}>
         <sphereGeometry args={[0.215, 32, 24]} />
         <meshStandardMaterial color={SKIN} roughness={0.5} />
       </mesh>
 
-      {/* 髪（後ろ） */}
       <mesh position={[0, 0.4, -0.08]} scale={[1.08, 1.05, 0.92]}>
         <sphereGeometry args={[0.255, 24, 18]} />
         <meshStandardMaterial color={HAIR} roughness={0.8} />
       </mesh>
-      {/* 頭頂 */}
       <mesh position={[0, 0.54, -0.02]} scale={[1.15, 0.7, 1]}>
         <sphereGeometry args={[0.18, 20, 14]} />
         <meshStandardMaterial color={HAIR} roughness={0.8} />
       </mesh>
-      {/* 前髪 */}
       <mesh position={[0, 0.535, 0.13]} scale={[1.45, 0.28, 0.5]}>
         <sphereGeometry args={[0.15, 18, 12]} />
         <meshStandardMaterial color={HAIR} roughness={0.8} />
       </mesh>
-      {/* サイド */}
       <mesh position={[-0.25, 0.28, -0.01]}>
         <capsuleGeometry args={[0.058, 0.26, 6, 10]} />
         <meshStandardMaterial color={HAIR} roughness={0.8} />
@@ -79,7 +68,6 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         <meshStandardMaterial color={HAIR} roughness={0.8} />
       </mesh>
 
-      {/* ほっぺ */}
       <mesh position={[-0.11, 0.325, 0.17]}>
         <sphereGeometry args={[0.042, 12, 10]} />
         <meshStandardMaterial color={BLUSH} transparent opacity={0.5} roughness={0.7} />
@@ -89,7 +77,6 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         <meshStandardMaterial color={BLUSH} transparent opacity={0.5} roughness={0.7} />
       </mesh>
 
-      {/* 目（左） */}
       <group position={[-0.075, 0.405, 0.19]}>
         <mesh>
           <sphereGeometry args={[0.05, 16, 12]} />
@@ -108,7 +95,6 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
           <meshStandardMaterial color="#ffffff" roughness={0.1} />
         </mesh>
       </group>
-      {/* 目（右） */}
       <group position={[0.075, 0.405, 0.19]}>
         <mesh>
           <sphereGeometry args={[0.05, 16, 12]} />
@@ -128,12 +114,11 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         </mesh>
       </group>
 
-      {/* 口（顔の下部） */}
       <mesh ref={mouthInnerRef} position={[0, 0.305, 0.195]}>
         <boxGeometry args={[0.05, 0.016, 0.018]} />
         <meshStandardMaterial color="#3a2824" roughness={0.7} />
       </mesh>
-      <mesh ref={lowerLipRef} position={[0, 0.298, 0.20]}>
+      <mesh ref={lowerLipRef} position={[0, 0.298, 0.2]}>
         <boxGeometry args={[0.062, 0.016, 0.022]} />
         <meshStandardMaterial color={LIP} roughness={0.35} />
       </mesh>
@@ -142,18 +127,15 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         <meshStandardMaterial color={LIP} roughness={0.35} />
       </mesh>
 
-      {/* 首 */}
       <mesh position={[0, 0.18, 0]}>
         <cylinderGeometry args={[0.065, 0.085, 0.14, 16]} />
         <meshStandardMaterial color={SKIN} roughness={0.5} />
       </mesh>
 
-      {/* 白いブラウス */}
       <mesh position={[0, 0.02, 0]}>
         <capsuleGeometry args={[0.195, 0.24, 8, 16]} />
         <meshStandardMaterial color={BLOUSE} roughness={0.6} />
       </mesh>
-      {/* ネイビーベスト（左右・前面） */}
       <mesh position={[-0.105, -0.01, 0.14]}>
         <boxGeometry args={[0.155, 0.34, 0.08]} />
         <meshStandardMaterial color={VEST} roughness={0.55} />
@@ -162,12 +144,10 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         <boxGeometry args={[0.155, 0.34, 0.08]} />
         <meshStandardMaterial color={VEST} roughness={0.55} />
       </mesh>
-      {/* ベスト中央の白い開き */}
       <mesh position={[0, -0.01, 0.175]}>
         <boxGeometry args={[0.055, 0.32, 0.04]} />
         <meshStandardMaterial color={BLOUSE} roughness={0.55} />
       </mesh>
-      {/* 白い襟 */}
       <mesh position={[-0.07, 0.145, 0.13]} rotation={[0.25, 0.15, 0.2]}>
         <boxGeometry args={[0.12, 0.04, 0.06]} />
         <meshStandardMaterial color={BLOUSE} roughness={0.5} />
@@ -176,7 +156,6 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         <boxGeometry args={[0.12, 0.04, 0.06]} />
         <meshStandardMaterial color={BLOUSE} roughness={0.5} />
       </mesh>
-      {/* リボンタイ */}
       <mesh position={[-0.04, 0.12, 0.16]} rotation={[0, 0, 0.4]}>
         <boxGeometry args={[0.055, 0.038, 0.02]} />
         <meshStandardMaterial color={VEST} roughness={0.45} />
@@ -189,12 +168,10 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         <boxGeometry args={[0.028, 0.028, 0.024]} />
         <meshStandardMaterial color={VEST} roughness={0.45} />
       </mesh>
-      {/* 名札 */}
       <mesh position={[0.12, 0.05, 0.185]}>
         <boxGeometry args={[0.07, 0.035, 0.012]} />
         <meshStandardMaterial color={GOLD} roughness={0.35} />
       </mesh>
-      {/* ボタン */}
       <mesh position={[0, 0.05, 0.19]}>
         <sphereGeometry args={[0.012, 8, 6]} />
         <meshStandardMaterial color={GOLD} roughness={0.3} />
@@ -208,7 +185,6 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
         <meshStandardMaterial color={GOLD} roughness={0.3} />
       </mesh>
 
-      {/* 腕（白い袖） */}
       <mesh position={[-0.26, 0.04, 0]} rotation={[0, 0, 0.32]}>
         <capsuleGeometry args={[0.055, 0.2, 6, 10]} />
         <meshStandardMaterial color={BLOUSE} roughness={0.6} />
@@ -221,7 +197,13 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
   );
 }
 
-export function ConciergeModel({ speaking }: { speaking: boolean }) {
+export function ConciergeModel({
+  speaking,
+  hairColor = '#5c4033',
+}: {
+  speaking: boolean;
+  hairColor?: string;
+}) {
   return (
     <Canvas
       dpr={[1, 1.5]}
@@ -233,7 +215,7 @@ export function ConciergeModel({ speaking }: { speaking: boolean }) {
       <hemisphereLight args={['#fff8f0', '#e0d4c4', 1.05]} />
       <directionalLight position={[2.2, 3.5, 2.5]} intensity={1.7} />
       <directionalLight position={[-2, 1.2, -1.5]} intensity={0.45} />
-      <CuteConciergeFigure speaking={speaking} />
+      <CuteConciergeFigure speaking={speaking} hairColor={hairColor} />
       <ContactShadows position={[0, -0.62, 0]} opacity={0.1} scale={2} blur={2} far={2.2} />
     </Canvas>
   );
