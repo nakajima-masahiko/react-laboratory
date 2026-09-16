@@ -25,6 +25,7 @@ import { useNav } from './nav-state';
 import { HotelPreview } from './scene/HotelPreview';
 import type { SceneId } from './scene/types';
 import { useHotelStore } from './store';
+import { ConciergeGuide } from './ConciergeGuide';
 
 const FLOOR_SCENES: Record<FloorId, SceneId> = {
   1: 'floor-1',
@@ -48,6 +49,8 @@ export function HomeView() {
       </section>
 
       <HotelPreview scene="lobby" autoRotate />
+
+      <ConciergeGuide />
 
       <div className="shiro-yado__cta-row">
         <button type="button" className="shiro-yado__btn shiro-yado__btn--primary" onClick={() => go({ v: 'dest' })}>
