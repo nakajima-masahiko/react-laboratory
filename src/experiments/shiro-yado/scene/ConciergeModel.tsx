@@ -31,8 +31,8 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
     }
 
     if (groupRef.current) {
-      groupRef.current.position.y = -0.48 + Math.sin(t * 1.35) * 0.007;
-      groupRef.current.rotation.y = Math.sin(t * 0.5) * 0.035;
+      groupRef.current.position.y = -0.42 + Math.sin(t * 1.35) * 0.006;
+      groupRef.current.rotation.y = Math.sin(t * 0.5) * 0.03;
     }
   });
 
@@ -47,7 +47,7 @@ function CuteConciergeFigure({ speaking }: { speaking: boolean }) {
   const GOLD = '#c9a84c';
 
   return (
-    <group ref={groupRef} position={[0, -0.48, 0]} scale={1.12}>
+    <group ref={groupRef} position={[0, -0.42, 0]} scale={0.95}>
       {/* 頭 */}
       <mesh position={[0, 0.38, 0]}>
         <sphereGeometry args={[0.215, 32, 24]} />
@@ -225,16 +225,16 @@ export function ConciergeModel({ speaking }: { speaking: boolean }) {
   return (
     <Canvas
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0.22, 2.15], fov: 30, near: 0.1, far: 20 }}
+      camera={{ position: [0, 0.18, 2.35], fov: 28, near: 0.1, far: 20 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      style={{ touchAction: 'none' }}
+      style={{ touchAction: 'none', width: '100%', height: '100%' }}
     >
       <ambientLight intensity={1.25} />
       <hemisphereLight args={['#fff8f0', '#e0d4c4', 1.05]} />
       <directionalLight position={[2.2, 3.5, 2.5]} intensity={1.7} />
       <directionalLight position={[-2, 1.2, -1.5]} intensity={0.45} />
       <CuteConciergeFigure speaking={speaking} />
-      <ContactShadows position={[0, -0.68, 0]} opacity={0.12} scale={2.2} blur={2.2} far={2.5} />
+      <ContactShadows position={[0, -0.62, 0]} opacity={0.1} scale={2} blur={2} far={2.2} />
     </Canvas>
   );
 }
