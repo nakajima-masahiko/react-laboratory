@@ -3,6 +3,10 @@ import type { Place, PlaceId } from './hotel-data';
 import { PLACES } from './hotel-data';
 import { PLACE_JA } from './place-data-ja';
 import { PLACE_EN } from './place-data-en';
+import { PLACE_FR } from './place-data-fr';
+import { PLACE_ES } from './place-data-es';
+import { PLACE_ZH } from './place-data-zh';
+import { PLACE_KO } from './place-data-ko';
 
 export type PlaceText = {
   name: string;
@@ -31,10 +35,10 @@ export type PlanLabels = {
 const PLACE_TEXT: Record<Locale, Record<PlaceId, PlaceText>> = {
   ja: PLACE_JA,
   en: PLACE_EN,
-  fr: PLACE_EN,
-  es: PLACE_EN,
-  zh: PLACE_EN,
-  ko: PLACE_EN,
+  fr: PLACE_FR,
+  es: PLACE_ES,
+  zh: PLACE_ZH,
+  ko: PLACE_KO,
 };
 
 export function getPlaceText(locale: Locale, id: PlaceId): PlaceText {
