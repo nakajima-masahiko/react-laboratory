@@ -865,3 +865,209 @@
     animation: none;
   }
 }
+
+.shiro-yado__tourism-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 116px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--sy-fg), var(--sy-accent));
+  color: var(--sy-elevated);
+  text-align: left;
+}
+
+.shiro-yado__tourism-link span,
+.shiro-yado__tourism-link strong,
+.shiro-yado__tourism-link small,
+.shiro-yado__tourism-link em {
+  display: block;
+}
+
+.shiro-yado__tourism-link small {
+  margin-bottom: 6px;
+  color: var(--sy-soft);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.shiro-yado__tourism-link strong {
+  font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-size: 1.25rem;
+}
+
+.shiro-yado__tourism-link em {
+  margin-top: 5px;
+  color: var(--sy-soft);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.shiro-yado__island-map {
+  overflow: hidden;
+  margin: 0;
+  border-radius: 16px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__island-map img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.shiro-yado__island-map figcaption {
+  padding: 12px 14px;
+  color: var(--sy-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.shiro-yado__spot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.shiro-yado__spot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 68px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  text-align: left;
+}
+
+.shiro-yado__spot.is-active {
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+}
+
+.shiro-yado__spot-number {
+  display: inline-flex;
+  flex: 0 0 30px;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--sy-soft);
+  color: var(--sy-fg);
+  font-weight: 700;
+}
+
+.shiro-yado__spot strong,
+.shiro-yado__spot small {
+  display: block;
+}
+
+.shiro-yado__spot strong {
+  line-height: 1.35;
+}
+
+.shiro-yado__spot small {
+  margin-top: 3px;
+  color: var(--sy-subtle);
+  font-size: 11px;
+}
+
+.shiro-yado__spot.is-active small {
+  color: var(--sy-soft);
+}
+
+.shiro-yado__tourism-detail {
+  display: grid;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--sy-elevated);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__tourism-concierge {
+  min-height: 300px;
+  background: radial-gradient(circle at 50% 35%, var(--sy-surface), var(--sy-soft));
+}
+
+.shiro-yado__tourism-copy {
+  padding: 18px;
+}
+
+.shiro-yado__tourism-copy h3 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.shiro-yado__tourism-copy > p:not(.shiro-yado__eyebrow) {
+  color: var(--sy-muted);
+  line-height: 1.8;
+}
+
+.shiro-yado__tourism-copy dl {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+}
+
+.shiro-yado__tourism-copy dt {
+  color: var(--sy-subtle);
+  font-size: 11px;
+}
+
+.shiro-yado__tourism-copy dd {
+  margin: 3px 0 0;
+  line-height: 1.55;
+}
+
+.shiro-yado__course-list {
+  display: grid;
+  gap: 10px;
+}
+
+.shiro-yado__course-list article {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__course-list article > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shiro-yado__course-list span {
+  color: var(--sy-accent);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.shiro-yado__course-list p {
+  margin: 8px 0 0;
+  color: var(--sy-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+@media (min-width: 640px) {
+  .shiro-yado__spot-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .shiro-yado__tourism-detail {
+    grid-template-columns: minmax(240px, 0.8fr) minmax(320px, 1.2fr);
+  }
+
+  .shiro-yado__tourism-concierge {
+    min-height: 460px;
+  }
+}

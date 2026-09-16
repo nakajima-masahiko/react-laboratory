@@ -5,6 +5,7 @@ import { LOCALES, type Locale } from './i18n';
 import { NavProvider } from './nav';
 import { backView, useNav, type View } from './nav-state';
 import { useHotelStore } from './store';
+import { TourismGuide } from './TourismGuide';
 import {
   CheckinView,
   DestView,
@@ -113,6 +114,7 @@ function Shell() {
     content = view.p ? <GuideView destId={view.p} /> : <DestView />;
   } else if (view.v === 'checkin') content = <CheckinView />;
   else if (view.v === 'dest') content = <DestView />;
+  else if (view.v === 'tourism') content = <TourismGuide />;
 
   return (
     <div className="shiro-yado">

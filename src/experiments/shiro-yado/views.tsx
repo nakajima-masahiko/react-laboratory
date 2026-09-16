@@ -60,6 +60,14 @@ export function HomeView() {
           <IconMap />
         </button>
       </div>
+      <button type="button" className="shiro-yado__tourism-link" onClick={() => go({ v: 'tourism' })}>
+        <span>
+          <small>SHIOSHIRO ISLAND</small>
+          <strong>汐白島の観光案内</strong>
+          <em>白の宿から巡る八つの景色</em>
+        </span>
+        <IconArrow />
+      </button>
       <section className="shiro-yado__section">
         <div className="shiro-yado__section-head">
           <h3>{ui.quickTitle}</h3>
