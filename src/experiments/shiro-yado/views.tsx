@@ -3,7 +3,6 @@ import { buildGuide } from './guide';
 import {
   FACILITY_IDS,
   FLOORS,
-  PLACES,
   ROOM_IDS,
   getPlace,
   type FloorId,
