@@ -1,0 +1,55 @@
+.walk-aquarium {
+  --aq-ink: rgba(229, 246, 246, 0.92);
+  --aq-muted: rgba(207, 231, 232, 0.58);
+  --aq-faint: rgba(207, 231, 232, 0.3);
+  --aq-line: rgba(181, 224, 229, 0.24);
+  --aq-panel: rgba(3, 12, 17, 0.82);
+  --aq-accent: #76d9e8;
+  position: relative;
+  width: 100vw;
+  height: min(82svh, 820px);
+  min-height: 620px;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  background: var(--aq-panel);
+  color: var(--aq-ink);
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  isolation: isolate;
+}
+.walk-aquarium canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
+.walk-aquarium::after { position: absolute; z-index: 2; inset: 0; content: ''; pointer-events: none; box-shadow: inset 0 0 100px rgba(0, 5, 8, 0.58), inset 0 -70px 100px rgba(0, 4, 7, 0.4); }
+.walk-aquarium-brand { position: absolute; z-index: 5; top: 28px; left: clamp(24px, 5vw, 72px); pointer-events: none; }
+.walk-aquarium-brand small, .walk-aquarium-label small, .walk-aquarium-intro small, .walk-aquarium-footer { font-family: var(--sans); letter-spacing: 0.25em; }
+.walk-aquarium-brand small { color: var(--aq-faint); font-size: 8px; }
+.walk-aquarium-brand h2 { margin: 8px 0 0; color: var(--aq-ink); font-size: clamp(16px, 2vw, 23px); font-weight: 400; letter-spacing: 0.16em; }
+.walk-aquarium-intro { position: absolute; z-index: 10; inset: 0; display: grid; place-content: center; justify-items: center; padding: 32px; background: radial-gradient(circle at center, rgba(7, 29, 39, 0.78), rgba(2, 7, 10, 0.94)); text-align: center; }
+.walk-aquarium-intro small { color: var(--aq-accent); font-size: 9px; }
+.walk-aquarium-intro h3 { max-width: 680px; margin: 20px 0 10px; color: var(--aq-ink); font-size: clamp(24px, 4vw, 44px); font-weight: 400; letter-spacing: 0.12em; }
+.walk-aquarium-intro p { margin: 0 0 28px; color: var(--aq-muted); font-size: 13px; letter-spacing: 0.08em; }
+.walk-aquarium-intro button, .walk-aquarium-resume { border: 1px solid var(--aq-line); background: rgba(14, 61, 75, 0.42); color: var(--aq-ink); letter-spacing: 0.16em; }
+.walk-aquarium-intro span { margin-top: 18px; color: var(--aq-faint); font-family: var(--sans); font-size: 9px; letter-spacing: 0.07em; }
+.walk-aquarium-resume { position: absolute; z-index: 8; top: 30px; right: clamp(24px, 5vw, 72px); font-size: 11px; }
+.walk-aquarium-label { position: absolute; z-index: 5; bottom: 90px; left: clamp(24px, 6vw, 88px); display: flex; flex-direction: column; padding: 14px 18px; border-left: 1px solid var(--aq-line); background: linear-gradient(90deg, var(--aq-panel), transparent); pointer-events: none; }
+.walk-aquarium-label small { color: var(--aq-faint); font-size: 8px; }
+.walk-aquarium-label strong { margin-top: 6px; font-size: 18px; font-weight: 400; letter-spacing: 0.15em; }
+.walk-aquarium-reticle { position: absolute; z-index: 5; top: 50%; left: 50%; width: 4px; height: 4px; border: 1px solid var(--aq-muted); border-radius: 50%; opacity: 0.48; pointer-events: none; transform: translate(-50%, -50%); }
+.walk-aquarium-footer { position: absolute; z-index: 5; right: clamp(24px, 5vw, 72px); bottom: 30px; left: clamp(24px, 5vw, 72px); display: flex; justify-content: space-between; color: var(--aq-faint); font-size: 8px; pointer-events: none; }
+.walk-aquarium-loading { position: absolute; z-index: 12; inset: 0; display: grid; place-items: center; background: var(--aq-panel); color: var(--aq-muted); letter-spacing: 0.16em; }
+.walk-aquarium-touch { position: absolute; z-index: 7; right: 18px; bottom: 58px; display: none; gap: 8px; }
+.walk-aquarium-touch > div { display: flex; gap: 6px; }
+.walk-aquarium .walk-aquarium-touch-button { min-width: 58px; padding: 10px 12px; border-color: var(--aq-line); background: var(--aq-panel); color: var(--aq-muted); font-size: 10px; }
+@media (hover: none), (pointer: coarse) {
+  .walk-aquarium-touch { display: flex; flex-direction: column; }
+  .walk-aquarium-reticle { display: none; }
+  .walk-aquarium-intro span { display: none; }
+  .walk-aquarium-resume { display: none; }
+  .walk-aquarium-label { bottom: 72px; }
+}
+@media (max-width: 680px) {
+  .walk-aquarium { height: 78svh; min-height: 560px; }
+  .walk-aquarium-brand { top: 20px; left: 20px; }
+  .walk-aquarium-footer { right: 20px; bottom: 20px; left: 20px; }
+  .walk-aquarium-footer span:first-child { display: none; }
+  .walk-aquarium-label { left: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { .walk-aquarium * { scroll-behavior: auto !important; transition-duration: 0.01ms !important; } }
