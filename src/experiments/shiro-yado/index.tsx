@@ -15,6 +15,8 @@ import {
 } from './views';
 import './styles.css';
 
+const TITLE_SRC = `${import.meta.env.BASE_URL}shiro-yado/title.svg`;
+
 function QuickNav({ current }: { current: View }) {
   const { go } = useNav();
   const myRoomId = useHotelStore((s) => s.myRoomId);
@@ -85,8 +87,15 @@ function Shell() {
           <span className="shiro-yado__icon-btn" aria-hidden />
         )}
         <button type="button" className="shiro-yado__brand" onClick={() => go({ v: 'home' })}>
-          <strong>{HOTEL_NAME}</strong>
-          <span>{HOTEL_NAME_EN}</span>
+          <img
+            className="shiro-yado__title-board"
+            src={TITLE_SRC}
+            alt={HOTEL_NAME}
+            width={160}
+            height={40}
+            decoding="async"
+          />
+          <span className="shiro-yado__brand-en">{HOTEL_NAME_EN}</span>
         </button>
         <span className="shiro-yado__here" title={here ? `現在地 ${here.name}` : undefined}>
           {here ? `${here.floor}F` : ''}
