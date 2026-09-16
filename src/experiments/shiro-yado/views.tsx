@@ -16,6 +16,7 @@ import {
   IconCheck,
   IconDoor,
   IconHall,
+  IconIsland,
   IconMap,
   IconPin,
 } from './icons';
@@ -63,10 +64,13 @@ export function HomeView() {
         </button>
       </div>
       <button type="button" className="shiro-yado__tourism-link" onClick={() => go({ v: 'tourism' })}>
-        <span>
-          <small>SHIOSHIRO ISLAND</small>
-          <strong>{tourism.linkTitle}</strong>
-          <em>{tourism.linkSubtitle}</em>
+        <span className="shiro-yado__tourism-link-main">
+          <span className="shiro-yado__tourism-link-icon"><IconIsland /></span>
+          <span>
+            <small>SHIOSHIRO ISLAND</small>
+            <strong>{tourism.linkTitle}</strong>
+            <em>{tourism.linkSubtitle}</em>
+          </span>
         </span>
         <IconArrow />
       </button>

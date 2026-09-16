@@ -886,6 +886,28 @@
   display: block;
 }
 
+.shiro-yado__tourism-link-main {
+  display: flex !important;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.shiro-yado__tourism-link-icon {
+  display: grid !important;
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 38%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sy-elevated) 12%, transparent);
+}
+
+.shiro-yado__tourism-link-icon svg {
+  display: block;
+}
+
 .shiro-yado__tourism-link small {
   margin-bottom: 6px;
   color: var(--sy-soft);

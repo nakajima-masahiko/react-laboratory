@@ -86,3 +86,16 @@ export function IconMap({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconIsland({ className }: IconProps) {
+  return (
+    <svg className={className} width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden>
+      <path d="M3 23.5c3.2-2.2 6.3-2.2 9.5 0s6.3 2.2 9.5 0 5.5-2.2 7 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M6 27c2.8-1.7 5.5-1.7 8.3 0s5.5 1.7 8.3 0 4.7-1.7 6.4 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity=".65" />
+      <path d="M8.5 21c1.7-4.5 4.2-7.2 7.5-8.2 3.5 1 6 3.7 7.5 8.2" fill="currentColor" opacity=".22" />
+      <path d="M8.5 21c1.7-4.5 4.2-7.2 7.5-8.2 3.5 1 6 3.7 7.5 8.2" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M16 12.8V6.5M16 6.5h5l-1.4 1.8L21 10h-5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12.8 17.8c1-1.3 2-2 3.2-2s2.2.7 3.2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
