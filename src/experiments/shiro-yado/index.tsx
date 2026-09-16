@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { getPlace, HOTEL_NAME, HOTEL_NAME_EN } from './hotel-data';
-import { IconBack, IconBath, IconBed, IconDoor, IconHall } from './icons';
+import { IconBack, IconBath, IconBed, IconDoor, IconHall, IconHome } from './icons';
 import { LOCALES, type Locale } from './i18n';
 import { NavProvider } from './nav';
 import { backView, useNav, type View } from './nav-state';
@@ -23,12 +23,14 @@ function QuickNav({ current }: { current: View }) {
   const myRoomId = useHotelStore((s) => s.myRoomId);
   const locale = useHotelStore((s) => s.locale);
   const short: Record<string, Record<Locale, string>> = {
+    home: { ja: 'ホーム', en: 'Home', fr: 'Accueil', es: 'Inicio', zh: '首页', ko: '홈' },
     banquet: { ja: '宴会場', en: 'Banquet', fr: 'Banquet', es: 'Salón', zh: '宴会厅', ko: '연회장' },
     bath: { ja: '浴場', en: 'Bath', fr: 'Bains', es: 'Baños', zh: '浴场', ko: '목욕탕' },
     restroom: { ja: 'トイレ', en: 'WC', fr: 'WC', es: 'Aseos', zh: '卫生间', ko: '화장실' },
     room: { ja: 'お部屋', en: 'Room', fr: 'Chambre', es: 'Hab.', zh: '客房', ko: '객실' },
   };
   const items = [
+    { key: 'home', label: short.home[locale] ?? 'Home', view: { v: 'home' as const }, icon: <IconHome /> },
     { key: 'banquet', label: short.banquet[locale] ?? 'Banquet', view: { v: 'guide' as const, p: 'banquet' as const }, icon: <IconHall /> },
     { key: 'bath', label: short.bath[locale] ?? 'Bath', view: { v: 'guide' as const, p: 'bath' as const }, icon: <IconBath /> },
     { key: 'restroom', label: short.restroom[locale] ?? 'WC', view: { v: 'guide' as const, p: 'restroom' as const }, icon: <IconDoor /> },
@@ -44,8 +46,10 @@ function QuickNav({ current }: { current: View }) {
     <nav className="shiro-yado__quick" aria-label="Quick navigation">
       {items.map((item) => {
         const active =
-          current.v === 'guide' &&
-          ((item.key === 'room' && current.p === myRoomId) || current.p === item.key);
+          item.key === 'home'
+            ? current.v === 'home'
+            : current.v === 'guide' &&
+              ((item.key === 'room' && current.p === myRoomId) || current.p === item.key);
         return (
           <button
             key={item.key}
