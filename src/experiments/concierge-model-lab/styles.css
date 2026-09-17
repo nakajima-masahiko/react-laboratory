@@ -1,0 +1,105 @@
+.concierge-lab {
+  --cl-ink: var(--text-h);
+  --cl-muted: var(--text);
+  --cl-paper: var(--bg);
+  --cl-line: var(--border);
+  --cl-accent: var(--accent);
+  --cl-soft: var(--accent-light);
+  --cl-radius: 18px;
+  color: var(--cl-muted);
+}
+
+.concierge-lab__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, .95fr);
+  min-height: 560px;
+  overflow: hidden;
+  border: 1px solid var(--cl-line);
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--cl-paper), var(--cl-soft));
+}
+
+.concierge-lab__intro { padding: clamp(32px, 6vw, 72px); align-self: center; }
+.concierge-lab__eyebrow, .concierge-lab__section-heading > p, .concierge-lab__phase-number {
+  margin: 0 0 12px;
+  color: var(--cl-accent);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.concierge-lab__intro h1 { margin: 0; font-size: clamp(2rem, 5vw, 4.25rem); line-height: 1.12; letter-spacing: -.045em; }
+.concierge-lab__lead { max-width: 590px; margin: 26px 0 38px; font-size: 1.02rem; line-height: 1.9; }
+.concierge-lab__progress-meta { display: flex; justify-content: space-between; margin-bottom: 9px; color: var(--cl-ink); font-size: .72rem; letter-spacing: .1em; }
+.concierge-lab__progress-track { height: 5px; overflow: hidden; border-radius: 999px; background: var(--cl-line); }
+.concierge-lab__progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--cl-accent); transition: width .35s ease; }
+
+.concierge-lab__viewer { position: relative; min-height: 480px; background: var(--cl-soft); }
+.concierge-lab__viewer canvas { cursor: grab; }
+.concierge-lab__viewer-caption { position: absolute; right: 22px; bottom: 22px; left: 22px; display: grid; padding: 16px 18px; border: 1px solid var(--cl-line); border-radius: 14px; background: color-mix(in srgb, var(--cl-paper) 84%, transparent); backdrop-filter: blur(12px); }
+.concierge-lab__viewer-caption span { color: var(--cl-accent); font-size: .65rem; font-weight: 800; letter-spacing: .14em; }
+.concierge-lab__viewer-caption strong { color: var(--cl-ink); }
+.concierge-lab__viewer-caption small { margin-top: 4px; }
+
+.concierge-lab__section { padding: 90px 0 0; }
+.concierge-lab__section-heading { display: grid; grid-template-columns: minmax(220px, .7fr) minmax(260px, 1fr); gap: 4px 34px; margin-bottom: 30px; }
+.concierge-lab__section-heading > p { grid-row: 1 / 3; }
+.concierge-lab__section-heading h2 { margin: 0; font-size: clamp(1.65rem, 3vw, 2.55rem); letter-spacing: -.03em; }
+.concierge-lab__section-heading span { line-height: 1.7; }
+
+.concierge-lab__workflow { display: grid; grid-template-columns: minmax(230px, .72fr) minmax(0, 1.28fr); border: 1px solid var(--cl-line); border-radius: var(--cl-radius); overflow: hidden; }
+.concierge-lab__phase-list { display: grid; background: var(--cl-soft); }
+.concierge-lab__phase { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; padding: 16px 20px; border: 0; border-bottom: 1px solid var(--cl-line); border-radius: 0; background: transparent; text-align: left; }
+.concierge-lab__phase:last-child { border-bottom: 0; }
+.concierge-lab__phase span { color: var(--cl-accent); font: 700 .74rem var(--mono); }
+.concierge-lab__phase strong { color: var(--cl-ink); }
+.concierge-lab__phase i { padding: 2px 7px; border-radius: 999px; background: var(--cl-accent); color: var(--accent-foreground); font-size: .64rem; font-style: normal; }
+.concierge-lab__phase.is-active { background: var(--cl-paper); box-shadow: inset 3px 0 var(--cl-accent); }
+.concierge-lab__phase-detail { padding: clamp(28px, 5vw, 56px); background: var(--cl-paper); }
+.concierge-lab__phase-detail h3 { margin: 0 0 12px; font-size: 2rem; }
+.concierge-lab__phase-detail > p:not(.concierge-lab__phase-number) { font-size: 1.05rem; }
+.concierge-lab__deliverable { display: flex; align-items: center; gap: 14px; margin: 25px 0; padding: 14px 16px; border: 1px solid var(--cl-line); border-radius: 10px; background: var(--cl-soft); }
+.concierge-lab__deliverable span { font-size: .75rem; font-weight: 800; }
+.concierge-lab__deliverable code { color: var(--cl-accent); }
+.concierge-lab__phase-detail ul { margin: 0 0 26px; padding-left: 1.25rem; line-height: 2; }
+.concierge-lab__complete { background: var(--cl-accent); color: var(--accent-foreground); font-weight: 700; }
+
+.concierge-lab__prompt-section { position: relative; }
+.concierge-lab__prompt-grid { display: grid; grid-template-columns: 1.45fr .55fr; gap: 16px; }
+.concierge-lab__prompt-card { padding: 26px; border: 1px solid var(--cl-line); border-radius: var(--cl-radius); background: var(--cl-paper); }
+.concierge-lab__prompt-card--main { background: var(--cl-soft); }
+.concierge-lab__prompt-card > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.concierge-lab__prompt-card span { color: var(--cl-accent); font-size: .72rem; font-weight: 800; letter-spacing: .13em; }
+.concierge-lab__prompt-card button { padding: 5px 11px; font-size: .8rem; }
+.concierge-lab__prompt-card p { margin: 22px 0 0; line-height: 1.9; }
+
+.concierge-lab__score-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.concierge-lab__score-grid article { padding: 24px; border: 1px solid var(--cl-line); border-radius: 14px; }
+.concierge-lab__score-grid strong { color: var(--cl-accent); font-size: 2rem; }
+.concierge-lab__score-grid strong small { margin-left: 2px; font-size: .7rem; }
+.concierge-lab__score-grid h3 { margin: 12px 0 4px; }
+.concierge-lab__score-grid p { margin: 0; font-size: .9rem; }
+.concierge-lab__handoff { display: grid; grid-template-columns: .7fr 1.3fr; gap: 30px; align-items: center; margin-top: 16px; padding: 28px; border-radius: var(--cl-radius); background: var(--cl-ink); color: var(--cl-paper); }
+.concierge-lab__handoff span { color: var(--cl-accent); font-size: .7rem; font-weight: 800; letter-spacing: .14em; }
+.concierge-lab__handoff h3 { margin: 5px 0 0; color: var(--cl-paper); }
+.concierge-lab__handoff p { margin: 0; }
+.concierge-lab__handoff code { color: var(--cl-accent); overflow-wrap: anywhere; }
+
+@media (max-width: 760px) {
+  .concierge-lab__hero, .concierge-lab__workflow, .concierge-lab__prompt-grid, .concierge-lab__handoff { grid-template-columns: 1fr; }
+  .concierge-lab__hero { min-height: 0; }
+  .concierge-lab__viewer { min-height: 430px; }
+  .concierge-lab__section { padding-top: 64px; }
+  .concierge-lab__section-heading { grid-template-columns: 1fr; }
+  .concierge-lab__section-heading > p { grid-row: auto; }
+  .concierge-lab__score-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .concierge-lab__intro { padding: 28px 22px; }
+  .concierge-lab__score-grid { grid-template-columns: 1fr; }
+  .concierge-lab__phase-detail { padding: 26px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .concierge-lab__progress-track span { transition: none; }
+}
