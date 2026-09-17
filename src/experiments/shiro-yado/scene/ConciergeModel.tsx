@@ -25,6 +25,7 @@ function ConciergePhoto() {
   return (
     <div className="shiro-yado__concierge-fallback" role="img" aria-label="白の宿コンシェルジュ（写真）">
       <img
+        className="shiro-yado__concierge-photo"
         src={CONCIERGE_IMAGE_LOCAL}
         alt="白の宿のコンシェルジュ"
         onError={(e) => {
@@ -33,14 +34,6 @@ function ConciergePhoto() {
           if (img.src !== CONCIERGE_IMAGE_REMOTE) {
             img.src = CONCIERGE_IMAGE_REMOTE;
           }
-        }}
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center 18%',
-          borderRadius: '12px',
-          display: 'block',
         }}
       />
     </div>
