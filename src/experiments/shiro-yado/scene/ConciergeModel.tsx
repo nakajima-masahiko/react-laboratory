@@ -16,9 +16,8 @@ function supportsWebGl() {
   return webglAvailable;
 }
 
-/** Grok Imagine で生成した白の宿コンシェルジュ画像（フォールバック用） */
-const CONCIERGE_IMAGE =
-  'https://assets.grok.com/users/bc95a996-7e67-400e-a9da-54275fc7c916/generated/35c7a451-1e48-465c-92eb-08eb6a165bf7/image.jpg?cache=1';
+/** リポジトリ内のコンシェルジュ画像（public/shiro-yado/concierge.jpg） */
+const CONCIERGE_IMAGE = `${import.meta.env.BASE_URL}shiro-yado/concierge.jpg`;
 
 function ConciergeFallback() {
   return (
