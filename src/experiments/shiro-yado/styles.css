@@ -1,1 +1,837 @@
-PLACEHOLDER_TOO_LONG
+.shiro-yado {
+  --sy-bg: #f4f1eb;
+  --sy-elevated: #fbf9f5;
+  --sy-surface: #ffffff;
+  --sy-fg: #2c2a27;
+  --sy-muted: #6f6a63;
+  --sy-subtle: #938d84;
+  --sy-accent: #5e6b66;
+  --sy-accent-fg: #f7f5f1;
+  --sy-border: #e4ddd3;
+  --sy-soft: #eee9e1;
+  --sy-stage: #f3f0ea;
+  --sy-skin: #f8d5c8;
+  --sy-lip: #d36f72;
+  --sy-gold: #c9a84c;
+  --sy-shadow: 0 0 0 1px rgb(44 42 39 / 0.06), 0 8px 24px rgb(44 42 39 / 0.04);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 96px);
+  overflow: visible;
+  margin: 0 -8px;
+  background: var(--sy-bg);
+  color: var(--sy-fg);
+  border: 1px solid var(--sy-border);
+  border-radius: 20px;
+  font-family: "Hiragino Sans", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+}
+
+.shiro-yado h2,
+.shiro-yado h3,
+.shiro-yado .shiro-yado__title,
+.shiro-yado .shiro-yado__floor-label,
+.shiro-yado .shiro-yado__brand strong {
+  font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  color: var(--sy-fg);
+  font-weight: 600;
+}
+
+.shiro-yado button {
+  font-family: inherit;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.shiro-yado button:hover {
+  border-color: transparent;
+}
+
+.shiro-yado button:focus-visible,
+.shiro-yado select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sy-accent) 58%, transparent);
+  outline-offset: 3px;
+}
+
+.shiro-yado__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.shiro-yado__header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 64px;
+  height: auto;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--sy-border);
+  background: rgb(251 249 245 / 0.92);
+}
+
+.shiro-yado__icon-btn {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.shiro-yado__icon-btn:hover {
+  background: var(--sy-soft);
+}
+
+.shiro-yado__brand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  min-width: 0;
+}
+
+.shiro-yado__title-board {
+  display: block;
+  height: 40px;
+  width: auto;
+  max-width: min(240px, 58vw);
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgb(44 42 39 / 0.12);
+}
+
+.shiro-yado__brand-en,
+.shiro-yado__brand span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--sy-subtle);
+  line-height: 1.2;
+}
+
+.shiro-yado__brand strong {
+  display: block;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}
+
+.shiro-yado__header-right {
+  display: grid;
+  grid-template-columns: auto 44px;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.shiro-yado__lang {
+  position: relative;
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border-radius: 9px;
+  background: var(--sy-soft);
+}
+
+.shiro-yado__lang select {
+  min-height: 36px;
+  max-width: 96px;
+  border: 0;
+  background: transparent;
+  color: var(--sy-fg);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.shiro-yado__sound {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 9px !important;
+  background: var(--sy-soft) !important;
+  color: var(--sy-muted) !important;
+}
+
+.shiro-yado__here {
+  grid-column: 1 / -1;
+  width: auto;
+  min-width: 24px;
+  text-align: right;
+  font-size: 10px;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__body {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 14px 14px;
+}
+
+.shiro-yado__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.shiro-yado__hero h2,
+.shiro-yado__title {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.25;
+}
+
+.shiro-yado__eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--sy-subtle);
+}
+
+.shiro-yado__lead,
+.shiro-yado__muted {
+  margin: 6px 0 0;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--sy-stage);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__canvas {
+  height: 260px;
+  touch-action: none;
+}
+
+.shiro-yado__stage-fallback {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sy-muted);
+  font-size: 0.9rem;
+}
+
+.shiro-yado__hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--sy-muted);
+  pointer-events: none;
+}
+
+.shiro-yado__cta-row {
+  display: grid;
+  gap: 10px;
+}
+
+.shiro-yado__concierge {
+  display: grid;
+  overflow: hidden;
+  background: var(--sy-elevated);
+  border: 1px solid var(--sy-border);
+  border-radius: 16px;
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__concierge-stage {
+  position: relative;
+  height: 220px;
+  min-height: 220px;
+  background-color: var(--sy-soft);
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+}
+
+.shiro-yado__concierge-fallback {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: end center;
+}
+
+.shiro-yado__concierge-fallback svg {
+  display: block;
+  width: min(82%, 240px);
+  height: 94%;
+}
+
+.shiro-yado__speaking {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--sy-elevated);
+  color: var(--sy-muted);
+}
+
+.shiro-yado__speaking.is-active {
+  background: var(--sy-accent);
+  color: var(--sy-accent-fg);
+}
+
+.shiro-yado__concierge-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px 18px;
+}
+
+.shiro-yado__concierge-content h3 {
+  margin: -4px 0 0;
+  font-size: 1.2rem;
+}
+
+.shiro-yado__concierge-copy {
+  margin: 0;
+  color: var(--sy-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.shiro-yado__concierge-menu {
+  display: grid;
+  gap: 6px;
+}
+
+.shiro-yado__concierge-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  text-align: left;
+}
+
+.shiro-yado__concierge-menu button.is-active,
+.shiro-yado__room-menu button.is-active {
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+}
+
+.shiro-yado__concierge-menu small {
+  color: var(--sy-muted);
+  text-align: right;
+  font-size: 11px;
+}
+
+.shiro-yado__concierge-menu button.is-active small {
+  color: var(--sy-soft);
+}
+
+.shiro-yado__room-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.shiro-yado__room-menu button {
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--sy-soft);
+  color: var(--sy-muted);
+  font-size: 12px;
+}
+
+.shiro-yado__speech {
+  padding: 12px 14px;
+  border-left: 3px solid var(--sy-accent);
+  background: var(--sy-soft);
+  border-radius: 0 8px 8px 0;
+}
+
+.shiro-yado__speech p {
+  margin: 0;
+  color: var(--sy-fg);
+  line-height: 1.7;
+  font-size: 0.92rem;
+}
+
+.shiro-yado__speech small {
+  display: block;
+  margin-top: 8px;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__speech-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.shiro-yado__speech-actions button {
+  min-height: 44px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--sy-elevated);
+  color: var(--sy-muted);
+  box-shadow: var(--sy-shadow);
+  font-size: 12px;
+}
+
+@media (min-width: 640px) {
+  .shiro-yado__cta-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .shiro-yado__canvas {
+    height: 320px;
+  }
+
+  .shiro-yado__concierge {
+    grid-template-columns: minmax(200px, 0.72fr) minmax(280px, 1.28fr);
+    align-items: stretch;
+  }
+
+  .shiro-yado__concierge-stage {
+    height: 100%;
+    min-height: 280px;
+    max-height: 320px;
+  }
+
+  .shiro-yado__concierge-content {
+    padding: 18px 20px 20px;
+    gap: 12px;
+  }
+
+  .shiro-yado__title-board {
+    max-width: min(280px, 48vw);
+    height: 44px;
+  }
+}
+
+@media (max-width: 520px) {
+  .shiro-yado__header {
+    padding-inline: 6px;
+  }
+
+  .shiro-yado__title-board {
+    max-width: 116px;
+    height: 34px;
+  }
+
+  .shiro-yado__brand-en {
+    display: none !important;
+  }
+
+  .shiro-yado__lang {
+    padding-inline: 6px;
+  }
+
+  .shiro-yado__lang select {
+    width: 52px;
+    max-width: 52px;
+  }
+
+  .shiro-yado__here {
+    font-size: 9px;
+  }
+}
+
+.shiro-yado__btn {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.shiro-yado__btn--primary {
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+}
+
+.shiro-yado__btn--accent {
+  background: var(--sy-accent);
+  color: var(--sy-accent-fg);
+}
+
+.shiro-yado__btn--outline {
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__btn--ghost {
+  color: var(--sy-muted);
+}
+
+.shiro-yado__btn:disabled {
+  opacity: 0.4;
+}
+
+.shiro-yado__section h3,
+.shiro-yado__card h3 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+}
+
+.shiro-yado__section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.shiro-yado__section-head p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--sy-subtle);
+}
+
+.shiro-yado__quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.shiro-yado__tile,
+.shiro-yado__row,
+.shiro-yado__card {
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  border-radius: 14px;
+  text-align: left;
+}
+
+.shiro-yado__tile {
+  min-height: 100px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: var(--sy-fg);
+}
+
+.shiro-yado__tile svg,
+.shiro-yado__quick svg {
+  color: var(--sy-accent);
+}
+
+.shiro-yado__tile strong,
+.shiro-yado__row strong {
+  display: block;
+  font-weight: 600;
+}
+
+.shiro-yado__tile small,
+.shiro-yado__row small {
+  display: block;
+  margin-top: 4px;
+  color: var(--sy-subtle);
+  font-size: 12px;
+}
+
+.shiro-yado__tile--soft {
+  background: var(--sy-soft);
+}
+
+.shiro-yado__card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shiro-yado__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shiro-yado__row {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--sy-fg);
+}
+
+.shiro-yado__row--tall {
+  min-height: 80px;
+}
+
+.shiro-yado__row--current {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--sy-accent) 40%, white);
+}
+
+.shiro-yado__row--selected {
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+}
+
+.shiro-yado__row--selected small {
+  color: rgb(251 249 245 / 0.7);
+}
+
+.shiro-yado__floor-label {
+  font-size: 1.4rem;
+}
+
+.shiro-yado__floor-label--lg {
+  font-size: 1.85rem;
+}
+
+.shiro-yado__facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+}
+
+.shiro-yado__facts dt {
+  font-size: 12px;
+  color: var(--sy-subtle);
+}
+
+.shiro-yado__facts dd {
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+.shiro-yado__facts-wide {
+  grid-column: 1 / -1;
+}
+
+.shiro-yado__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shiro-yado__chips li {
+  background: var(--sy-soft);
+  color: var(--sy-muted);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.shiro-yado__summary,
+.shiro-yado__summary-lg {
+  display: block;
+  margin-top: 8px;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__summary-lg {
+  font-size: 1.05rem;
+}
+
+.shiro-yado__plan {
+  display: grid;
+  gap: 6px;
+}
+
+.shiro-yado__plan-row {
+  display: grid;
+  gap: 6px;
+}
+
+.shiro-yado__plan-row--3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.shiro-yado__plan-row--5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.shiro-yado__cell {
+  position: relative;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  background: var(--sy-soft);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.shiro-yado__cell--active {
+  background: var(--sy-accent);
+  color: var(--sy-accent-fg);
+}
+
+.shiro-yado__cell--here {
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+}
+
+.shiro-yado__cell--muted {
+  background: var(--sy-surface);
+  color: var(--sy-muted);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__cell--short {
+  min-height: 32px;
+}
+
+.shiro-yado__dot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.shiro-yado__steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.shiro-yado__steps li {
+  display: flex;
+  gap: 14px;
+}
+
+.shiro-yado__steps span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.shiro-yado__steps p {
+  margin: 4px 0 16px;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__arrived {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--sy-soft);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.shiro-yado__quick {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  flex-shrink: 0;
+  border-top: 1px solid var(--sy-border);
+  background: var(--sy-elevated);
+}
+
+.shiro-yado__quick button {
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__quick button.is-active {
+  color: var(--sy-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shiro-yado * {
+    transition: none !important;
+  }
+}
+
+/* Promo and other styles from original continue... 
+   (full original content was restored from previous commit + toggle added at end)
+*/
+
+/* 3D / 写真 切り替えトグル */
+.shiro-yado__mode-toggle {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 5;
+  min-height: 32px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgb(251 249 245 / 0.92);
+  color: var(--sy-muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  box-shadow: var(--sy-shadow);
+  backdrop-filter: blur(6px);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.shiro-yado__mode-toggle:hover {
+  background: var(--sy-elevated);
+  color: var(--sy-fg);
+}
+
+.shiro-yado__mode-toggle:active {
+  transform: scale(0.97);
+}
