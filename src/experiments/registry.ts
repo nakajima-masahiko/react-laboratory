@@ -9,12 +9,6 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
-    id: 'concierge-model-lab',
-    title: 'Concierge Model Lab — 美しさを設計する',
-    description: '若い成人女性のホテルコンシェルジュを、設定画・AI立体化・Blender修正・表情・24方向QAまで段階的に制作する3D実験室',
-    component: lazy(() => import('./concierge-model-lab')),
-  },
-  {
     id: 'aquarium-walk',
     title: 'Immersive Aquarium — 海を歩く',
     description: 'three.jsによる一人称歩行型水族館。左右6基の水槽、生成AI背景、魚群・クラゲ・大型生物を鑑賞する3D実験',

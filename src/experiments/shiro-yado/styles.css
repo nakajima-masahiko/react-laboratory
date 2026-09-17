@@ -804,9 +804,486 @@
   }
 }
 
-/* Promo and other styles from original continue... 
-   (full original content was restored from previous commit + toggle added at end)
-*/
+.shiro-yado__promo {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgb(251 249 245 / 0.92), rgb(238 232 222 / 0.95)),
+    var(--sy-soft);
+  border: 1px solid var(--sy-border);
+  box-shadow: var(--sy-shadow);
+  padding: 14px 8px 12px;
+}
+
+.shiro-yado__promo-track {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 4px;
+  min-height: 88px;
+}
+
+.shiro-yado__promo-slide {
+  text-align: center;
+  padding: 4px 6px 2px;
+  animation: sy-promo-in 0.45s ease;
+}
+
+@keyframes sy-promo-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.shiro-yado__promo-eyebrow {
+  margin: 0 0 4px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--sy-subtle);
+}
+
+.shiro-yado__promo-title {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-weight: 600;
+  color: var(--sy-fg);
+  line-height: 1.35;
+}
+
+.shiro-yado__promo-body {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__promo-nav {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--sy-muted);
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__promo-nav:hover {
+  color: var(--sy-fg);
+  background: var(--sy-elevated);
+}
+
+.shiro-yado__promo-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.shiro-yado__promo-dots button {
+  width: 28px;
+  height: 28px;
+  padding: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--sy-border) 0 3px, transparent 4px);
+}
+
+.shiro-yado__promo-dots button.is-active {
+  background: radial-gradient(circle, var(--sy-accent) 0 5px, transparent 6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shiro-yado__promo-slide {
+    animation: none;
+  }
+}
+
+.shiro-yado__home-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.shiro-yado__home-action {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  min-height: 104px;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px !important;
+  background: var(--sy-surface) !important;
+  box-shadow: var(--sy-shadow) !important;
+  text-align: left;
+}
+
+.shiro-yado__home-action-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--sy-soft);
+  color: var(--sy-accent);
+}
+
+.shiro-yado__home-action > span:nth-child(2),
+.shiro-yado__home-action strong,
+.shiro-yado__home-action small,
+.shiro-yado__home-action em {
+  display: block;
+}
+
+.shiro-yado__home-action small {
+  margin-bottom: 5px;
+  color: var(--sy-subtle);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.shiro-yado__home-action strong {
+  font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-size: 1.15rem;
+}
+
+.shiro-yado__home-action em {
+  overflow: hidden;
+  margin-top: 4px;
+  color: var(--sy-muted);
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shiro-yado__tourism-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 116px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--sy-fg), var(--sy-accent));
+  color: var(--sy-elevated);
+  text-align: left;
+}
+
+@media (min-width: 860px) {
+  .shiro-yado__home-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .shiro-yado__home-action,
+  .shiro-yado__tourism-link {
+    min-height: 174px;
+  }
+
+  .shiro-yado__home-action {
+    grid-template-columns: 1fr auto;
+    align-content: center;
+  }
+
+  .shiro-yado__home-action-icon {
+    grid-column: 1 / -1;
+    margin-bottom: 4px;
+  }
+
+  .shiro-yado__home-action em {
+    white-space: normal;
+  }
+}
+
+.shiro-yado__tourism-link span,
+.shiro-yado__tourism-link strong,
+.shiro-yado__tourism-link small,
+.shiro-yado__tourism-link em {
+  display: block;
+}
+
+.shiro-yado__tourism-link-main {
+  display: flex !important;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.shiro-yado__tourism-link-icon {
+  display: grid !important;
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, white 28%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, white 14%, transparent);
+}
+
+.shiro-yado__tourism-link small {
+  margin-bottom: 4px;
+  color: color-mix(in srgb, white 72%, transparent);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+}
+
+.shiro-yado__tourism-link strong {
+  font-family: "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-size: 1.2rem;
+}
+
+.shiro-yado__tourism-link em {
+  margin-top: 4px;
+  color: color-mix(in srgb, white 78%, transparent);
+  font-size: 13px;
+  font-style: normal;
+  line-height: 1.5;
+}
+
+/* Home: concierge sits at the top of the content and stays under the sticky header */
+.shiro-yado__stack--home {
+  gap: 14px;
+}
+
+.shiro-yado__concierge-anchor {
+  position: relative;
+  z-index: 12;
+  margin: 0;
+}
+
+.shiro-yado__stack--home > .shiro-yado__concierge-anchor {
+  order: -1;
+}
+
+.shiro-yado__body:has(.shiro-yado__stack--home) {
+  padding-top: 8px;
+}
+
+/* Stick under the app header (min-height ~64px) while scrolling home content */
+.shiro-yado__stack--home .shiro-yado__concierge {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  background: var(--sy-elevated);
+  box-shadow: var(--sy-shadow);
+}
+
+/* ── Tourism / island map (mobile-first, no overflow) ── */
+.shiro-yado__island-map {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--sy-soft);
+  box-shadow: var(--sy-shadow);
+  border: 1px solid var(--sy-border);
+}
+
+.shiro-yado__island-map img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.shiro-yado__island-map figcaption {
+  margin: 0;
+  padding: 10px 14px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--sy-muted);
+  text-align: center;
+  background: var(--sy-elevated);
+  border-top: 1px solid var(--sy-border);
+}
+
+.shiro-yado__spot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.shiro-yado__spot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+  text-align: left;
+  color: var(--sy-fg);
+}
+
+.shiro-yado__spot strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.shiro-yado__spot small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--sy-subtle);
+}
+
+.shiro-yado__spot-number {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--sy-soft);
+  color: var(--sy-accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.shiro-yado__spot.is-active {
+  background: var(--sy-fg);
+  color: var(--sy-elevated);
+}
+
+.shiro-yado__spot.is-active small {
+  color: rgb(251 249 245 / 0.7);
+}
+
+.shiro-yado__spot.is-active .shiro-yado__spot-number {
+  background: var(--sy-accent);
+  color: var(--sy-accent-fg);
+}
+
+.shiro-yado__tourism-detail {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--sy-elevated);
+  border: 1px solid var(--sy-border);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__tourism-concierge {
+  width: 100%;
+  max-width: 180px;
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--sy-soft);
+}
+
+.shiro-yado__tourism-concierge canvas,
+.shiro-yado__tourism-concierge > * {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.shiro-yado__tourism-copy h3 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.shiro-yado__tourism-copy p {
+  margin: 0 0 10px;
+  color: var(--sy-muted);
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+.shiro-yado__tourism-copy dl {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.shiro-yado__tourism-copy dt {
+  font-size: 11px;
+  color: var(--sy-subtle);
+  letter-spacing: 0.06em;
+}
+
+.shiro-yado__tourism-copy dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.shiro-yado__course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shiro-yado__course-list article {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--sy-surface);
+  box-shadow: var(--sy-shadow);
+}
+
+.shiro-yado__course-list article > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.shiro-yado__course-list strong {
+  font-size: 0.95rem;
+}
+
+.shiro-yado__course-list span {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--sy-subtle);
+}
+
+.shiro-yado__course-list p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--sy-muted);
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .shiro-yado__spot-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .shiro-yado__tourism-detail {
+    grid-template-columns: minmax(140px, 180px) 1fr;
+    align-items: start;
+  }
+
+  .shiro-yado__tourism-concierge {
+    margin: 0;
+    max-width: none;
+  }
+
+  .shiro-yado__island-map img {
+    max-height: min(52vh, 420px);
+  }
+}
+
+@media (max-width: 380px) {
+  .shiro-yado__spot-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* 3D / 写真 切り替えトグル */
 .shiro-yado__mode-toggle {
