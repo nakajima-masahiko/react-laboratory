@@ -1,4 +1,11 @@
-import { useEffect, useState, type ComponentType } from 'react';
+import {
+  Component,
+  useEffect,
+  useState,
+  type ComponentType,
+  type ErrorInfo,
+  type ReactNode,
+} from 'react';
 import { getUi } from '../ui-extra';
 import { useHotelStore } from '../store';
 import type { SceneId } from './types';
@@ -7,6 +14,25 @@ type StageProps = {
   scene: SceneId;
   autoRotate?: boolean;
 };
+
+class SceneErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('Failed to render the 3D hotel scene.', error, info);
+  }
+
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
 
 export function HotelPreview({
   scene,
@@ -46,13 +72,21 @@ export function HotelPreview({
     };
   }, []);
 
+  const fallback = (
+    <div className="shiro-yado__stage-fallback" role="status">
+      {ui.sceneFailed}
+    </div>
+  );
+
   return (
     <div className="shiro-yado__stage" data-scene={scene}>
       <div className="shiro-yado__canvas">
         {Stage ? (
-          <Stage scene={scene} autoRotate={autoRotate && !reduceMotion} />
+          <SceneErrorBoundary key={scene} fallback={fallback}>
+            <Stage scene={scene} autoRotate={autoRotate && !reduceMotion} />
+          </SceneErrorBoundary>
         ) : (
-          <div className="shiro-yado__stage-fallback">
+          <div className="shiro-yado__stage-fallback" role="status">
             {failed ? ui.sceneFailed : ui.loadingScene}
           </div>
         )}
