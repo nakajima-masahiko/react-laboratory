@@ -17,7 +17,7 @@ type StageProps = {
   onUnavailable?: () => void;
 };
 
-const BATH_FALLBACK_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.webp`;
+const BATH_FALLBACK_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.svg`;
 
 class SceneErrorBoundary extends Component<
   { children: ReactNode; fallback: ReactNode },
