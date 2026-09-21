@@ -184,7 +184,6 @@ function RockGarden() {
 export function ImmersiveBathInterior() {
   return (
     <group>
-      <fog attach="fog" args={['#dce7e2', 9, 21]} />
       <Box args={[10, 0.12, 7]} position={[0, 0, 0]} color="#414846" roughness={0.94} />
       <Box args={[10, 4.2, 0.16]} position={[0, 2.1, -3.5]} color="#e8e3d7" roughness={0.9} />
       <Box args={[0.16, 4.2, 7]} position={[-5, 2.1, 0]} color="#d8d5cb" roughness={0.9} />
@@ -204,7 +203,7 @@ export function ImmersiveBathInterior() {
         </group>
       ))}
       <rectAreaLight position={[0, 3.65, 1.2]} rotation={[-Math.PI / 2, 0, 0]} width={7} height={1.2} color="#fff0d2" intensity={2.8} />
-      <spotLight position={[-1.8, 4.1, 2.8]} target-position={[0, 0, -0.8]} angle={0.62} penumbra={0.85} intensity={6} color="#d7f5ee" distance={12} />
+      <spotLight position={[-1.8, 4.1, 2.8]} angle={0.62} penumbra={0.85} intensity={6} color="#d7f5ee" distance={12} />
     </group>
   );
 }
