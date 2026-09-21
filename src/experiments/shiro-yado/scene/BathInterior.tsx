@@ -89,7 +89,8 @@ function FujiMural() {
 
   return (
     <group>
-      <mesh position={[0, 2.18, -3.45]} receiveShadow>
+      {/* The rear wall front face is z=-3.42; keep the mural in front of it and behind the cedar frame. */}
+      <mesh position={[0, 2.18, -3.35]} receiveShadow>
         <planeGeometry args={[9.0, 3.35]} />
         <meshStandardMaterial map={texture} roughness={0.72} metalness={0} />
       </mesh>
