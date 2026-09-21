@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { getPlace, type FloorId, type PlaceId } from './hotel-data';
 
-export type ViewId = 'home' | 'floors' | 'floor' | 'place' | 'guide' | 'checkin' | 'dest' | 'tourism';
+export type ViewId = 'home' | 'floors' | 'floor' | 'place' | 'guide' | 'checkin' | 'dest' | 'tourism' | 'nearby';
 
 export type View = {
   v: ViewId;

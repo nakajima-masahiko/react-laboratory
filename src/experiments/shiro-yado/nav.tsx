@@ -9,6 +9,7 @@ function viewFromPath(pathname: string): View {
   const parts = pathname.slice(BASE_PATH.length).split('/').filter(Boolean);
   const [view, value] = parts;
   if (view === 'tourism') return { v: 'tourism' };
+  if (view === 'nearby') return { v: 'nearby' };
   if (view === 'floors') return { v: 'floors' };
   if (view === 'floor' && ['1', '2', '3'].includes(value)) return { v: 'floor', f: Number(value) as FloorId };
   if ((view === 'place' || view === 'guide') && getPlace(value)) return { v: view, p: value as View['p'] };
