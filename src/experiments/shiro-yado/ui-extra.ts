@@ -34,6 +34,7 @@ type ExtraUi = {
   dragHint: string;
   loadingScene: string;
   sceneFailed: string;
+  retryScene: string;
   hotelName: string;
   guideTo: (name: string) => string;
   fromOrigin: (floor: number, name: string, minutes: string) => string;
@@ -74,7 +75,8 @@ const EXTRA: Record<Locale, ExtraUi> = {
     lobbyReturnSub: "1階 · チェックインの場所へ戻る",
     dragHint: "ドラッグで回転・ピンチで拡大",
     loadingScene: "空間を読み込み中",
-    sceneFailed: "3Dを表示できません",
+    sceneFailed: "3Dを表示できないため、浴場イメージを表示しています",
+    retryScene: "3D表示を再試行",
     hotelName: "白の宿",
     guideTo: (name) => `${name}へ`,
     fromOrigin: (floor, name, minutes) => `${floor}F ${name}から · ${minutes}`,
@@ -113,7 +115,8 @@ const EXTRA: Record<Locale, ExtraUi> = {
     lobbyReturnSub: "1F · Return to check-in",
     dragHint: "Drag to rotate · pinch to zoom",
     loadingScene: "Loading space…",
-    sceneFailed: "Unable to show 3D",
+    sceneFailed: "3D is unavailable, so a preview image is shown",
+    retryScene: "Retry 3D",
     hotelName: "Shiro no Yado",
     guideTo: (name) => `To ${name}`,
     fromOrigin: (floor, name, minutes) => `From ${floor}F ${name} · ${minutes}`,
@@ -152,7 +155,8 @@ const EXTRA: Record<Locale, ExtraUi> = {
     lobbyReturnSub: "1er · Retour à l’enregistrement",
     dragHint: "Glisser pour tourner · pincer pour zoomer",
     loadingScene: "Chargement de l’espace…",
-    sceneFailed: "3D indisponible",
+    sceneFailed: "La 3D est indisponible ; une image est affichée",
+    retryScene: "Réessayer la 3D",
     hotelName: "Shiro no Yado",
     guideTo: (name) => `Vers ${name}`,
     fromOrigin: (floor, name, minutes) => `Depuis ${floor}e ${name} · ${minutes}`,
@@ -191,7 +195,8 @@ const EXTRA: Record<Locale, ExtraUi> = {
     lobbyReturnSub: "1.ª · Volver al check-in",
     dragHint: "Arrastre para girar · pellizque para ampliar",
     loadingScene: "Cargando el espacio…",
-    sceneFailed: "No se puede mostrar 3D",
+    sceneFailed: "La vista 3D no está disponible; se muestra una imagen",
+    retryScene: "Reintentar 3D",
     hotelName: "Shiro no Yado",
     guideTo: (name) => `Hacia ${name}`,
     fromOrigin: (floor, name, minutes) => `Desde ${floor}ª ${name} · ${minutes}`,
@@ -230,7 +235,8 @@ const EXTRA: Record<Locale, ExtraUi> = {
     lobbyReturnSub: "1楼 · 返回入住处",
     dragHint: "拖动旋转 · 双指缩放",
     loadingScene: "正在加载空间…",
-    sceneFailed: "无法显示 3D",
+    sceneFailed: "无法显示3D，正在显示预览图片",
+    retryScene: "重试3D",
     hotelName: "白之宿",
     guideTo: (name) => `前往${name}`,
     fromOrigin: (floor, name, minutes) => `从${floor}楼 ${name} · ${minutes}`,
@@ -269,7 +275,8 @@ const EXTRA: Record<Locale, ExtraUi> = {
     lobbyReturnSub: "1층 · 체크인 장소로",
     dragHint: "드래그로 회전 · 핀치로 확대",
     loadingScene: "공간 불러오는 중…",
-    sceneFailed: "3D를 표시할 수 없습니다",
+    sceneFailed: "3D를 표시할 수 없어 미리보기 이미지를 표시합니다",
+    retryScene: "3D 다시 시도",
     hotelName: "시로노야도",
     guideTo: (name) => `${name}(으)로`,
     fromOrigin: (floor, name, minutes) => `${floor}층 ${name}에서 · ${minutes}`,
