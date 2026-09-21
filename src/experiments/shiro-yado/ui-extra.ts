@@ -34,6 +34,7 @@ type ExtraUi = {
   dragHint: string;
   loadingScene: string;
   sceneFailed: string;
+  retryScene: string;
   hotelName: string;
   guideTo: (name: string) => string;
   fromOrigin: (floor: number, name: string, minutes: string) => string;
@@ -75,6 +76,7 @@ const EXTRA: Record<Locale, ExtraUi> = {
     dragHint: "ドラッグで回転・ピンチで拡大",
     loadingScene: "空間を読み込み中",
     sceneFailed: "3Dを表示できません",
+    retryScene: "3D表示を再試行",
     hotelName: "白の宿",
     guideTo: (name) => `${name}へ`,
     fromOrigin: (floor, name, minutes) => `${floor}F ${name}から · ${minutes}`,
@@ -114,6 +116,7 @@ const EXTRA: Record<Locale, ExtraUi> = {
     dragHint: "Drag to rotate · pinch to zoom",
     loadingScene: "Loading space…",
     sceneFailed: "Unable to show 3D",
+    retryScene: "Retry 3D",
     hotelName: "Shiro no Yado",
     guideTo: (name) => `To ${name}`,
     fromOrigin: (floor, name, minutes) => `From ${floor}F ${name} · ${minutes}`,
@@ -153,6 +156,7 @@ const EXTRA: Record<Locale, ExtraUi> = {
     dragHint: "Glisser pour tourner · pincer pour zoomer",
     loadingScene: "Chargement de l’espace…",
     sceneFailed: "3D indisponible",
+    retryScene: "Réessayer la 3D",
     hotelName: "Shiro no Yado",
     guideTo: (name) => `Vers ${name}`,
     fromOrigin: (floor, name, minutes) => `Depuis ${floor}e ${name} · ${minutes}`,
@@ -192,6 +196,7 @@ const EXTRA: Record<Locale, ExtraUi> = {
     dragHint: "Arrastre para girar · pellizque para ampliar",
     loadingScene: "Cargando el espacio…",
     sceneFailed: "No se puede mostrar 3D",
+    retryScene: "Reintentar 3D",
     hotelName: "Shiro no Yado",
     guideTo: (name) => `Hacia ${name}`,
     fromOrigin: (floor, name, minutes) => `Desde ${floor}ª ${name} · ${minutes}`,
@@ -231,6 +236,7 @@ const EXTRA: Record<Locale, ExtraUi> = {
     dragHint: "拖动旋转 · 双指缩放",
     loadingScene: "正在加载空间…",
     sceneFailed: "无法显示 3D",
+    retryScene: "重试3D",
     hotelName: "白之宿",
     guideTo: (name) => `前往${name}`,
     fromOrigin: (floor, name, minutes) => `从${floor}楼 ${name} · ${minutes}`,
@@ -270,6 +276,7 @@ const EXTRA: Record<Locale, ExtraUi> = {
     dragHint: "드래그로 회전 · 핀치로 확대",
     loadingScene: "공간 불러오는 중…",
     sceneFailed: "3D를 표시할 수 없습니다",
+    retryScene: "3D 다시 시도",
     hotelName: "시로노야도",
     guideTo: (name) => `${name}(으)로`,
     fromOrigin: (floor, name, minutes) => `${floor}층 ${name}에서 · ${minutes}`,

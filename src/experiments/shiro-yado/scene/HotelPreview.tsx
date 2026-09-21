@@ -13,7 +13,11 @@ import type { SceneId } from './types';
 type StageProps = {
   scene: SceneId;
   autoRotate?: boolean;
+  fallback?: ReactNode;
+  onUnavailable?: () => void;
 };
+
+const BATH_FALLBACK_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.webp`;
 
 class SceneErrorBoundary extends Component<
   { children: ReactNode; fallback: ReactNode },
@@ -49,6 +53,7 @@ export function HotelPreview({
   const [Stage, setStage] = useState<ComponentType<StageProps> | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -60,6 +65,9 @@ export function HotelPreview({
 
   useEffect(() => {
     let live = true;
+    setStage(null);
+    setFailed(false);
+
     void import('./HotelStage')
       .then((mod) => {
         if (live) setStage(() => mod.HotelStage);
@@ -70,24 +78,46 @@ export function HotelPreview({
     return () => {
       live = false;
     };
-  }, []);
+  }, [attempt]);
 
   const fallback = (
-    <div className="shiro-yado__stage-fallback" role="status">
-      {ui.sceneFailed}
+    <div
+      className={
+        scene === 'bath'
+          ? 'shiro-yado__stage-fallback shiro-yado__stage-fallback--bath'
+          : 'shiro-yado__stage-fallback'
+      }
+      role="status"
+    >
+      {scene === 'bath' ? (
+        <img src={BATH_FALLBACK_SRC} alt="" aria-hidden="true" />
+      ) : null}
+      <div className="shiro-yado__stage-fallback-copy">
+        <strong>{ui.sceneFailed}</strong>
+        <button type="button" onClick={() => setAttempt((value) => value + 1)}>
+          {ui.retryScene}
+        </button>
+      </div>
     </div>
   );
 
   return (
     <div className="shiro-yado__stage" data-scene={scene}>
       <div className="shiro-yado__canvas">
-        {Stage ? (
-          <SceneErrorBoundary key={scene} fallback={fallback}>
-            <Stage scene={scene} autoRotate={autoRotate && !reduceMotion} />
+        {failed ? (
+          fallback
+        ) : Stage ? (
+          <SceneErrorBoundary key={`${scene}-${attempt}`} fallback={fallback}>
+            <Stage
+              scene={scene}
+              autoRotate={autoRotate && !reduceMotion}
+              fallback={fallback}
+              onUnavailable={() => setFailed(true)}
+            />
           </SceneErrorBoundary>
         ) : (
           <div className="shiro-yado__stage-fallback" role="status">
-            {failed ? ui.sceneFailed : ui.loadingScene}
+            {ui.loadingScene}
           </div>
         )}
       </div>
