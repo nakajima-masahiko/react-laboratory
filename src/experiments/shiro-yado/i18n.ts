@@ -20,7 +20,7 @@ export function getLocaleMeta(locale: Locale) {
   return LOCALES.find((item) => item.id === locale) ?? LOCALES[0];
 }
 
-export type ConciergeTopic = 'hotel' | 'banquet' | 'rooms' | 'bath' | 'restroom';
+export type ConciergeTopic = 'hotel' | 'banquet' | 'rooms' | 'bath' | 'restroom' | 'nearby';
 
 type ConciergeCopy = {
   greeting: string;
@@ -33,6 +33,8 @@ type ConciergeCopy = {
   unsupported: string;
   topics: Record<ConciergeTopic, { label: string; description: string }>;
   hotelSpeech: string;
+  nearbySpeech: string;
+  nearbyAction: string;
   pickRoom: string;
   roomLabels: Record<string, string>;
   routeIntro: (name: string) => string;
@@ -86,9 +88,12 @@ const CONCIERGE: Record<Locale, ConciergeCopy> = {
       rooms: { label: '各客室の行き方', description: '201号室〜205号室' },
       bath: { label: '浴場の案内', description: '3階・しろみゆ' },
       restroom: { label: 'トイレの案内', description: '3階・エレベーター正面' },
+      nearby: { label: '周辺のお店', description: '食事処・居酒屋・コンビニ' },
     },
     hotelSpeech:
       '白の宿は、白と淡い木を基調にした小さな3階建てのホテルです。1階にフロントとロビー、2階に5つの客室、3階に宴会場、浴場、お手洗いがございます。どうぞごゆっくりお過ごしくださいませ。',
+    nearbySpeech: '白の宿の周辺には、島魚の食事処、居酒屋、コンビニなど、歩いて立ち寄れるお店がございます。周辺マップで場所や徒歩時間、営業時間をご確認いただけます。',
+    nearbyAction: '周辺マップを開く',
     pickRoom: 'ご案内する客室を、201号室から205号室の中からお選びください。',
     roomLabels: {
       'room-201': '201 スタンダードツイン',
@@ -123,9 +128,12 @@ const CONCIERGE: Record<Locale, ConciergeCopy> = {
       rooms: { label: 'Guest rooms', description: 'Rooms 201–205' },
       bath: { label: 'Bathhouse', description: '3F · Shiromiyu' },
       restroom: { label: 'Restrooms', description: '3F · by the elevators' },
+      nearby: { label: 'Nearby places', description: 'Dining, izakaya and convenience' },
     },
     hotelSpeech:
       'Shiro no Yado is a small three-story hotel with white walls and light wood. The lobby is on the 1st floor, five guest rooms on the 2nd, and the banquet hall, bathhouse, and restrooms on the 3rd. Please enjoy your stay.',
+    nearbySpeech: 'Around Shiro no Yado, you will find restaurants serving island fish, izakaya and convenience stores within walking distance. Open the nearby map to check locations, walking times and hours.',
+    nearbyAction: 'Open nearby map',
     pickRoom: 'Please choose a room from 201 to 205.',
     roomLabels: {
       'room-201': '201 Standard Twin',
@@ -160,9 +168,12 @@ const CONCIERGE: Record<Locale, ConciergeCopy> = {
       rooms: { label: 'Chambres', description: 'Chambres 201–205' },
       bath: { label: 'Bains', description: '3e · Shiromiyu' },
       restroom: { label: 'Toilettes', description: '3e · face aux ascenseurs' },
+      nearby: { label: 'Adresses à proximité', description: 'Restaurants, izakaya et supérettes' },
     },
     hotelSpeech:
       'Shiro no Yado est un petit hôtel de trois étages, aux murs blancs et au bois clair. Le lobby est au 1er étage, cinq chambres au 2e, et la salle de banquet, les bains et les toilettes au 3e. Bon séjour.',
+    nearbySpeech: 'Autour de Shiro no Yado, vous trouverez à pied des restaurants de poisson, des izakaya et des supérettes. Ouvrez le plan pour consulter les emplacements, les temps de marche et les horaires.',
+    nearbyAction: 'Ouvrir le plan des environs',
     pickRoom: 'Veuillez choisir une chambre de 201 à 205.',
     roomLabels: {
       'room-201': '201 Twin standard',
@@ -197,9 +208,12 @@ const CONCIERGE: Record<Locale, ConciergeCopy> = {
       rooms: { label: 'Habitaciones', description: 'Hab. 201–205' },
       bath: { label: 'Baños', description: '3F · Shiromiyu' },
       restroom: { label: 'Aseos', description: '3F · frente al ascensor' },
+      nearby: { label: 'Lugares cercanos', description: 'Restaurantes, izakaya y tiendas' },
     },
     hotelSpeech:
       'Shiro no Yado es un pequeño hotel de tres plantas, con paredes blancas y madera clara. El lobby está en la 1.ª planta, cinco habitaciones en la 2.ª, y el salón, los baños y los aseos en la 3.ª. Que disfrute su estancia.',
+    nearbySpeech: 'Cerca de Shiro no Yado encontrará restaurantes de pescado, izakayas y tiendas a pocos minutos a pie. Abra el mapa para ver ubicaciones, tiempos a pie y horarios.',
+    nearbyAction: 'Abrir mapa cercano',
     pickRoom: 'Elija una habitación del 201 al 205.',
     roomLabels: {
       'room-201': '201 Twin estándar',
@@ -233,9 +247,12 @@ const CONCIERGE: Record<Locale, ConciergeCopy> = {
       rooms: { label: '客房', description: '201–205号房' },
       bath: { label: '浴场', description: '3楼·白水' },
       restroom: { label: '卫生间', description: '3楼·电梯正面' },
+      nearby: { label: '周边店铺', description: '餐厅、居酒屋和便利店' },
     },
     hotelSpeech:
       '白之宿是一家以白色与浅木色为主的三层小酒店。一楼为前台与大堂，二楼有五间客房，三楼有宴会厅、浴场与卫生间。请慢用。',
+    nearbySpeech: '白之宿周边步行范围内有岛鱼餐厅、居酒屋和便利店。打开周边地图即可查看位置、步行时间和营业时间。',
+    nearbyAction: '打开周边地图',
     pickRoom: '请从201至205号房中选择要案内的客房。',
     roomLabels: {
       'room-201': '201 标准双床房',
@@ -269,9 +286,12 @@ const CONCIERGE: Record<Locale, ConciergeCopy> = {
       rooms: { label: '객실', description: '201–205호' },
       bath: { label: '목욕탕', description: '3층 · 시로미유' },
       restroom: { label: '화장실', description: '3층 · 엘리베이터 앞' },
+      nearby: { label: '주변 가게', description: '식당·이자카야·편의점' },
     },
     hotelSpeech:
       '시로노야도는 흰색과 옅은 나무를 기조로 한 작은 3층 호텔입니다. 1층에 프론트와 로비, 2층에 객실 5실, 3층에 연회장·목욕탕·화장실이 있습니다. 편안하게 머물러 주세요.',
+    nearbySpeech: '시로노야도 주변에는 걸어서 갈 수 있는 섬 생선 식당, 이자카야, 편의점이 있습니다. 주변 지도에서 위치와 도보 시간, 영업시간을 확인해 주세요.',
+    nearbyAction: '주변 지도 열기',
     pickRoom: '안내할 객실을 201호부터 205호 중에서 선택해 주세요.',
     roomLabels: {
       'room-201': '201 스탠다드 트윈',
@@ -398,6 +418,7 @@ export function getConciergeSpeech(
 ) {
   const c = getConciergeCopy(locale);
   if (topic === 'hotel') return c.hotelSpeech;
+  if (topic === 'nearby') return c.nearbySpeech;
   if (topic === 'rooms') {
     if (!roomId) return c.pickRoom;
     return buildRouteSpeech(locale, fromFloor, fromPlaceId, roomId);
