@@ -28,7 +28,6 @@ function QuickNav({ current }: { current: View }) {
     home: { ja: 'ホーム', en: 'Home', fr: 'Accueil', es: 'Inicio', zh: '首页', ko: '홈' },
     guide: { ja: '館内案内', en: 'Guide', fr: 'Guide', es: 'Guía', zh: '馆内', ko: '관내' },
     tourism: { ja: '観光案内', en: 'Explore', fr: 'Visites', es: 'Turismo', zh: '观光', ko: '관광' },
-    nearby: { ja: '周辺', en: 'Nearby', fr: 'À proximité', es: 'Cerca', zh: '周边', ko: '주변' },
     room: { ja: 'お部屋', en: 'Room', fr: 'Chambre', es: 'Hab.', zh: '客房', ko: '객실' },
     floors: { ja: '館内図', en: 'Map', fr: 'Plan', es: 'Mapa', zh: '地图', ko: '지도' },
   };
@@ -36,7 +35,6 @@ function QuickNav({ current }: { current: View }) {
     { key: 'home', label: short.home[locale] ?? 'Home', view: { v: 'home' as const }, icon: <IconHome /> },
     { key: 'guide', label: short.guide[locale] ?? 'Guide', view: { v: 'dest' as const }, icon: <IconHome /> },
     { key: 'tourism', label: short.tourism[locale] ?? 'Explore', view: { v: 'tourism' as const }, icon: <IconIsland /> },
-    { key: 'nearby', label: short.nearby[locale] ?? 'Nearby', view: { v: 'nearby' as const }, icon: <IconMap /> },
     {
       key: 'room',
       label: short.room[locale] ?? 'Room',
@@ -56,7 +54,9 @@ function QuickNav({ current }: { current: View }) {
               ? ['dest', 'guide', 'place'].includes(current.v) && !(current.v === 'guide' && current.p === myRoomId)
               : item.key === 'room'
                 ? current.v === 'checkin' || (['guide', 'place'].includes(current.v) && current.p === myRoomId)
-                : current.v === item.key;
+                : item.key === 'tourism'
+                  ? current.v === 'tourism' || current.v === 'nearby'
+                  : current.v === item.key;
         return (
           <button
             key={item.key}
