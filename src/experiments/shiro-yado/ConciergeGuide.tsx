@@ -6,6 +6,7 @@ import {
   type ConciergeTopic,
 } from './i18n';
 import type { PlaceId } from './hotel-data';
+import { useNav } from './nav-state';
 import { ConciergeModel, type ConciergeMode } from './scene/ConciergeModel';
 import { useHotelStore } from './store';
 import { useConciergeSpeech } from './use-concierge-speech';
@@ -26,6 +27,7 @@ const IDLE_MS = 10000;
 const AUTO_SWITCH_INTERVAL_MS = 8000;
 
 export function ConciergeGuide() {
+  const { go } = useNav();
   const fromFloor = useHotelStore((state) => state.fromFloor);
   const fromPlaceId = useHotelStore((state) => state.fromPlaceId);
   const myRoomId = useHotelStore((state) => state.myRoomId);
@@ -215,6 +217,16 @@ export function ConciergeGuide() {
               </button>
             ))}
           </div>
+        ) : null}
+
+        {topic === 'nearby' ? (
+          <button
+            type="button"
+            className="shiro-yado__btn shiro-yado__btn--accent"
+            onClick={() => { markInteracted(); stop(); go({ v: 'nearby' }); }}
+          >
+            {copy.nearbyAction}
+          </button>
         ) : null}
 
         <div className="shiro-yado__speech" aria-live="polite">
