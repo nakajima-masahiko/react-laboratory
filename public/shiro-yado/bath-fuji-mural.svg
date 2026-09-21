@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">朝焼けの富士山と黒松</title>
+  <desc id="desc">白の宿の浴場を飾る、朝焼けの富士山、湖、黒松を描いた銭湯絵風の壁画</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#668eaa"/>
+      <stop offset=".42" stop-color="#d8b28f"/>
+      <stop offset=".72" stop-color="#f2d2a7"/>
+      <stop offset="1" stop-color="#d8c4a0"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="72%" cy="35%" r="25%">
+      <stop offset="0" stop-color="#fffbdc" stop-opacity=".95"/>
+      <stop offset=".28" stop-color="#ffd99e" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#ffd99e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fuji" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8f3e8"/>
+      <stop offset=".27" stop-color="#e9e6df"/>
+      <stop offset=".29" stop-color="#8197a3"/>
+      <stop offset="1" stop-color="#415c65"/>
+    </linearGradient>
+    <linearGradient id="farHills" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#617b73"/>
+      <stop offset="1" stop-color="#263f3b"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9db7af"/>
+      <stop offset=".42" stop-color="#668d89"/>
+      <stop offset="1" stop-color="#274a4b"/>
+    </linearGradient>
+    <linearGradient id="reflection" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f8d6a4" stop-opacity="0"/>
+      <stop offset=".55" stop-color="#f8d6a4" stop-opacity=".16"/>
+      <stop offset=".72" stop-color="#fff2c2" stop-opacity=".46"/>
+      <stop offset="1" stop-color="#f8d6a4" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="mist" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f4eee0" stop-opacity="0"/>
+      <stop offset=".22" stop-color="#f4eee0" stop-opacity=".7"/>
+      <stop offset=".65" stop-color="#f4eee0" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#f4eee0" stop-opacity="0"/>
+    </linearGradient>
+    <g id="pine">
+      <path d="M0 0 C-12-86-8-182 10-282 C22-350 18-410 8-470" fill="none" stroke="#172c29" stroke-width="28" stroke-linecap="round"/>
+      <path d="M4-170 C-48-224-104-246-174-250 M7-225 C72-280 134-302 210-294 M8-288 C-38-337-89-360-151-365 M11-348 C66-389 120-408 178-401 M9-405 C-18-435-47-449-84-454" fill="none" stroke="#1e3831" stroke-width="18" stroke-linecap="round"/>
+      <g fill="#17352e">
+        <ellipse cx="-176" cy="-251" rx="92" ry="23" transform="rotate(8 -176 -251)"/>
+        <ellipse cx="-93" cy="-230" rx="82" ry="22" transform="rotate(17 -93 -230)"/>
+        <ellipse cx="196" cy="-297" rx="106" ry="25" transform="rotate(-8 196 -297)"/>
+        <ellipse cx="105" cy="-278" rx="89" ry="23" transform="rotate(-18 105 -278)"/>
+        <ellipse cx="-148" cy="-366" rx="80" ry="21" transform="rotate(12 -148 -366)"/>
+        <ellipse cx="-72" cy="-345" rx="70" ry="20" transform="rotate(20 -72 -345)"/>
+        <ellipse cx="168" cy="-402" rx="88" ry="22" transform="rotate(-12 168 -402)"/>
+        <ellipse cx="94" cy="-385" rx="72" ry="20" transform="rotate(-22 94 -385)"/>
+        <ellipse cx="-80" cy="-454" rx="58" ry="18" transform="rotate(13 -80 -454)"/>
+      </g>
+    </g>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <rect width="1600" height="700" fill="url(#sunGlow)"/>
+  <circle cx="1150" cy="285" r="58" fill="#fff5c6" opacity=".86"/>
+
+  <path d="M180 620 L720 105 L1280 620 Z" fill="url(#fuji)"/>
+  <path d="M720 105 L586 235 L654 218 L706 268 L755 213 L806 246 L864 230 Z" fill="#fcfaf4" opacity=".96"/>
+  <path d="M720 105 L586 235 L627 223 L688 178 L706 268 L755 213 L806 246 L864 230 Z" fill="#d8dfe0" opacity=".55"/>
+  <path d="M0 590 C180 510 330 540 470 590 C630 646 795 575 930 550 C1100 518 1300 560 1600 505 L1600 700 L0 700 Z" fill="url(#farHills)"/>
+  <path d="M0 635 C220 578 420 650 615 619 C825 586 1005 632 1190 600 C1360 570 1480 592 1600 575 L1600 718 L0 718 Z" fill="#385b55" opacity=".82"/>
+
+  <rect y="650" width="1600" height="250" fill="url(#water)"/>
+  <path d="M760 650 L1320 650 L1510 900 L615 900 Z" fill="url(#reflection)"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M100 707 C360 689 475 716 700 701" stroke="#d6e1d7" stroke-width="5" opacity=".33"/>
+    <path d="M850 730 C1070 711 1285 742 1490 716" stroke="#f6dfb8" stroke-width="6" opacity=".3"/>
+    <path d="M240 780 C505 756 690 790 960 766" stroke="#d9ece2" stroke-width="4" opacity=".22"/>
+    <path d="M920 830 C1130 806 1340 837 1535 817" stroke="#f7dfb3" stroke-width="5" opacity=".24"/>
+    <path d="M25 858 C290 835 515 868 750 844" stroke="#d5e8df" stroke-width="4" opacity=".18"/>
+  </g>
+
+  <path d="M-80 620 C260 556 510 603 780 578 C1030 555 1285 592 1680 535 L1680 660 C1290 627 1038 657 770 632 C490 608 250 660-80 646 Z" fill="url(#mist)" opacity=".72"/>
+
+  <use href="#pine" transform="translate(185 892) scale(1.25)"/>
+  <use href="#pine" transform="translate(1455 870) scale(-1.08 1.08)"/>
+  <path d="M0 815 C150 762 260 790 395 850 L395 900 L0 900 Z" fill="#162f2a"/>
+  <path d="M1600 790 C1450 748 1352 788 1240 858 L1240 900 L1600 900 Z" fill="#18332e"/>
+
+  <rect x="18" y="18" width="1564" height="864" rx="10" fill="none" stroke="#d8bd86" stroke-width="12" opacity=".8"/>
+  <rect x="34" y="34" width="1532" height="832" rx="6" fill="none" stroke="#f7e8c8" stroke-width="3" opacity=".7"/>
+</svg>
