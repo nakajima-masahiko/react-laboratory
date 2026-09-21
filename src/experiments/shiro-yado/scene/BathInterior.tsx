@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { Box } from './primitives';
 
-const MURAL_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.webp`;
+const MURAL_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.svg`;
 
 function Stone({ position, args, color = '#666967' }: { position: [number, number, number]; args: [number, number, number]; color?: string }) {
   return (
