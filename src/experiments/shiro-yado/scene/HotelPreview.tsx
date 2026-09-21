@@ -47,7 +47,7 @@ export function HotelPreview({
   }, []);
 
   return (
-    <div className="shiro-yado__stage">
+    <div className="shiro-yado__stage" data-scene={scene}>
       <div className="shiro-yado__canvas">
         {Stage ? (
           <Stage scene={scene} autoRotate={autoRotate && !reduceMotion} />

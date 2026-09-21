@@ -1,6 +1,6 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { ContactShadows, OrbitControls } from '@react-three/drei';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import {
   Floor1Overview,
   Floor2Overview,
@@ -28,7 +28,7 @@ const CAM: Record<string, Cam> = {
   'room-204': { position: [4.8, 3.2, 5.0], target: [0, 0.55, 0], min: 3.6, max: 10 },
   'room-205': { position: [5.2, 3.4, 5.4], target: [0, 0.55, 0], min: 3.8, max: 11 },
   banquet: { position: [6.4, 4.0, 6.6], target: [0.2, 0.4, 0], min: 5, max: 13 },
-  bath: { position: [4.8, 3.2, 5.2], target: [-0.2, 0.4, -0.2], min: 3.6, max: 10 },
+  bath: { position: [7.2, 4.35, 8.2], target: [-0.2, 1.15, -0.45], min: 5.4, max: 14 },
   restroom: { position: [4.0, 2.8, 4.6], target: [0, 0.5, 0], min: 3.2, max: 8 },
 };
 
@@ -37,7 +37,7 @@ function Lights() {
     <>
       <ambientLight intensity={0.78} />
       <hemisphereLight args={['#ffffff', '#d9d1c4', 0.55]} />
-      <directionalLight position={[7, 12, 6]} intensity={1.15} />
+      <directionalLight position={[7, 12, 6]} intensity={1.15} castShadow />
       <directionalLight position={[-6, 6, -4]} intensity={0.25} />
     </>
   );
@@ -81,9 +81,11 @@ export function HotelStage({
   autoRotate?: boolean;
 }) {
   const cam = CAM[scene] ?? CAM.lobby;
+  const background = scene === 'bath' ? '#172321' : '#f3f0ea';
 
   return (
     <Canvas
+      shadows
       dpr={[1, 1.6]}
       frameloop="always"
       camera={{ position: cam.position, fov: 36, near: 0.1, far: 80 }}
@@ -93,15 +95,16 @@ export function HotelStage({
         powerPreference: 'high-performance',
       }}
       onCreated={({ gl, invalidate }) => {
-        gl.setClearColor('#f3f0ea', 1);
+        gl.setClearColor(background, 1);
         invalidate();
       }}
-      style={{ touchAction: 'none', background: '#f3f0ea' }}
+      style={{ touchAction: 'none', background }}
     >
-      <color attach="background" args={['#f3f0ea']} />
+      <color attach="background" args={[background]} />
+      {scene === 'bath' ? <fog attach="fog" args={['#dce7e2', 10, 22]} /> : null}
       <Lights />
       <CameraRig scene={scene} />
-      <SceneBody scene={scene} />
+      <Suspense fallback={null}><SceneBody scene={scene} /></Suspense>
       <ContactShadows
         position={[0, 0.02, 0]}
         opacity={0.14}
