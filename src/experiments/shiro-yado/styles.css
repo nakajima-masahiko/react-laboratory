@@ -1363,3 +1363,128 @@
     transform: none;
   }
 }
+
+
+/* Nearby dining and convenience map */
+.shiro-yado__nearby-filters {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-block: 0.25rem;
+  scrollbar-width: none;
+}
+.shiro-yado__nearby-filters::-webkit-scrollbar { display: none; }
+.shiro-yado__nearby-filters button {
+  flex: 0 0 auto;
+  border: 1px solid var(--sy-border);
+  border-radius: 999px;
+  background: var(--sy-surface);
+  color: var(--sy-muted);
+  padding: 0.62rem 1rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.shiro-yado__nearby-filters button.is-active {
+  border-color: var(--sy-accent);
+  background: var(--sy-accent);
+  color: var(--sy-accent-fg);
+}
+.shiro-yado__nearby-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(17rem, 0.75fr);
+  gap: 1rem;
+}
+.shiro-yado__nearby-map {
+  position: relative;
+  min-height: 30rem;
+  overflow: hidden;
+  border: 1px solid var(--sy-border);
+  border-radius: 1.5rem;
+  background: #dcebed;
+  box-shadow: var(--sy-shadow);
+}
+.shiro-yado__nearby-map > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.shiro-yado__map-coast { fill: #f2ead8; stroke: #cad8c5; stroke-width: 1.2; }
+.shiro-yado__map-road { fill: none; stroke: #fff; stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 1 1.5; }
+.shiro-yado__hotel-pin,
+.shiro-yado__place-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+.shiro-yado__hotel-pin {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  color: var(--sy-fg);
+}
+.shiro-yado__hotel-pin span,
+.shiro-yado__place-pin span,
+.shiro-yado__category-dot {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  place-items: center;
+  border-radius: 50% 50% 50% 12%;
+  background: var(--sy-accent);
+  color: white;
+  box-shadow: 0 5px 14px rgb(44 42 39 / 0.22);
+  font-weight: 800;
+}
+.shiro-yado__hotel-pin span { width: 3.25rem; height: 3.25rem; border-radius: 1rem; background: #fff; color: var(--sy-accent); border: 3px solid var(--sy-accent); }
+.shiro-yado__hotel-pin strong { padding: 0.15rem 0.45rem; border-radius: 999px; background: rgb(255 255 255 / 0.9); font-size: 0.76rem; white-space: nowrap; }
+.shiro-yado__place-pin { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.shiro-yado__place-pin.is-active span { outline: 4px solid rgb(255 255 255 / 0.9); transform: scale(1.15); }
+.shiro-yado__place-pin.is-restaurant span,
+.shiro-yado__category-dot.is-restaurant { background: #bb6b4f; }
+.shiro-yado__place-pin.is-izakaya span,
+.shiro-yado__category-dot.is-izakaya { background: #59658d; }
+.shiro-yado__place-pin.is-convenience span,
+.shiro-yado__category-dot.is-convenience { background: #4f836e; }
+.shiro-yado__nearby-list { display: grid; align-content: start; gap: 0.65rem; }
+.shiro-yado__nearby-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid var(--sy-border);
+  border-radius: 1rem;
+  background: var(--sy-surface);
+  color: var(--sy-fg);
+  text-align: left;
+  cursor: pointer;
+}
+.shiro-yado__nearby-card.is-active { border-color: var(--sy-accent); box-shadow: var(--sy-shadow); }
+.shiro-yado__nearby-card > span:nth-child(2) { display: grid; gap: 0.18rem; }
+.shiro-yado__nearby-card small { color: var(--sy-muted); }
+.shiro-yado__nearby-card em { color: var(--sy-subtle); font-size: 0.75rem; font-style: normal; }
+.shiro-yado__nearby-card b { color: var(--sy-accent); font-size: 0.68rem; }
+.shiro-yado__category-dot { width: 2.35rem; height: 2.35rem; flex: 0 0 auto; border-radius: 0.75rem; box-shadow: none; }
+.shiro-yado__nearby-selected {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid var(--sy-border);
+  border-radius: 1.25rem;
+  background: var(--sy-surface);
+  padding: 1rem 1.15rem;
+  box-shadow: var(--sy-shadow);
+}
+.shiro-yado__nearby-selected h3,
+.shiro-yado__nearby-selected p { margin: 0; }
+.shiro-yado__nearby-selected dl { display: flex; gap: 1rem; margin: 0; }
+.shiro-yado__nearby-selected dl div { display: grid; gap: 0.2rem; }
+.shiro-yado__nearby-selected dt { color: var(--sy-subtle); font-size: 0.7rem; }
+.shiro-yado__nearby-selected dd { margin: 0; font-weight: 800; white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .shiro-yado__nearby-layout { grid-template-columns: 1fr; }
+  .shiro-yado__nearby-map { min-height: 23rem; }
+  .shiro-yado__nearby-selected { grid-template-columns: auto 1fr; }
+  .shiro-yado__nearby-selected dl { grid-column: 1 / -1; border-top: 1px solid var(--sy-border); padding-top: 0.75rem; }
+  .shiro-yado__quick button { min-width: 4.1rem; }
+}
