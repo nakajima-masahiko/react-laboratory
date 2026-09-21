@@ -13,6 +13,7 @@ import {
 } from './primitives';
 
 import type { PlaceId } from '../hotel-data';
+import { ImmersiveBathInterior } from './BathInterior';
 
 function TwinRoom({ deluxe = false }: { deluxe?: boolean }) {
   return (
@@ -127,26 +128,7 @@ function BanquetInterior() {
 }
 
 function BathInterior() {
-  return (
-    <group>
-      <RoomShell width={7.2} depth={5.8} height={2.5} windows="none" />
-      <Box args={[7.2, 0.04, 5.8]} position={[0, 0.02, 0]} color={C.stone} />
-      <Box args={[3.6, 0.46, 2.1]} position={[-0.7, 0.28, -0.7]} color={C.wood} />
-      <mesh position={[-0.7, 0.52, -0.7]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[3.2, 1.7]} />
-        <meshStandardMaterial
-          color={C.water}
-          roughness={0.12}
-          metalness={0.15}
-        />
-      </mesh>
-      <Box args={[0.08, 1.4, 2.2]} position={[1.5, 0.8, -0.7]} color={C.woodDark} />
-      <Box args={[1.1, 0.12, 0.42]} position={[2.4, 0.28, 1.4]} color={C.stone} />
-      <Box args={[1.1, 0.12, 0.42]} position={[2.4, 0.28, 0.7]} color={C.stone} />
-      <Box args={[0.55, 0.32, 0.55]} position={[2.4, 0.2, -1.8]} color={C.wood} />
-      <Plant position={[-3.1, 0, 2.2]} />
-    </group>
-  );
+  return <ImmersiveBathInterior />;
 }
 
 function RestroomInterior() {
