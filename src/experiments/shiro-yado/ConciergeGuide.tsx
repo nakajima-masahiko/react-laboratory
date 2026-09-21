@@ -219,6 +219,16 @@ export function ConciergeGuide() {
           </div>
         ) : null}
 
+        {topic === 'bath' ? (
+          <button
+            type="button"
+            className="shiro-yado__btn shiro-yado__btn--accent"
+            onClick={() => { markInteracted(); stop(); go({ v: 'place', p: 'bath' }); }}
+          >
+            {copy.bathAction}
+          </button>
+        ) : null}
+
         {topic === 'nearby' ? (
           <button
             type="button"
