@@ -1,6 +1,6 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { ContactShadows, OrbitControls } from '@react-three/drei';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, type ReactNode } from 'react';
 import {
   Floor1Overview,
   Floor2Overview,
@@ -76,15 +76,18 @@ function SceneBody({ scene }: { scene: SceneId }) {
 export function HotelStage({
   scene,
   autoRotate = false,
+  fallback,
 }: {
   scene: SceneId;
   autoRotate?: boolean;
+  fallback?: ReactNode;
 }) {
   const cam = CAM[scene] ?? CAM.lobby;
   const background = scene === 'bath' ? '#172321' : '#f3f0ea';
 
   return (
     <Canvas
+      fallback={fallback}
       shadows
       dpr={[1, 1.6]}
       frameloop="always"
@@ -92,7 +95,7 @@ export function HotelStage({
       gl={{
         antialias: true,
         alpha: false,
-        powerPreference: 'high-performance',
+        powerPreference: 'default',
       }}
       onCreated={({ gl, invalidate }) => {
         gl.setClearColor(background, 1);
