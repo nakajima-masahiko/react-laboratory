@@ -14,29 +14,10 @@ type StageProps = {
   scene: SceneId;
   autoRotate?: boolean;
   fallback?: ReactNode;
+  onUnavailable?: () => void;
 };
 
 const BATH_FALLBACK_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.webp`;
-
-function canCreateWebGLContext() {
-  try {
-    const canvas = document.createElement('canvas');
-    const attributes: WebGLContextAttributes = {
-      alpha: false,
-      antialias: false,
-      powerPreference: 'default',
-    };
-    const context =
-      canvas.getContext('webgl2', attributes) ??
-      canvas.getContext('webgl', attributes);
-
-    if (!context) return false;
-    context.getExtension('WEBGL_lose_context')?.loseContext();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 class SceneErrorBoundary extends Component<
   { children: ReactNode; fallback: ReactNode },
@@ -87,13 +68,6 @@ export function HotelPreview({
     setStage(null);
     setFailed(false);
 
-    if (!canCreateWebGLContext()) {
-      setFailed(true);
-      return () => {
-        live = false;
-      };
-    }
-
     void import('./HotelStage')
       .then((mod) => {
         if (live) setStage(() => mod.HotelStage);
@@ -130,16 +104,17 @@ export function HotelPreview({
   return (
     <div className="shiro-yado__stage" data-scene={scene}>
       <div className="shiro-yado__canvas">
-        {Stage ? (
+        {failed ? (
+          fallback
+        ) : Stage ? (
           <SceneErrorBoundary key={`${scene}-${attempt}`} fallback={fallback}>
             <Stage
               scene={scene}
               autoRotate={autoRotate && !reduceMotion}
               fallback={fallback}
+              onUnavailable={() => setFailed(true)}
             />
           </SceneErrorBoundary>
-        ) : failed ? (
-          fallback
         ) : (
           <div className="shiro-yado__stage-fallback" role="status">
             {ui.loadingScene}
