@@ -57,6 +57,12 @@ export function NearbyGuide() {
   const [selectedId, setSelectedId] = useState(PLACES[0].id);
   const selected = PLACES.find((place) => place.id === selectedId) ?? PLACES[0];
 
+  const selectCategory = (next: Category) => {
+    setCategory(next);
+    const firstVisible = next === 'all' ? PLACES[0] : PLACES.find((place) => place.category === next);
+    if (firstVisible) setSelectedId(firstVisible.id);
+  };
+
   return (
     <div className="shiro-yado__stack">
       <header className="shiro-yado__hero">
@@ -67,14 +73,14 @@ export function NearbyGuide() {
 
       <div className="shiro-yado__nearby-filters" role="group" aria-label={copy.title}>
         {(Object.keys(copy.filters) as Category[]).map((key) => (
-          <button key={key} type="button" className={category === key ? 'is-active' : undefined} aria-pressed={category === key} onClick={() => setCategory(key)}>
+          <button key={key} type="button" className={category === key ? 'is-active' : undefined} aria-pressed={category === key} onClick={() => selectCategory(key)}>
             {copy.filters[key]}
           </button>
         ))}
       </div>
 
       <section className="shiro-yado__nearby-layout">
-        <div className="shiro-yado__nearby-map" role="img" aria-label={copy.mapLabel}>
+        <div className="shiro-yado__nearby-map" role="group" aria-label={copy.mapLabel}>
           <svg viewBox="0 0 100 100" aria-hidden="true">
             <path className="shiro-yado__map-coast" d="M4 13C20 2 39 8 51 4c17-5 39 2 44 20 5 17-4 26 0 40 4 16-9 30-28 31-17 1-24-7-39-5C10 92 2 77 6 61 10 46-6 29 4 13Z" />
             <path className="shiro-yado__map-road" d="M17 49c20-2 31-17 47-12 12 4 13 18 26 21M45 13c2 18-4 30 2 45 5 13 17 21 30 25M14 76c18-8 27-8 39-3" />
