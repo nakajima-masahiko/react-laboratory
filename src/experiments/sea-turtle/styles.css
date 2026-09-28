@@ -1,0 +1,20 @@
+.sea-turtle { --ocean-ink: #edf7ef; --ocean-muted: #b5d2ce; --ocean-panel: #062d3cdd; --ocean-line: #b7ded233; --ocean-accent: #b8ddca; --ocean-space: 1rem; position: relative; height: max(720px, 88dvh); overflow: hidden; background: var(--ocean-panel); color: var(--ocean-ink); border-radius: var(--ocean-space); isolation: isolate; text-align: left; }
+.sea-turtle-canvas { position: absolute; inset: 0; touch-action: none; }
+.sea-turtle-canvas canvas { display: block; }
+.sea-turtle-brand { position: absolute; left: 5%; top: 6%; pointer-events: none; }
+.sea-turtle-brand small, .sea-turtle-info>small { letter-spacing: .2em; font-size: .65rem; color: var(--ocean-accent); }
+.sea-turtle-brand h2 { font-family: 'Yu Mincho', serif; font-weight: 400; font-size: clamp(1.5rem, 3.3vw, 2.8rem); line-height: 1.5; letter-spacing: .1em; margin: var(--ocean-space) 0; }
+.sea-turtle-brand p, .sea-turtle-caption { font-size: .75rem; color: var(--ocean-muted); }
+.sea-turtle-caption { position: absolute; left: 5%; bottom: 145px; line-height: 1.8; pointer-events: none; }
+.sea-turtle-help, .sea-turtle-info, .sea-turtle-status { position: absolute; padding: calc(var(--ocean-space) * 1.5); border: 1px solid var(--ocean-line); background: var(--ocean-panel); backdrop-filter: blur(15px); border-radius: var(--ocean-space); }
+.sea-turtle-help { right: 4%; bottom: 145px; max-width: 330px; }
+.sea-turtle-help p, .sea-turtle-info p { font-size: .85rem; line-height: 1.9; color: var(--ocean-muted); }
+.sea-turtle-info { right: 4%; top: 5%; width: min(310px, 78%); max-height: 60%; overflow: auto; }
+.sea-turtle-info select { display: block; width: 100%; margin-top: .5rem; padding: .5rem; color: var(--ocean-ink); background: var(--ocean-panel); }
+.sea-turtle button { color: var(--ocean-ink); background: transparent; border: 1px solid var(--ocean-line); border-radius: 999px; padding: .7rem 1rem; cursor: pointer; min-height: 44px; font-size: .8rem; }
+.sea-turtle button:hover, .sea-turtle button[aria-pressed=true] { background: var(--ocean-accent); color: var(--ocean-panel); }
+.sea-turtle button:focus-visible, .sea-turtle select:focus-visible { outline: 3px solid var(--ocean-accent); outline-offset: 3px; }
+.sea-turtle-help>button, .sea-turtle-info>button { float: right; }
+.sea-turtle-controls { position: absolute; left: 4%; right: 4%; bottom: 3%; display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; padding: var(--ocean-space); background: var(--ocean-panel); border: 1px solid var(--ocean-line); backdrop-filter: blur(15px); border-radius: var(--ocean-space); }
+.sea-turtle-status { inset: 40% 15% auto; text-align: center; }
+@media(max-width: 600px) { .sea-turtle { height: max(780px, 92dvh); } .sea-turtle-brand { top: 4%; } .sea-turtle-brand h2 { font-size: 1.6rem; } .sea-turtle-caption { bottom: 230px; } .sea-turtle-help { bottom: 240px; left: 5%; right: 5%; max-width: none; } .sea-turtle-controls { gap: .4rem; } .sea-turtle-controls button { padding: .6rem .8rem; } .sea-turtle-info { top: 22%; max-height: 43%; } }
