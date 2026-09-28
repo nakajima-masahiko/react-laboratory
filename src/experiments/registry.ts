@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'sea-turtle',
+    title: '蒼海を旅するアオウミガメ',
+    description: '水中を泳ぐウミガメを自由観察・追跡・接近観察。光の揺らぎ、海草、魚群と過ごす静かな3D体験',
+    component: lazy(() => import('./sea-turtle')),
+  },
+  {
     id: 'aquarium-walk',
     title: 'Immersive Aquarium — 海を歩く',
     description: 'three.jsによる一人称歩行型水族館。左右6基の水槽、生成AI背景、魚群・クラゲ・大型生物を鑑賞する3D実験',
