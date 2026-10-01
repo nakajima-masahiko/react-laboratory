@@ -63,3 +63,11 @@ onChange={(range) => {
 - 初回フレームが黒く残ることがあるため、`frameloop="always"` と `gl.setClearColor("#f3f0ea", 1)` を併用する。
 - テクスチャは使わず、箱・平面・マテリアル色のみ。操作は OrbitControls の回転とズームだけ。
 - 3D 本体は `HotelStage` を動的 import し、実験一覧の初期表示を重くしない。
+
+## ABYSS RUSH のブラウザ検証（2026-10-01）
+
+- ゲーム本体は既存の Three.js を直接利用する。ルール・コース計算はDOMから分離し、Node上で全車の3周完走まで再現する。
+- 制限付き検証環境では標準のPlaywright Chromiumダウンロードが不完全なZIPになったため、検証専用の `@sparticuz/chromium` を使用した。これはアプリ依存には追加していない。
+- 同パッケージの展開で `chown /tmp/fonts` が失敗する環境では、同梱BrotliをNodeのzlibで展開し、tarを所有者変更なしで展開すると起動できる。日本語のスクリーンショットには日本語フォントとfontconfig設定も必要。
+- サーバーレス向け `--single-process` は、Playwrightが最初のBrowserContextを閉じた後にブラウザ自体も終了させる場合がある。複数ケースの検証ではこの起動引数を除外する。
+- ソフトウェアWebGLによるヘッドレス検証のFPSを、実機iPad/PCの性能として扱わない。実機Safariの性能確認は別途必要。

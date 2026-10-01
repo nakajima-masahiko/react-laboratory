@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'kart-rush',
+    title: 'ABYSS RUSH — 海底グランプリ',
+    description: '透明な海中トンネルを6台で駆け抜ける3Dカートレース。AI対戦・ドリフト・アイテム・タッチ操作対応',
+    component: lazy(() => import('./kart-rush')),
+  },
+  {
     id: 'sea-turtle',
     title: '蒼海を旅するアオウミガメ',
     description: '水中を泳ぐウミガメを自由観察・追跡・接近観察。光の揺らぎ、海草、魚群と過ごす静かな3D体験',
