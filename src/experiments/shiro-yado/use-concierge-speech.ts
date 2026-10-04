@@ -1,80 +1,35 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createConciergePlayback, type ConciergePlaybackState } from './concierge-playback';
 import { useHotelStore } from './store';
-
-type SpeechState = {
-  isSpeaking: boolean;
-  isSupported: boolean;
-  message: string;
-};
-
-function chooseVoice(voices: SpeechSynthesisVoice[], lang: string) {
-  const prefix = lang.slice(0, 2).toLowerCase();
-  return (
-    voices.find((voice) => voice.lang === lang && voice.localService) ??
-    voices.find((voice) => voice.lang === lang) ??
-    voices.find((voice) => voice.lang.toLowerCase().startsWith(prefix) && voice.localService) ??
-    voices.find((voice) => voice.lang.toLowerCase().startsWith(prefix)) ??
-    null
-  );
-}
 
 export function useConciergeSpeech(speechLang = 'ja-JP') {
   const speechEnabled = useHotelStore((state) => state.speechEnabled);
-  const [state, setState] = useState<SpeechState>({
-    isSpeaking: false,
-    isSupported: typeof window !== 'undefined' && 'speechSynthesis' in window,
-    message: '',
+  const [state, setState] = useState<ConciergePlaybackState>({
+    phase: 'idle', requestId: 0, message: '',
+    isSupported: typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window,
   });
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const langRef = useRef(speechLang);
+  const [playback] = useState(() => createConciergePlayback({
+    synth: typeof window !== 'undefined' ? window.speechSynthesis : undefined,
+    Utterance: typeof window !== 'undefined' ? window.SpeechSynthesisUtterance : undefined,
+    language: speechLang, enabled: speechEnabled, onChange: setState,
+  }));
 
+  useEffect(() => { playback.configure(speechLang, speechEnabled); }, [playback, speechLang, speechEnabled]);
   useEffect(() => {
-    langRef.current = speechLang;
-  }, [speechLang]);
-
-  const stop = useCallback(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    utteranceRef.current = null;
-    setState((current) => ({ ...current, isSpeaking: false }));
-  }, []);
-
-  const speak = useCallback((message: string) => {
-    if (!speechEnabled) {
-      setState((current) => ({ ...current, isSpeaking: false, message }));
-      return;
-    }
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      setState({ isSpeaking: false, isSupported: false, message });
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(message);
-    const lang = langRef.current;
-    utterance.lang = lang;
-    utterance.rate = 0.92;
-    utterance.pitch = 1.05;
-    utterance.volume = 1;
-    utterance.voice = chooseVoice(window.speechSynthesis.getVoices(), lang);
-    utterance.onstart = () => {
-      setState({ isSpeaking: true, isSupported: true, message });
+    const hidden = () => { if (document.hidden) playback.stop(); };
+    document.addEventListener('visibilitychange', hidden);
+    window.addEventListener('pagehide', playback.stop);
+    return () => {
+      document.removeEventListener('visibilitychange', hidden);
+      window.removeEventListener('pagehide', playback.stop);
+      playback.dispose();
     };
-    utterance.onend = () => {
-      utteranceRef.current = null;
-      setState((current) => ({ ...current, isSpeaking: false }));
-    };
-    utterance.onerror = () => {
-      utteranceRef.current = null;
-      setState((current) => ({ ...current, isSpeaking: false }));
-    };
-    utteranceRef.current = utterance;
-    setState({ isSpeaking: true, isSupported: true, message });
-    window.speechSynthesis.speak(utterance);
-  }, [speechEnabled]);
+  }, [playback]);
 
-  useEffect(() => stop, [stop]);
-
-  return { ...state, speak, stop };
+  return {
+    ...state, playback,
+    isSpeaking: state.phase === 'speaking',
+    isBusy: ['bowing', 'loading', 'speaking', 'paused'].includes(state.phase),
+    speak: playback.speak, stop: playback.stop,
+  };
 }

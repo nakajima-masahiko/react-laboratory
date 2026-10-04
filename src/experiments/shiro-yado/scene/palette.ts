@@ -17,3 +17,11 @@ export const C = {
   rug: '#ddd6ca',
   night: '#dfe7ea',
 } as const;
+
+// Neutral studio illumination is part of the character artwork in every UI theme.
+export const CONCIERGE_LIGHT = {
+  neutral: '#ffffff',
+  soft: '#fffaf6',
+  warm: '#fff7ef',
+  bounce: '#eae6e2',
+} as const;

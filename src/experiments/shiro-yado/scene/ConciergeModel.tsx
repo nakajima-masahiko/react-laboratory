@@ -1,277 +1,129 @@
-import { ContactShadows } from '@react-three/drei';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
-import type { Group, Mesh } from 'three';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { NeutralToneMapping, Object3D, SRGBColorSpace } from 'three';
+import type { Group } from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
+import type { ConciergePlayback } from '../concierge-playback';
+import { createConciergeRig } from './concierge-rig';
+import { CONCIERGE_LIGHT } from './palette';
 
+const MODEL_URL = `${import.meta.env.BASE_URL}models/shiro-yado/hotel-concierge.glb`;
+const PHOTO_URL = `${import.meta.env.BASE_URL}shiro-yado/concierge.jpg`;
+let assetPromise: Promise<GLTF> | undefined;
 let webglAvailable: boolean | undefined;
 
 function supportsWebGl() {
   if (webglAvailable !== undefined) return webglAvailable;
   try {
-    const canvas = document.createElement('canvas');
-    webglAvailable = Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
-  } catch {
-    webglAvailable = false;
-  }
+    const context = document.createElement('canvas').getContext('webgl2');
+    webglAvailable = Boolean(context);
+    context?.getExtension('WEBGL_lose_context')?.loseContext();
+  } catch { webglAvailable = false; }
   return webglAvailable;
 }
 
-/** 写真モード用画像（public にあればそちら、なければ Grok アセット） */
-const CONCIERGE_IMAGE_LOCAL = `${import.meta.env.BASE_URL}shiro-yado/concierge.jpg`;
-const CONCIERGE_IMAGE_REMOTE =
-  'https://assets.grok.com/users/bc95a996-7e67-400e-a9da-54275fc7c916/generated/35c7a451-1e48-465c-92eb-08eb6a165bf7/image.jpg?cache=1';
-
-function ConciergePhoto() {
-  return (
-    <div className="shiro-yado__concierge-fallback" role="img" aria-label="白の宿コンシェルジュ（写真）">
-      <img
-        className="shiro-yado__concierge-photo"
-        src={CONCIERGE_IMAGE_LOCAL}
-        alt="白の宿のコンシェルジュ"
-        onError={(e) => {
-          // public にファイルが無い場合はリモート画像にフォールバック
-          const img = e.currentTarget;
-          if (img.src !== CONCIERGE_IMAGE_REMOTE) {
-            img.src = CONCIERGE_IMAGE_REMOTE;
-          }
-        }}
-      />
-    </div>
-  );
+function loadAsset() {
+  assetPromise ??= new GLTFLoader().loadAsync(MODEL_URL).catch((error: unknown) => {
+    assetPromise = undefined;
+    throw error;
+  });
+  return assetPromise;
 }
 
-function CuteConciergeFigure({ speaking, hairColor }: { speaking: boolean; hairColor: string }) {
-  const groupRef = useRef<Group>(null);
-  const lowerLipRef = useRef<Mesh>(null);
-  const mouthInnerRef = useRef<Mesh>(null);
+function ConciergePhoto() {
+  return <div className="shiro-yado__concierge-fallback" role="img" aria-label="白の宿コンシェルジュ（写真）">
+    <img className="shiro-yado__concierge-photo" src={PHOTO_URL} alt="白の宿のコンシェルジュ" />
+  </div>;
+}
 
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
+function ConciergeFigure({ asset, playback, onUnavailable, onReady }: {
+  asset: GLTF;
+  playback: ConciergePlayback;
+  onUnavailable: () => void;
+  onReady: () => void;
+}) {
+  const gl = useThree((state) => state.gl);
+  useEffect(() => {
+    const canvas = gl.domElement;
+    canvas.addEventListener('webglcontextlost', onUnavailable);
+    return () => canvas.removeEventListener('webglcontextlost', onUnavailable);
+  }, [gl, onUnavailable]);
+  const group = useRef<Group>(null);
+  const rig = useRef<ReturnType<typeof createConciergeRig> | null>(null);
+  useEffect(() => {
+    const parent = group.current;
+    if (!parent) return;
+    let current: ReturnType<typeof createConciergeRig>;
+    try { current = createConciergeRig(asset.scene, asset.animations, playback.completeBow); }
+    catch { onUnavailable(); return; }
+    rig.current = current;
+    parent.add(current.model);
+    onReady();
+    return () => { rig.current = null; parent.remove(current.model); current.dispose(); };
+  }, [asset, playback, onUnavailable, onReady]);
 
-    const syllable = speaking
-      ? Math.max(0, Math.sin(t * 16) * 0.72 + Math.sin(t * 29) * 0.28)
-      : 0;
-    const open = speaking ? 0.011 + syllable * 0.026 : 0;
-
-    if (lowerLipRef.current) {
-      lowerLipRef.current.position.y = 0.298 - open;
-    }
-    if (mouthInnerRef.current) {
-      mouthInnerRef.current.position.y = 0.305 - open * 0.45;
-      mouthInnerRef.current.scale.y = 0.55 + open * 20;
-    }
-
-    if (groupRef.current) {
-      groupRef.current.position.y = -0.42 + Math.sin(t * 1.35) * 0.006;
-      groupRef.current.rotation.y = Math.sin(t * 0.5) * 0.03;
-    }
+  useFrame(({ camera }, dt) => {
+    const current = rig.current;
+    if (!current) return;
+    current.update(playback.state, dt, performance.now(), playback.getBoundaryTime());
+    camera.position.set(0, 1.51 + current.cameraOffset.y, 0.85 + current.cameraOffset.z);
+    camera.lookAt(0, 1.51 + current.cameraOffset.y, 0);
   });
-
-  // 画像に合わせて色を調整（ネイビーベスト + ピンクのスカーフ感）
-  const SKIN = '#f8d5c8';
-  const HAIR = hairColor;
-  const BLUSH = '#f0a090';
-  const LIP = '#e07878';
-  const EYE_W = '#fffaf6';
-  const IRIS = '#4a3428';
-  const BLOUSE = '#f8f5f0';
-  const VEST = '#1e3a5f';
-  const GOLD = '#c9a84c';
-  const SCARF = '#c47a7a';
-
-  return (
-    <group ref={groupRef} position={[0, -0.42, 0]} scale={0.95}>
-      <mesh position={[0, 0.38, 0]}>
-        <sphereGeometry args={[0.215, 32, 24]} />
-        <meshStandardMaterial color={SKIN} roughness={0.5} />
-      </mesh>
-
-      <mesh position={[0, 0.4, -0.08]} scale={[1.08, 1.05, 0.92]}>
-        <sphereGeometry args={[0.255, 24, 18]} />
-        <meshStandardMaterial color={HAIR} roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 0.54, -0.02]} scale={[1.15, 0.7, 1]}>
-        <sphereGeometry args={[0.18, 20, 14]} />
-        <meshStandardMaterial color={HAIR} roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 0.535, 0.13]} scale={[1.45, 0.28, 0.5]}>
-        <sphereGeometry args={[0.15, 18, 12]} />
-        <meshStandardMaterial color={HAIR} roughness={0.8} />
-      </mesh>
-      <mesh position={[-0.25, 0.28, -0.01]}>
-        <capsuleGeometry args={[0.058, 0.26, 6, 10]} />
-        <meshStandardMaterial color={HAIR} roughness={0.8} />
-      </mesh>
-      <mesh position={[0.25, 0.28, -0.01]}>
-        <capsuleGeometry args={[0.058, 0.26, 6, 10]} />
-        <meshStandardMaterial color={HAIR} roughness={0.8} />
-      </mesh>
-
-      <mesh position={[-0.11, 0.325, 0.17]}>
-        <sphereGeometry args={[0.042, 12, 10]} />
-        <meshStandardMaterial color={BLUSH} transparent opacity={0.5} roughness={0.7} />
-      </mesh>
-      <mesh position={[0.11, 0.325, 0.17]}>
-        <sphereGeometry args={[0.042, 12, 10]} />
-        <meshStandardMaterial color={BLUSH} transparent opacity={0.5} roughness={0.7} />
-      </mesh>
-
-      <group position={[-0.075, 0.405, 0.19]}>
-        <mesh>
-          <sphereGeometry args={[0.05, 16, 12]} />
-          <meshStandardMaterial color={EYE_W} roughness={0.3} />
-        </mesh>
-        <mesh position={[0.005, -0.003, 0.03]}>
-          <sphereGeometry args={[0.029, 12, 10]} />
-          <meshStandardMaterial color={IRIS} roughness={0.4} />
-        </mesh>
-        <mesh position={[0.005, -0.003, 0.048]}>
-          <sphereGeometry args={[0.013, 8, 6]} />
-          <meshStandardMaterial color="#1a100c" roughness={0.25} />
-        </mesh>
-        <mesh position={[0.012, 0.012, 0.055]}>
-          <sphereGeometry args={[0.011, 8, 6]} />
-          <meshStandardMaterial color="#ffffff" roughness={0.1} />
-        </mesh>
-      </group>
-      <group position={[0.075, 0.405, 0.19]}>
-        <mesh>
-          <sphereGeometry args={[0.05, 16, 12]} />
-          <meshStandardMaterial color={EYE_W} roughness={0.3} />
-        </mesh>
-        <mesh position={[-0.005, -0.003, 0.03]}>
-          <sphereGeometry args={[0.029, 12, 10]} />
-          <meshStandardMaterial color={IRIS} roughness={0.4} />
-        </mesh>
-        <mesh position={[-0.005, -0.003, 0.048]}>
-          <sphereGeometry args={[0.013, 8, 6]} />
-          <meshStandardMaterial color="#1a100c" roughness={0.25} />
-        </mesh>
-        <mesh position={[-0.012, 0.012, 0.055]}>
-          <sphereGeometry args={[0.011, 8, 6]} />
-          <meshStandardMaterial color="#ffffff" roughness={0.1} />
-        </mesh>
-      </group>
-
-      <mesh ref={mouthInnerRef} position={[0, 0.305, 0.195]}>
-        <boxGeometry args={[0.05, 0.016, 0.018]} />
-        <meshStandardMaterial color="#3a2824" roughness={0.7} />
-      </mesh>
-      <mesh ref={lowerLipRef} position={[0, 0.298, 0.2]}>
-        <boxGeometry args={[0.062, 0.016, 0.022]} />
-        <meshStandardMaterial color={LIP} roughness={0.35} />
-      </mesh>
-      <mesh position={[0, 0.316, 0.202]}>
-        <boxGeometry args={[0.058, 0.011, 0.018]} />
-        <meshStandardMaterial color={LIP} roughness={0.35} />
-      </mesh>
-
-      <mesh position={[0, 0.18, 0]}>
-        <cylinderGeometry args={[0.065, 0.085, 0.14, 16]} />
-        <meshStandardMaterial color={SKIN} roughness={0.5} />
-      </mesh>
-
-      <mesh position={[0, 0.02, 0]}>
-        <capsuleGeometry args={[0.195, 0.24, 8, 16]} />
-        <meshStandardMaterial color={BLOUSE} roughness={0.6} />
-      </mesh>
-
-      <mesh position={[-0.105, -0.01, 0.14]}>
-        <boxGeometry args={[0.155, 0.34, 0.08]} />
-        <meshStandardMaterial color={VEST} roughness={0.55} />
-      </mesh>
-      <mesh position={[0.105, -0.01, 0.14]}>
-        <boxGeometry args={[0.155, 0.34, 0.08]} />
-        <meshStandardMaterial color={VEST} roughness={0.55} />
-      </mesh>
-      <mesh position={[0, -0.01, 0.175]}>
-        <boxGeometry args={[0.055, 0.32, 0.04]} />
-        <meshStandardMaterial color={BLOUSE} roughness={0.55} />
-      </mesh>
-
-      <mesh position={[-0.07, 0.145, 0.13]} rotation={[0.25, 0.15, 0.2]}>
-        <boxGeometry args={[0.12, 0.04, 0.06]} />
-        <meshStandardMaterial color={BLOUSE} roughness={0.5} />
-      </mesh>
-      <mesh position={[0.07, 0.145, 0.13]} rotation={[0.25, -0.15, -0.2]}>
-        <boxGeometry args={[0.12, 0.04, 0.06]} />
-        <meshStandardMaterial color={BLOUSE} roughness={0.5} />
-      </mesh>
-
-      <mesh position={[0, 0.155, 0.19]} rotation={[0.4, 0, 0]}>
-        <boxGeometry args={[0.09, 0.055, 0.03]} />
-        <meshStandardMaterial color={SCARF} roughness={0.45} />
-      </mesh>
-      <mesh position={[0.04, 0.13, 0.2]} rotation={[0.2, 0.3, 0.6]}>
-        <boxGeometry args={[0.04, 0.08, 0.02]} />
-        <meshStandardMaterial color={SCARF} roughness={0.45} />
-      </mesh>
-      <mesh position={[-0.04, 0.13, 0.2]} rotation={[0.2, -0.3, -0.6]}>
-        <boxGeometry args={[0.04, 0.08, 0.02]} />
-        <meshStandardMaterial color={SCARF} roughness={0.45} />
-      </mesh>
-
-      <mesh position={[0.12, 0.05, 0.185]}>
-        <boxGeometry args={[0.07, 0.035, 0.012]} />
-        <meshStandardMaterial color={GOLD} roughness={0.35} />
-      </mesh>
-
-      <mesh position={[0, 0.05, 0.19]}>
-        <sphereGeometry args={[0.012, 8, 6]} />
-        <meshStandardMaterial color={GOLD} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, -0.01, 0.19]}>
-        <sphereGeometry args={[0.012, 8, 6]} />
-        <meshStandardMaterial color={GOLD} roughness={0.3} />
-      </mesh>
-      <mesh position={[0, -0.07, 0.19]}>
-        <sphereGeometry args={[0.012, 8, 6]} />
-        <meshStandardMaterial color={GOLD} roughness={0.3} />
-      </mesh>
-
-      <mesh position={[-0.26, 0.04, 0]} rotation={[0, 0, 0.32]}>
-        <capsuleGeometry args={[0.055, 0.2, 6, 10]} />
-        <meshStandardMaterial color={BLOUSE} roughness={0.6} />
-      </mesh>
-      <mesh position={[0.26, 0.04, 0]} rotation={[0, 0, -0.32]}>
-        <capsuleGeometry args={[0.055, 0.2, 6, 10]} />
-        <meshStandardMaterial color={BLOUSE} roughness={0.6} />
-      </mesh>
-    </group>
-  );
+  return <group ref={group} dispose={null} />;
 }
 
 export type ConciergeMode = 'auto' | '3d' | 'photo';
 
-export function ConciergeModel({
-  speaking,
-  hairColor = '#5c4033',
-  mode = 'auto',
-}: {
-  speaking: boolean;
-  hairColor?: string;
-  /** 'auto' = WebGLがあれば3D、なければ写真 / '3d' = 強制3D / 'photo' = 強制写真 */
+export function ConciergeModel({ playback, mode = 'auto' }: {
+  playback: ConciergePlayback;
   mode?: ConciergeMode;
 }) {
-  const usePhoto = mode === 'photo' || (mode === 'auto' && !supportsWebGl());
+  const [asset, setAsset] = useState<GLTF | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [lightTarget] = useState(() => {
+    const target = new Object3D(); target.position.set(0, 1.51, 0); return target;
+  });
+  const photo = mode === 'photo' || !supportsWebGl() || failed;
+  const { phase, requestId } = playback.state;
+  const unavailable = useCallback(() => setFailed(true), []);
+  const loaded = useCallback(() => setReady(true), []);
 
-  if (usePhoto) {
-    return <ConciergePhoto />;
-  }
+  useEffect(() => {
+    if (photo) return;
+    let alive = true;
+    void loadAsset().then((result) => { if (alive) setAsset(result); }, () => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, [photo]);
+  useEffect(() => {
+    // A photo or unavailable GPU must not leave the spoken guide waiting for a bow.
+    if (photo && phase === 'bowing') playback.completeBow(requestId);
+  }, [photo, phase, requestId, playback]);
 
-  return (
-    <Canvas
+  return <div className="shiro-yado__concierge-portrait" data-testid="concierge-model"
+    data-phase={phase} data-model={photo ? 'photo' : ready && asset ? 'ready' : 'loading'}>
+    {photo || !asset ? <ConciergePhoto /> : <Canvas
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0.18, 2.35], fov: 28, near: 0.1, far: 20 }}
+      camera={{ position: [0, 1.51, 0.85], fov: 34, near: 0.01, far: 20 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      style={{ touchAction: 'none', width: '100%', height: '100%' }}
+      onCreated={({ gl, camera }) => {
+        gl.outputColorSpace = SRGBColorSpace;
+        gl.toneMapping = NeutralToneMapping;
+        gl.toneMappingExposure = 0.90;
+        camera.lookAt(0, 1.51, 0);
+      }}
+      fallback={<ConciergePhoto />}
+      style={{ pointerEvents: 'none', touchAction: 'pan-y', width: '100%', height: '100%' }}
     >
-      <ambientLight intensity={1.25} />
-      <hemisphereLight args={['#fff8f0', '#e0d4c4', 1.05]} />
-      <directionalLight position={[2.2, 3.5, 2.5]} intensity={1.7} />
-      <directionalLight position={[-2, 1.2, -1.5]} intensity={0.45} />
-      <CuteConciergeFigure speaking={speaking} hairColor={hairColor} />
-      <ContactShadows position={[0, -0.62, 0]} opacity={0.1} scale={2} blur={2} far={2.2} />
-    </Canvas>
-  );
+      <primitive object={lightTarget} />
+      <ambientLight color={CONCIERGE_LIGHT.neutral} intensity={1.6} />
+      <hemisphereLight args={[CONCIERGE_LIGHT.soft, CONCIERGE_LIGHT.bounce, 0.65]} />
+      <directionalLight color={CONCIERGE_LIGHT.warm} position={[-2, 4, 4]} intensity={0.45} />
+      <directionalLight color={CONCIERGE_LIGHT.neutral} position={[-1, 3, -3]} intensity={0.6} />
+      <directionalLight color={CONCIERGE_LIGHT.soft} position={[-0.3, 1.96, 1.85]} intensity={0.7} target={lightTarget} />
+      <directionalLight color={CONCIERGE_LIGHT.neutral} position={[0.2, 0.96, 1.45]} intensity={0.2} target={lightTarget} />
+      <ConciergeFigure asset={asset} playback={playback} onUnavailable={unavailable} onReady={loaded} />
+    </Canvas>}
+  </div>;
 }
