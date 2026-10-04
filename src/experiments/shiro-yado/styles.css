@@ -1579,3 +1579,12 @@
 .shiro-yado__stage:has(.shiro-yado__stage-fallback) .shiro-yado__hint {
   display: none;
 }
+
+/* The concierge is a fixed chest portrait; gestures belong to the page. */
+.shiro-yado__concierge-portrait {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  touch-action: pan-y;
+}

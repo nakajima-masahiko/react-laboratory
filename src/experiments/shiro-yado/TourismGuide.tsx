@@ -13,7 +13,7 @@ export function TourismGuide() {
   const localeMeta = getLocaleMeta(locale);
   const [selectedId, setSelectedId] = useState(tourism.spots[0].id);
   const selected = tourism.spots.find((spot) => spot.id === selectedId) ?? tourism.spots[0];
-  const { isSpeaking, isSupported, message, speak, stop } = useConciergeSpeech(localeMeta.speechLang);
+  const { isBusy, isSupported, message, playback, speak, stop } = useConciergeSpeech(localeMeta.speechLang);
 
   const selectSpot = (spotId: string) => {
     setSelectedId(spotId);
@@ -50,7 +50,7 @@ export function TourismGuide() {
       </section>
 
       <section className="shiro-yado__tourism-detail" aria-live="polite">
-        <div className="shiro-yado__tourism-concierge" aria-label={tourism.conciergeLabel}><ConciergeModel speaking={isSpeaking} hairColor={localeMeta.hairColor} /></div>
+        <div className="shiro-yado__tourism-concierge" aria-label={tourism.conciergeLabel}><ConciergeModel playback={playback} /></div>
         <div className="shiro-yado__tourism-copy">
           <p className="shiro-yado__eyebrow">SPOT {selected.number}</p>
           <h3>{selected.name}</h3>
@@ -61,7 +61,7 @@ export function TourismGuide() {
           </dl>
           <div className="shiro-yado__speech-actions">
             <button type="button" onClick={() => speak(tourism.speech(selected))}>{message ? tourism.listenAgain : tourism.listen}</button>
-            {isSpeaking ? <button type="button" onClick={stop}>{tourism.stop}</button> : null}
+            {isBusy ? <button type="button" onClick={stop}>{tourism.stop}</button> : null}
           </div>
           {!isSupported ? <small>{tourism.unsupported}</small> : null}
         </div>

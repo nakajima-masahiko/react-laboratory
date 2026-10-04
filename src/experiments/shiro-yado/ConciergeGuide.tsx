@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   getConciergeCopy,
   getConciergeSpeech,
@@ -21,11 +21,6 @@ const ROOM_IDS: PlaceId[] = [
 
 const EXTERIOR_SRC = `${import.meta.env.BASE_URL}shiro-yado/exterior.svg`;
 
-/** 操作していないと判断するまでの時間（ミリ秒） */
-const IDLE_MS = 10000;
-/** 自動切り替えの間隔（ミリ秒） */
-const AUTO_SWITCH_INTERVAL_MS = 8000;
-
 export function ConciergeGuide() {
   const { go } = useNav();
   const fromFloor = useHotelStore((state) => state.fromFloor);
@@ -35,80 +30,16 @@ export function ConciergeGuide() {
   const [topic, setTopic] = useState<ConciergeTopic | null>(null);
   const [roomId, setRoomId] = useState<PlaceId | null>(myRoomId);
   const [mode, setMode] = useState<ConciergeMode>('3d');
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const hasGreeted = useRef(false);
-  const greetedLocale = useRef(locale);
-  const lastInteractRef = useRef(Date.now());
-  const idleTimerRef = useRef<number | null>(null);
-  const autoSwitchTimerRef = useRef<number | null>(null);
   const meta = getLocaleMeta(locale);
   const copy = getConciergeCopy(locale);
-  const { isSpeaking, isSupported, message, speak, stop } = useConciergeSpeech(meta.speechLang);
-
-  const markInteracted = useCallback(() => {
-    lastInteractRef.current = Date.now();
-    // 操作があったら自動切り替えを一旦止める
-    if (autoSwitchTimerRef.current) {
-      window.clearInterval(autoSwitchTimerRef.current);
-      autoSwitchTimerRef.current = null;
-    }
-  }, []);
-
-  // モード切り替え（フェードアニメ付き）
-  const switchMode = useCallback((next?: ConciergeMode) => {
-    setIsTransitioning(true);
-    window.setTimeout(() => {
-      setMode((prev) => {
-        if (next) return next;
-        return prev === 'photo' ? '3d' : 'photo';
-      });
-      setIsTransitioning(false);
-    }, 320);
-  }, []);
-
-  // アイドル検知 → 一定時間操作がなければ自動切り替え開始
-  useEffect(() => {
-    const checkIdle = () => {
-      const idle = Date.now() - lastInteractRef.current >= IDLE_MS;
-      if (idle && !isSpeaking && !autoSwitchTimerRef.current) {
-        // 最初の切り替え
-        switchMode();
-        // 以降は定期的に切り替え
-        autoSwitchTimerRef.current = window.setInterval(() => {
-          if (!isSpeaking) {
-            switchMode();
-          }
-        }, AUTO_SWITCH_INTERVAL_MS);
-      }
-    };
-
-    idleTimerRef.current = window.setInterval(checkIdle, 1500);
-
-    return () => {
-      if (idleTimerRef.current) window.clearInterval(idleTimerRef.current);
-      if (autoSwitchTimerRef.current) window.clearInterval(autoSwitchTimerRef.current);
-    };
-  }, [isSpeaking, switchMode]);
-
-  // 発話中は自動切り替えを止める
-  useEffect(() => {
-    if (isSpeaking) {
-      markInteracted();
-    }
-  }, [isSpeaking, markInteracted]);
+  const { isSpeaking, isBusy, phase, isSupported, message, playback, speak, stop } = useConciergeSpeech(meta.speechLang);
 
   useEffect(() => {
-    if (hasGreeted.current && greetedLocale.current === locale) return;
-    hasGreeted.current = true;
-    greetedLocale.current = locale;
-    const timer = window.setTimeout(() => {
-      speak(copy.greeting);
-    }, 350);
-    return () => window.clearTimeout(timer);
-  }, [speak, locale, copy.greeting]);
+    speak(copy.greeting);
+    return stop;
+  }, [speak, stop, locale, copy.greeting]);
 
   const selectTopic = (nextTopic: ConciergeTopic) => {
-    markInteracted();
     setTopic(nextTopic);
     if (nextTopic === 'rooms') {
       const nextRoom = roomId ?? myRoomId;
@@ -124,15 +55,13 @@ export function ConciergeGuide() {
   };
 
   const selectRoom = (nextRoomId: PlaceId) => {
-    markInteracted();
     setTopic('rooms');
     setRoomId(nextRoomId);
     speak(getConciergeSpeech(locale, 'rooms', fromFloor, fromPlaceId, nextRoomId));
   };
 
   const toggleMode = () => {
-    markInteracted();
-    switchMode();
+    setMode((current) => current === 'photo' ? '3d' : 'photo');
   };
 
   const modeLabel = mode === 'photo' ? '写真' : '3D';
@@ -147,8 +76,6 @@ export function ConciergeGuide() {
     <section
       className="shiro-yado__concierge"
       aria-labelledby="concierge-title"
-      onPointerDown={markInteracted}
-      onClick={markInteracted}
     >
       <div
         className="shiro-yado__concierge-stage"
@@ -157,18 +84,12 @@ export function ConciergeGuide() {
           backgroundImage: `linear-gradient(180deg, rgb(251 249 245 / 0.42) 0%, rgb(243 240 234 / 0.55) 45%, rgb(236 230 220 / 0.7) 100%), url(${EXTERIOR_SRC})`,
         }}
       >
-        <div
-          className={
-            isTransitioning
-              ? 'shiro-yado__concierge-view is-fading'
-              : 'shiro-yado__concierge-view'
-          }
-        >
-          <ConciergeModel speaking={isSpeaking} hairColor={meta.hairColor} mode={mode} />
+        <div className="shiro-yado__concierge-view">
+          <ConciergeModel playback={playback} mode={mode} />
         </div>
 
         <span className={isSpeaking ? 'shiro-yado__speaking is-active' : 'shiro-yado__speaking'}>
-          {isSpeaking ? copy.speaking : copy.waiting}
+          {isBusy ? copy.speaking : phase === 'error' ? copy.listenAgain : copy.waiting}
         </span>
 
         {/* 3D / 写真 切り替えボタン */}
@@ -223,7 +144,7 @@ export function ConciergeGuide() {
           <button
             type="button"
             className="shiro-yado__btn shiro-yado__btn--accent"
-            onClick={() => { markInteracted(); stop(); go({ v: 'place', p: 'bath' }); }}
+            onClick={() => { stop(); go({ v: 'place', p: 'bath' }); }}
           >
             {copy.bathAction}
           </button>
@@ -233,7 +154,7 @@ export function ConciergeGuide() {
           <button
             type="button"
             className="shiro-yado__btn shiro-yado__btn--accent"
-            onClick={() => { markInteracted(); stop(); go({ v: 'nearby' }); }}
+            onClick={() => { stop(); go({ v: 'nearby' }); }}
           >
             {copy.nearbyAction}
           </button>
@@ -242,11 +163,11 @@ export function ConciergeGuide() {
         <div className="shiro-yado__speech" aria-live="polite">
           <p>{message || copy.greeting}</p>
           <div className="shiro-yado__speech-actions">
-            <button type="button" onClick={() => { markInteracted(); speak(message || copy.greeting); }}>
+            <button type="button" onClick={() => { speak(message || copy.greeting); }}>
               {copy.listenAgain}
             </button>
-            {isSpeaking ? (
-              <button type="button" onClick={() => { markInteracted(); stop(); }}>
+            {isBusy ? (
+              <button type="button" onClick={() => { stop(); }}>
                 {copy.stop}
               </button>
             ) : null}

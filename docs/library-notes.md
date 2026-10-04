@@ -61,7 +61,7 @@ onChange={(range) => {
 - React 19 向けに `@react-three/fiber` は **9.4.2 に固定**する。9.5 以降は peer が `react: >=19 <19.3` となり、このラボの React 19.3 と衝突する。
 - `@react-three/drei` v10 を併用する。
 - 初回フレームが黒く残ることがあるため、`frameloop="always"` と `gl.setClearColor("#f3f0ea", 1)` を併用する。
-- テクスチャは使わず、箱・平面・マテリアル色のみ。操作は OrbitControls の回転とズームだけ。
+- 館内の基本形状は箱・平面・マテリアル色が中心。館内ビューでは OrbitControls で回転・ズームし、コンシェルジュはテクスチャ付きGLBを正面固定で表示する。
 - 3D 本体は `HotelStage` を動的 import し、実験一覧の初期表示を重くしない。
 
 ## ABYSS RUSH のブラウザ検証（2026-10-01）
@@ -71,3 +71,10 @@ onChange={(range) => {
 - 同パッケージの展開で `chown /tmp/fonts` が失敗する環境では、同梱BrotliをNodeのzlibで展開し、tarを所有者変更なしで展開すると起動できる。日本語のスクリーンショットには日本語フォントとfontconfig設定も必要。
 - サーバーレス向け `--single-process` は、Playwrightが最初のBrowserContextを閉じた後にブラウザ自体も終了させる場合がある。複数ケースの検証ではこの起動引数を除外する。
 - ソフトウェアWebGLによるヘッドレス検証のFPSを、実機iPad/PCの性能として扱わない。実機Safariの性能確認は別途必要。
+
+## 白の宿のGLBコンシェルジュ（2026-10-04）
+
+- スキン付きGLBの複製には `SkeletonUtils.clone` を使う。キャッシュした原本の顔メッシュやスケルトンを直接変形すると、写真切り替えや再マウントで状態が共有される。口の変形用geometryと口内メッシュは各インスタンスが所有し、共有するGLBのテクスチャ・geometryは破棄しない。
+- アニメーションミキサーの後に首の傾きを加算する場合、次のフレームのミキサー更新前に元のクォータニオンへ戻す。戻さないと回転が蓄積する。
+- Web Speechの終了と中断は区別する。request IDと現在のutteranceを照合して、`cancel()` 後の古いイベントを無視する。初回の自動音声が拒否されても、再生ボタンではお辞儀を繰り返さず、クリック中に `speak()` を呼べるようにする。
+- 検証環境の標準Playwrightブラウザ取得URLは不完全なZIPを返した。検証専用のPlaywright 1.56.1ではMicrosoft配信先へのフォールバックでChromiumを取得できた。アプリ依存関係には追加していない。
