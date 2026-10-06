@@ -53,10 +53,69 @@ CandleCore Lab は `/#/experiment/candle-core-lab` から開けます。
 | `npm run build:wasm` | `wasm/sma-benchmark` クレートを `wasm32-unknown-unknown` 向けにビルドし、`wasm-bindgen` で `src/experiments/sma-wasm-benchmark/wasm-pkg/` を再生成（SMA WASM Benchmark 用） |
 | `npm run build:wasm:check` | Rust 側だけ `cargo check` で型・借用検査（高速） |
 
+## デモ動画
+
+録画ファイルの保存先は **`artifacts/demos/YYYY-MM-DD/`**（撮影日・日本時間）です。
+短い完成動画をリポジトリに保存し、同じフォルダに撮影条件・確認結果を残します。
+
+| ファイル | 内容 |
+| --- | --- |
+| `<experiment-id>.webm` | 実際のブラウザ操作を録画した動画 |
+| `<experiment-id>.png` | 動画の内容を示すプレビュー画像 |
+| `<experiment-id>.md` | シナリオ・撮影条件・確認結果・制約 |
+| `<experiment-id>.json` | 自動確認の結果、ブラウザ情報、エラーログ |
+
+同日に撮り直す場合は `DEMO_OUTPUT_DIR` で別のサブフォルダを指定してください。
+既存動画は上書きしません。失敗した録画、ブラウザの認証情報、一時ファイルはコミットせず、
+長時間の動画はGitHub ActionsのArtifactsなどに保管してください。
+
+### 保存済みの動画（2026-10-07）
+
+| 実験 | 動画 | 内容・確認結果 |
+| --- | --- | --- |
+| アオウミガメ | [WebM](artifacts/demos/2026-10-07/sea-turtle.webm) | [追跡・接近観察・呼吸観察・一時停止](artifacts/demos/2026-10-07/sea-turtle.md) |
+| ABYSS RUSH — 海底グランプリ | [WebM](artifacts/demos/2026-10-07/kart-rush.webm) | [レース開始・走行・一時停止・再開](artifacts/demos/2026-10-07/kart-rush.md) |
+| 白の宿 | [WebM](artifacts/demos/2026-10-07/shiro-yado.webm) | [コンシェルジュ・浴場案内・ホームへの復帰](artifacts/demos/2026-10-07/shiro-yado.md) |
+
+GitHubのファイル画面で再生できない場合は **Download raw file** でダウンロードしてください。
+録画は1280×900の無音WebMです。撮影時の操作確認であり、全機能・全端末のテストを意味しません。
+
+### Copilotで撮影する
+
+[playwright-demo-video Skill](.github/skills/playwright-demo-video/SKILL.md) を使い、例えば次のように指示します。
+
+```text
+playwright-demo-video Skillを使って、海中レースを操作・確認し、
+30〜60秒の動画を artifacts/demos/YYYY-MM-DD/ に保存してください。
+撮影条件と確認結果も記録してください。
+```
+
+保存済みの3シナリオは [scripts/record-demo-videos.mjs](scripts/record-demo-videos.mjs) で再撮影できます。
+プロジェクトの通常のセットアップを済ませ、開発サーバーを起動したうえで実行してください。
+2026-10-07の撮影にはPlaywright 1.51.1とChromium 134を使用しました。
+
+```bash
+# 録画用ツールを作業環境に追加（package.json / lockfileは変更しない）
+npm install --no-save --package-lock=false playwright@1.51.1
+npx --no-install playwright install chromium
+
+# 別ターミナルで通常の開発サーバーを起動
+npm run dev -- --host 127.0.0.1 --port 5173
+
+# 3本を録画。引数に sea-turtle / kart-rush / shiro-yado を指定すると対象を限定
+node scripts/record-demo-videos.mjs
+```
+
+`DEMO_BASE_URL`（既定 `http://127.0.0.1:5173/react-laboratory/`）と
+`DEMO_OUTPUT_DIR` でURL・保存先を変更できます。スクリプトは既存サーバーへ接続し、
+実際のUI操作と状態確認を行って動画・プレビュー・JSONを保存します。
+録画後は内容を目視確認し、Markdownの確認記録を添えてください。
+
 ## ディレクトリ構成
 
 ```
 react-laboratory/
+├── artifacts/demos/              # 日付別のデモ動画・プレビュー・確認記録
 ├── .github/workflows/deploy.yml   # GitHub Pages への自動デプロイ
 ├── docs/                          # プロジェクトドキュメント
 │   ├── architecture.md            # アーキテクチャ解説

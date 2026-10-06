@@ -1,0 +1,22 @@
+{
+  "id": "shiro-yado",
+  "url": "http://127.0.0.1:5173/react-laboratory/#/experiments/shiro-yado",
+  "revision": "8d253a33581d454300dbe0048b8885a6ebf73c43",
+  "recordedAt": "2026-10-06T16:04:44.103Z",
+  "browser": "134.0.6998.35",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "backend": "Playwright recordVideo",
+  "checks": [
+    "Concierge heading, canvas and ready 3D model confirmed",
+    "Bath guidance topic selected and destination action displayed",
+    "Bathhouse page heading visible",
+    "Returned to concierge home with ready 3D model"
+  ],
+  "errors": [],
+  "warnings": [],
+  "failedRequests": [],
+  "failure": null
+}

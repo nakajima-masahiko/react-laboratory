@@ -20,7 +20,7 @@ description: >
    `npm run dev -- --host 127.0.0.1 --port 5173` in a managed background process.
    Respect the Vite base path: the home URL is
    `http://127.0.0.1:5173/react-laboratory/` and experiment URLs are
-   `/react-laboratory/experiments/<id>/`. Read the server output to confirm the
+   `/react-laboratory/#/experiments/<id>`. Read the server output to confirm the
    port; do not replace another running server.
 4. Check available tooling with `playwright-cli --help`. If a project-local
    Playwright exists, also check `npx --no-install playwright cli --help`.
@@ -125,12 +125,13 @@ If neither backend is usable, report the exact blocker without claiming a video.
    file alone does not prove a usable recording. State any review limitation.
 2. Save a concise sibling `<filename>.md` with the scenario, actual checks and
    outcomes, viewport, URL, recording backend/version, and unresolved issues.
-3. Keep generated recordings, temporary scripts, and browser state out of
-   source commits. Use the execution environment's artifact mechanism when
+3. Store curated recordings under `artifacts/demos/YYYY-MM-DD/` with a sibling
+   Markdown report, following the root README. Commit requested curated videos;
+   keep temporary takes, traces, and browser state out of source commits.
+   Use the execution environment's artifact mechanism when
    available; provide real downloadable links only after upload succeeds.
    In a PR, summarize checks and link accessible artifacts, never a local path
-   presented as a downloadable attachment. Do not commit large videos merely
-   to attach them to a PR.
+   presented as a downloadable attachment. Keep each curated clip short and compact; use external artifacts for long recordings.
 4. Return a short Japanese report: demonstrated scenario, checks passed or
    failed, video location/link, and limitations. Distinguish inspection from
    automated assertions and do not claim broader test coverage.

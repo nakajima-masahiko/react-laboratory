@@ -1,0 +1,22 @@
+{
+  "id": "sea-turtle",
+  "url": "http://127.0.0.1:5173/react-laboratory/#/experiments/sea-turtle",
+  "revision": "8d253a33581d454300dbe0048b8885a6ebf73c43",
+  "recordedAt": "2026-10-06T16:00:45.931Z",
+  "browser": "134.0.6998.35",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "backend": "Playwright recordVideo",
+  "checks": [
+    "3D canvas visible and loading status cleared",
+    "Tracking view selected",
+    "Close observation and front-flipper information displayed",
+    "Pause state reflected by replay button"
+  ],
+  "errors": [],
+  "warnings": [],
+  "failedRequests": [],
+  "failure": null
+}

@@ -1,0 +1,22 @@
+{
+  "id": "kart-rush",
+  "url": "http://127.0.0.1:5173/react-laboratory/#/experiments/kart-rush",
+  "revision": "8d253a33581d454300dbe0048b8885a6ebf73c43",
+  "recordedAt": "2026-10-06T16:01:17.767Z",
+  "browser": "134.0.6998.35",
+  "viewport": {
+    "width": 1280,
+    "height": 900
+  },
+  "backend": "Playwright recordVideo",
+  "checks": [
+    "Race entered racing state with easy difficulty and lightweight rendering",
+    "Six vehicle markers present; their positions changed while racing",
+    "Pause dialog opened",
+    "Race resumed"
+  ],
+  "errors": [],
+  "warnings": [],
+  "failedRequests": [],
+  "failure": null
+}
