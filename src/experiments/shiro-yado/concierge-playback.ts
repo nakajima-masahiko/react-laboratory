@@ -85,11 +85,21 @@ export function createConciergePlayback({ synth, Utterance, onChange, language, 
       state = { ...state, message };
       // Bow on the first greeting. Later topic/replay clicks start speech in
       // the user gesture, including after the browser has refused autoplay.
-      if (!hasBowed && message.trim()) publish('bowing');
+      if (!hasBowed && message.trim()) {
+        publish('bowing');
+        const id = state.requestId;
+        // Loading, an offscreen model, or a lost GPU must never hold narration forever.
+        startupTimer = setTimeout(() => {
+          if (state.phase !== 'bowing' || state.requestId !== id) return;
+          hasBowed = true;
+          startSpeech();
+        }, 16000);
+      }
       else startSpeech();
     },
     completeBow(id: number) {
       if (state.phase !== 'bowing' || id !== state.requestId) return;
+      clearTimer();
       hasBowed = true;
       startSpeech();
     },

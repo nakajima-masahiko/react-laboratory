@@ -8,11 +8,15 @@ import {
 } from 'react';
 import { getUi } from '../ui-extra';
 import { useHotelStore } from '../store';
+import { FloorPlan } from '../floor-plan';
+import { getPlace, type FloorId } from '../hotel-data';
+import { useSceneActivity } from './use-scene-activity';
 import type { SceneId } from './types';
 
 type StageProps = {
   scene: SceneId;
   autoRotate?: boolean;
+  animate?: boolean;
   fallback?: ReactNode;
   onUnavailable?: () => void;
 };
@@ -51,17 +55,9 @@ export function HotelPreview({
   const ui = getUi(locale);
   const resolvedHint = hint ?? ui.dragHint;
   const [Stage, setStage] = useState<ComponentType<StageProps> | null>(null);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const { ref, visible, reduced } = useSceneActivity();
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduceMotion(mq.matches);
-    const onChange = () => setReduceMotion(mq.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
 
   useEffect(() => {
     let live = true;
@@ -80,6 +76,8 @@ export function HotelPreview({
     };
   }, [attempt]);
 
+  const place = getPlace(scene);
+  const floor = place?.floor ?? Number(scene.slice(-1)) as FloorId;
   const fallback = (
     <div
       className={
@@ -91,7 +89,7 @@ export function HotelPreview({
     >
       {scene === 'bath' ? (
         <img src={BATH_FALLBACK_SRC} alt="" aria-hidden="true" />
-      ) : null}
+      ) : <FloorPlan floor={floor} highlight={place?.id} />}
       <div className="shiro-yado__stage-fallback-copy">
         <strong>{ui.sceneFailed}</strong>
         <button type="button" onClick={() => setAttempt((value) => value + 1)}>
@@ -102,7 +100,7 @@ export function HotelPreview({
   );
 
   return (
-    <div className="shiro-yado__stage" data-scene={scene}>
+    <div ref={ref} className="shiro-yado__stage" data-scene={scene}>
       <div className="shiro-yado__canvas">
         {failed ? (
           fallback
@@ -110,7 +108,8 @@ export function HotelPreview({
           <SceneErrorBoundary key={`${scene}-${attempt}`} fallback={fallback}>
             <Stage
               scene={scene}
-              autoRotate={autoRotate && !reduceMotion}
+              autoRotate={autoRotate && !reduced && visible}
+              animate={!reduced && visible}
               fallback={fallback}
               onUnavailable={() => setFailed(true)}
             />

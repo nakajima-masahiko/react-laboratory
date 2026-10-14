@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getPlace, type FloorId } from './hotel-data';
 import { NavContext, type View } from './nav-state';
@@ -29,6 +29,14 @@ export function NavProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const view = useMemo(() => viewFromPath(location.pathname), [location.pathname]);
+  useEffect(() => {
+    const body = document.querySelector<HTMLElement>('.shiro-yado__body');
+    body?.scrollTo(0, 0);
+    const heading = body?.querySelector<HTMLElement>('h2');
+    heading?.setAttribute('tabindex', '-1');
+    heading?.focus({ preventScroll: true });
+    document.querySelector('.shiro-yado')?.scrollIntoView({ block: 'start' });
+  }, [location.pathname]);
   const value = useMemo(() => ({ view, go: (next: View) => navigate(pathFromView(next)) }), [navigate, view]);
   return <NavContext.Provider value={value}>{children}</NavContext.Provider>;
 }

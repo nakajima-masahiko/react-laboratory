@@ -120,3 +120,19 @@ test('fixed frontal camera frames the chest and leaves space above the head on n
     assert.ok(hair.y > 0.6 && hair.y < 0.9);
   }
 });
+
+test('a stalled bow releases speech and stop cancels its deadline', (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { playback, utterances } = setup(t);
+  playback.speak('loading model');
+  t.mock.timers.tick(16000);
+  assert.equal(utterances.length, 1);
+  assert.equal(playback.state.phase, 'loading');
+  playback.stop();
+  playback.configure('en-US', true);
+  playback.speak('cancel before model loads');
+  playback.stop();
+  t.mock.timers.tick(16000);
+  assert.equal(utterances.length, 1);
+  assert.equal(playback.state.phase, 'idle');
+});

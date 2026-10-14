@@ -77,11 +77,13 @@ function SceneBody({ scene }: { scene: SceneId }) {
 export function HotelStage({
   scene,
   autoRotate = false,
+  animate = true,
   fallback,
   onUnavailable,
 }: {
   scene: SceneId;
   autoRotate?: boolean;
+  animate?: boolean;
   fallback?: ReactNode;
   onUnavailable?: () => void;
 }) {
@@ -93,7 +95,7 @@ export function HotelStage({
       fallback={fallback}
       shadows
       dpr={[1, 1.6]}
-      frameloop="always"
+      frameloop={animate && (scene === 'bath' || autoRotate) ? 'always' : 'demand'}
       camera={{ position: cam.position, fov: 36, near: 0.1, far: 80 }}
       gl={(defaults) => {
         try {

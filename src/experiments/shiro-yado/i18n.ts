@@ -1,3 +1,5 @@
+import { buildGuide } from './guide';
+import { getPlace, type FloorId } from './hotel-data';
 export type Locale = 'ja' | 'en' | 'fr' | 'es' | 'zh' | 'ko';
 
 export const LOCALES: ReadonlyArray<{
@@ -69,8 +71,7 @@ type UiCopy = {
   rooms: string;
 };
 
-const sideKey = (side: string, c: ConciergeCopy) =>
-  side === 'left' ? c.sideLeft : side === 'right' ? c.sideRight : c.sideCenter;
+
 
 const CONCIERGE: Record<Locale, ConciergeCopy> = {
   ja: {
@@ -319,99 +320,6 @@ const CONCIERGE: Record<Locale, ConciergeCopy> = {
   },
 };
 
-const DEST_NAMES: Record<Locale, Record<string, string>> = {
-  ja: {
-    lobby: 'ロビー',
-    banquet: '宴会場',
-    bath: '浴場',
-    restroom: 'お手洗い',
-    'room-201': '201号室',
-    'room-202': '202号室',
-    'room-203': '203号室',
-    'room-204': '204号室',
-    'room-205': '205号室',
-  },
-  en: {
-    lobby: 'the lobby',
-    banquet: 'the banquet hall',
-    bath: 'the bathhouse',
-    restroom: 'the restrooms',
-    'room-201': 'room 201',
-    'room-202': 'room 202',
-    'room-203': 'room 203',
-    'room-204': 'room 204',
-    'room-205': 'room 205',
-  },
-  fr: {
-    lobby: 'le lobby',
-    banquet: 'la salle de banquet',
-    bath: 'les bains',
-    restroom: 'les toilettes',
-    'room-201': 'la chambre 201',
-    'room-202': 'la chambre 202',
-    'room-203': 'la chambre 203',
-    'room-204': 'la chambre 204',
-    'room-205': 'la chambre 205',
-  },
-  es: {
-    lobby: 'el lobby',
-    banquet: 'el salón de banquetes',
-    bath: 'los baños',
-    restroom: 'los aseos',
-    'room-201': 'la habitación 201',
-    'room-202': 'la habitación 202',
-    'room-203': 'la habitación 203',
-    'room-204': 'la habitación 204',
-    'room-205': 'la habitación 205',
-  },
-  zh: {
-    lobby: '大堂',
-    banquet: '宴会厅',
-    bath: '浴场',
-    restroom: '卫生间',
-    'room-201': '201号房',
-    'room-202': '202号房',
-    'room-203': '203号房',
-    'room-204': '204号房',
-    'room-205': '205号房',
-  },
-  ko: {
-    lobby: '로비',
-    banquet: '연회장',
-    bath: '목욕탕',
-    restroom: '화장실',
-    'room-201': '201호',
-    'room-202': '202호',
-    'room-203': '203호',
-    'room-204': '204호',
-    'room-205': '205호',
-  },
-};
-
-const DEST_FLOOR: Record<string, number> = {
-  lobby: 1,
-  banquet: 3,
-  bath: 3,
-  restroom: 3,
-  'room-201': 2,
-  'room-202': 2,
-  'room-203': 2,
-  'room-204': 2,
-  'room-205': 2,
-};
-
-const DEST_SIDE: Record<string, string> = {
-  lobby: 'center',
-  banquet: 'right',
-  bath: 'left',
-  restroom: 'center',
-  'room-201': 'left',
-  'room-202': 'left',
-  'room-203': 'center',
-  'room-204': 'right',
-  'room-205': 'right',
-};
-
 export function getConciergeCopy(locale: Locale) {
   return CONCIERGE[locale] ?? CONCIERGE.ja;
 }
@@ -439,21 +347,12 @@ function buildRouteSpeech(
   fromPlaceId: string,
   destId: string,
 ) {
-  const c = getConciergeCopy(locale);
-  const names = DEST_NAMES[locale] ?? DEST_NAMES.ja;
-  const destName = names[destId] ?? destId;
-  const toFloor = DEST_FLOOR[destId] ?? 1;
-  const side = sideKey(DEST_SIDE[destId] ?? 'center', c);
-  const intro = c.routeIntro(destName);
-
-  if (fromPlaceId === 'lobby' || fromFloor === 1) {
-    if (toFloor === 1) return `${intro} ${c.routeSameFloor(destName, side)}`;
-    return `${intro} ${c.routeLobbyTo(destName, toFloor, side)}`;
-  }
-  if (fromFloor === toFloor) {
-    return `${intro} ${c.routeSameFloor(destName, side)}`;
-  }
-  return `${intro} ${c.routeElevator(fromFloor, toFloor, destName, side)}`;
+  const origin = getPlace(fromPlaceId);
+  const destination = getPlace(destId);
+  if (!origin || !destination) return '';
+  const floor = [1, 2, 3].includes(fromFloor) ? fromFloor as FloorId : origin.floor;
+  const guide = buildGuide({ floor, placeId: origin.id }, destination.id, locale);
+  return guide ? [guide.summary, ...guide.steps.map((step) => `${step.title}。${step.body}`)].join(' ') : '';
 }
 
 export const UI: Record<Locale, UiCopy> = {

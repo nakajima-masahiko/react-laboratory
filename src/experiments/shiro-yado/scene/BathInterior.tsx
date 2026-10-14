@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useTexture } from '@react-three/drei';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import * as THREE from 'three';
 import { Box } from './primitives';
 
@@ -78,14 +78,14 @@ function SteamWisp({ position, delay, scale = 1 }: { position: [number, number, 
   );
 }
 
-function FujiMural() {
-  const texture = useTexture(MURAL_SRC);
+function configureMuralTexture(texture: THREE.Texture) {
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  texture.needsUpdate = true;
+}
 
-  useEffect(() => {
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = 8;
-    texture.needsUpdate = true;
-  }, [texture]);
+function FujiMural() {
+  const texture = useTexture(MURAL_SRC, configureMuralTexture);
 
   return (
     <group>

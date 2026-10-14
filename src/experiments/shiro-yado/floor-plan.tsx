@@ -60,6 +60,9 @@ export function FloorPlan({ floor, highlight, here }: Props) {
           <Label id="room-204" name="204" highlight={highlight} here={here} />
           <Label id="room-205" name="205" highlight={highlight} here={here} />
         </div>
+        <div className="shiro-yado__plan-row shiro-yado__plan-row--5" aria-hidden="true">
+          <span /><span /><div className="shiro-yado__cell shiro-yado__cell--muted">EV ↑</div><span /><span />
+        </div>
       </div>
     );
   }

@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { FloorPlan } from './floor-plan';
 import { buildGuide } from './guide';
 import {
@@ -17,19 +16,18 @@ import {
   IconCheck,
   IconDoor,
   IconHall,
-  IconIsland,
-  IconMap,
   IconPin,
 } from './icons';
 import { getUi } from './ui-extra';
-import { getTourism } from './tourism-content';
 import { getFloorText, localizePlace } from './place-i18n';
 import { useNav } from './nav-state';
 import { HotelPreview } from './scene/HotelPreview';
 import type { SceneId } from './scene/types';
 import { useHotelStore } from './store';
 import { ConciergeGuide } from './ConciergeGuide';
-import { PromoSlider } from './PromoSlider';
+import { WelcomeHome } from './WelcomeHome';
+import { StayControls } from './StayControls';
+import { WELCOME } from './welcome-copy';
 
 const FLOOR_SCENES: Record<FloorId, SceneId> = {
   1: 'floor-1',
@@ -42,49 +40,13 @@ export function HomeView() {
   const myRoomId = useHotelStore((s) => s.myRoomId);
   const locale = useHotelStore((s) => s.locale);
   const ui = getUi(locale);
-  const tourism = getTourism(locale);
   const myRoom = myRoomId ? localizePlace(locale, myRoomId) : null;
-
-  useEffect(() => {
-    const body = document.querySelector('.shiro-yado__body');
-    if (body instanceof HTMLElement) body.scrollTop = 0;
-    window.scrollTo(0, 0);
-  }, []);
 
   return (
     <div className="shiro-yado__stack shiro-yado__stack--home">
-      <div className="shiro-yado__concierge-anchor">
-        <ConciergeGuide />
-      </div>
-      <section className="shiro-yado__hero">
-        <p className="shiro-yado__eyebrow">{ui.homeEyebrow}</p>
-        <h2 className="shiro-yado__title">{ui.hotelName}</h2>
-        <p className="shiro-yado__lead">{ui.homeLead}</p>
-      </section>
-      <nav className="shiro-yado__home-actions" aria-label="Main services">
-        <button type="button" className="shiro-yado__home-action" onClick={() => go({ v: 'dest' })}>
-          <span className="shiro-yado__home-action-icon"><IconMap /></span>
-          <span><small>HOTEL GUIDE</small><strong>{ui.chooseDest}</strong><em>{ui.destLead}</em></span>
-          <IconArrow />
-        </button>
-        <button type="button" className="shiro-yado__tourism-link" onClick={() => go({ v: 'tourism' })}>
-          <span className="shiro-yado__tourism-link-main">
-            <span className="shiro-yado__tourism-link-icon"><IconIsland /></span>
-            <span>
-              <small>SHIOSHIRO ISLAND</small>
-              <strong>{tourism.linkTitle}</strong>
-              <em>{tourism.linkSubtitle}</em>
-            </span>
-          </span>
-          <IconArrow />
-        </button>
-        <button type="button" className="shiro-yado__home-action" onClick={() => go(myRoom ? { v: 'guide', p: myRoom.id } : { v: 'checkin' })}>
-          <span className="shiro-yado__home-action-icon"><IconBed /></span>
-          <span><small>MY STAY</small><strong>{myRoom ? ui.toRoom : ui.checkIn}</strong><em>{myRoom ? `${myRoom.number} ${myRoom.typeLabel}` : ui.stayUnsetHint}</em></span>
-          <IconArrow />
-        </button>
-      </nav>
-      <PromoSlider />
+      <WelcomeHome />
+      <StayControls showRoom />
+      <div className="shiro-yado__concierge-anchor"><ConciergeGuide /></div>
       <section className="shiro-yado__section">
         <div className="shiro-yado__section-head">
           <h3>{ui.quickTitle}</h3>
@@ -345,6 +307,7 @@ export function GuideView({ destId }: { destId: PlaceId }) {
           {origin ? ui.fromOrigin(origin.floor, origin.shortName, guide.minutes) : guide.minutes}
         </p>
       </header>
+      <StayControls />
       <HotelPreview scene={dest.id} hint={ui.destSceneHint} />
       <section className="shiro-yado__section">
         <h3>{ui.floorPosition(dest.floor)}</h3>
@@ -395,6 +358,7 @@ export function CheckinView() {
         <p className="shiro-yado__eyebrow">CHECK IN</p>
         <h2>{ui.checkinTitle}</h2>
         <p className="shiro-yado__muted">{ui.checkinLead}</p>
+        <p className="shiro-yado__muted">{WELCOME[locale].stayHint}</p>
       </header>
       <ul className="shiro-yado__list">
         {ROOM_IDS.map((id) => {
@@ -405,6 +369,7 @@ export function CheckinView() {
               <button
                 type="button"
                 className={selected ? 'shiro-yado__row shiro-yado__row--selected' : 'shiro-yado__row'}
+                aria-pressed={selected}
                 onClick={() => setMyRoom(id)}
               >
                 <span>

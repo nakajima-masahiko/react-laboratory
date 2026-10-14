@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { FloorId, PlaceId } from './hotel-data';
-import type { Locale } from './i18n';
+import { getPlace, type FloorId, type PlaceId } from './hotel-data';
+import { LOCALES, type Locale } from './i18n';
 
 type HotelState = {
   myRoomId: PlaceId | null;
@@ -26,8 +26,6 @@ export const useHotelStore = create<HotelState>()(
       setMyRoom: (id) =>
         set({
           myRoomId: id,
-          fromFloor: 1,
-          fromPlaceId: 'lobby',
         }),
       setHere: (floor, placeId) =>
         set({
@@ -40,6 +38,16 @@ export const useHotelStore = create<HotelState>()(
     {
       name: 'shiro-yado-v2',
       skipHydration: true,
+      merge: (persisted, current) => {
+        if (!persisted || typeof persisted !== 'object') return current;
+        const saved = persisted as Record<string, unknown>;
+        const room = typeof saved.myRoomId === 'string' ? getPlace(saved.myRoomId) : undefined;
+        const origin = typeof saved.fromPlaceId === 'string' ? getPlace(saved.fromPlaceId) : undefined;
+        const locale = LOCALES.find((item) => item.id === saved.locale)?.id ?? current.locale;
+        return { ...current, myRoomId: room?.kind === 'room' ? room.id : null,
+          fromPlaceId: origin?.id ?? 'lobby', fromFloor: origin?.floor ?? 1, locale,
+          speechEnabled: typeof saved.speechEnabled === 'boolean' ? saved.speechEnabled : current.speechEnabled };
+      },
       partialize: (s) => ({
         myRoomId: s.myRoomId,
         fromFloor: s.fromFloor,

@@ -1,3 +1,5 @@
+import { getRouteText } from './route-text';
+
 export type FloorId = 1 | 2 | 3;
 
 export type PlaceId =
@@ -37,7 +39,7 @@ export type Place = {
 export const HOTEL_NAME = '白の宿';
 export const HOTEL_NAME_EN = 'SHIRO NO YADO';
 
-export const PLACES: Record<PlaceId, Place> = {
+const PLACE_DETAILS: Record<PlaceId, Omit<Place, 'fromElevator' | 'toElevator'>> = {
   lobby: {
     id: 'lobby',
     floor: 1,
@@ -51,8 +53,6 @@ export const PLACES: Record<PlaceId, Place> = {
     description:
       '白い壁と淡い木のカウンターが迎える、チェックイン・アウトの場所です。正面奥がエレベーターホールです。',
     summary: '1階の中央、エントランスを入ってすぐです',
-    fromElevator: 'エレベーターを降りると正面がロビー、左手がフロントです。',
-    toElevator: 'ソファの奥、正面右手のエレベーターホールへ進みます。',
     hours: 'フロント 7:00–22:00',
     mapSide: 'center',
   },
@@ -69,9 +69,7 @@ export const PLACES: Record<PlaceId, Place> = {
     amenities: ['シングルベッド×2', 'ユニットバス', 'デスク', '32インチテレビ'],
     description:
       '白い壁に淡い木のヘッドボード。二人でゆったり休める標準のツインです。',
-    summary: '2階廊下の左手、最初の部屋です',
-    fromElevator: '2階で降り、廊下を左手に進んだ最初の扉です。',
-    toElevator: '部屋を出て右へ。廊下のつきあたりがエレベーターです。',
+    summary: '2階のエレベーターホールから左手です',
     mapSide: 'left',
   },
   'room-202': {
@@ -87,9 +85,7 @@ export const PLACES: Record<PlaceId, Place> = {
     amenities: ['ダブルベッド', 'ユニットバス', 'デスク', '32インチテレビ'],
     description:
       '幅160cmのダブルベッドを中心にした、静かな二人部屋。白のリネンが印象です。',
-    summary: '2階廊下の左手、2つ目の部屋です',
-    fromElevator: '2階で降り、廊下を左手に進んだ2つ目の扉です。',
-    toElevator: '部屋を出て右へ。すぐ先がエレベーターホールです。',
+    summary: '2階のエレベーターホールから左手です',
     mapSide: 'left',
   },
   'room-203': {
@@ -106,8 +102,6 @@ export const PLACES: Record<PlaceId, Place> = {
     description:
       'ソファとデスクを設けた広めのツイン。滞在中の作業や、少し長い休みにも向きます。',
     summary: '2階廊下の中央です',
-    fromElevator: '2階で降り、廊下を左手へ。中央の扉が203号室です。',
-    toElevator: '部屋を出て右へ、廊下の中央からホールへ戻ります。',
     mapSide: 'center',
   },
   'room-204': {
@@ -123,9 +117,7 @@ export const PLACES: Record<PlaceId, Place> = {
     amenities: ['セミダブル×2', '二面窓', 'ラウンジチェア', '40インチテレビ'],
     description:
       '角部屋ならではの大きな二面窓。朝の光と、街の眺めをゆっくり味わえます。',
-    summary: '2階廊下の奥、角の部屋です',
-    fromElevator: '2階で降り、廊下を左手いっぱいに進んだ突きあたりです。',
-    toElevator: '部屋を出て右へ、廊下をエレベーターまで戻ります。',
+    summary: '2階のエレベーターホールから右手です',
     mapSide: 'right',
   },
   'room-205': {
@@ -141,9 +133,7 @@ export const PLACES: Record<PlaceId, Place> = {
     amenities: ['シングル×2', 'ソファベッド', 'ダイニングテーブル', 'バスタブ'],
     description:
       '家族やグループのための広い一室。テーブルを囲んで、部屋でも過ごせます。',
-    summary: '2階廊下の右手、エレベーター横です',
-    fromElevator: '2階で降りて右手すぐ。エレベーター横の扉です。',
-    toElevator: '部屋を出て左へ、すぐエレベーターホールです。',
+    summary: '2階のエレベーターホールから右手です',
     mapSide: 'right',
   },
   banquet: {
@@ -159,8 +149,6 @@ export const PLACES: Record<PlaceId, Place> = {
     description:
       '白い壁と木の床が続く、小さな宴会場。会食、会合、少人数の祝い事に使われます。',
     summary: '3階の右側です',
-    fromElevator: '3階で降り、右手の大きな扉が「白の間」です。',
-    toElevator: '扉を出て左へ。すぐエレベーターホールです。',
     hours: '10:00–22:00（要予約）',
     mapSide: 'right',
   },
@@ -177,8 +165,6 @@ export const PLACES: Record<PlaceId, Place> = {
     description:
       '朝焼けの富士山と黒松を描いた大壁画を望む、白御影石と檜の内湯。やわらかな灯りと湯気に包まれる、白の宿の特別な湯処です。',
     summary: '3階の左側です',
-    fromElevator: '3階で降り、左手の暖簾が浴場「しろみゆ」です。',
-    toElevator: '入口を出て右へ。正面がエレベーターです。',
     hours: '15:00–24:00 / 6:00–10:00',
     mapSide: 'left',
   },
@@ -195,12 +181,14 @@ export const PLACES: Record<PlaceId, Place> = {
     description:
       '3階エレベーターホールの正面。男女別と、車いす対応の多目的トイレがあります。',
     summary: '3階の中央、エレベーター前です',
-    fromElevator: '3階で降りて正面すぐ。左手が女性、右手が男性、中央が多目的です。',
-    toElevator: '扉を出て数歩でエレベーターホールです。',
     hours: '24時間',
     mapSide: 'center',
   },
 };
+
+export const PLACES = Object.fromEntries(
+  Object.entries(PLACE_DETAILS).map(([id, place]) => [id, { ...place, ...getRouteText('ja', place) }]),
+) as Record<PlaceId, Place>;
 
 export const ROOM_IDS: PlaceId[] = [
   'room-201',
@@ -243,10 +231,10 @@ export const FLOORS: {
 ];
 
 export function getPlace(id: string | undefined | null): Place | undefined {
-  if (!id) return undefined;
+  if (!id || !Object.hasOwn(PLACES, id)) return undefined;
   return PLACES[id as PlaceId];
 }
 
 export function isPlaceId(id: string): id is PlaceId {
-  return id in PLACES;
+  return Object.hasOwn(PLACES, id);
 }
