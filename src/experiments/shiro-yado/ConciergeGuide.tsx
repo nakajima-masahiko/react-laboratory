@@ -77,7 +77,7 @@ export function ConciergeGuide() {
         className="shiro-yado__concierge-stage"
         aria-label="Hotel concierge 3D model"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgb(251 249 245 / 0.42) 0%, rgb(243 240 234 / 0.55) 45%, rgb(236 230 220 / 0.7) 100%), url(${EXTERIOR_SRC})`,
+          backgroundImage: `linear-gradient(180deg, rgb(251 249 245 / 0.08) 0%, rgb(243 240 234 / 0.12) 45%, rgb(236 230 220 / 0.18) 100%), url(${EXTERIOR_SRC})`,
         }}
       >
         <div className="shiro-yado__concierge-view">

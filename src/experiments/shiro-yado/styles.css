@@ -1,5 +1,5 @@
 .shiro-yado {
-  --sy-bg: #f4f1eb;
+  --sy-bg: #ffffff;
   --sy-elevated: #fbf9f5;
   --sy-surface: #ffffff;
   --sy-fg: #2c2a27;
@@ -1071,7 +1071,7 @@
   line-height: 1.5;
 }
 
-/* Home keeps the welcome, stay controls and concierge in reading order. */
+/* The concierge welcomes guests first, followed by ways to enjoy the stay. */
 .shiro-yado__stack--home {
   gap: 14px;
 }
@@ -1624,10 +1624,6 @@
   .shiro-yado__experiences button > svg:last-child { grid-column: 3; grid-row: 1 / 3; }
   .shiro-yado__quick button { min-width: 0; font-size: .65rem; }
 }
-@media (prefers-color-scheme: dark) {
-  .shiro-yado { color-scheme: dark; --sy-bg: var(--bg); --sy-elevated: color-mix(in srgb, var(--bg) 92%, var(--text-h)); --sy-surface: color-mix(in srgb, var(--bg) 88%, var(--text-h)); --sy-fg: var(--text-h); --sy-muted: var(--text); --sy-subtle: var(--text); --sy-border: var(--border); --sy-soft: color-mix(in srgb, var(--bg) 80%, var(--text-h)); --sy-accent: #b9cec1; --sy-accent-fg: #17251e; }
-  .shiro-yado__header, .shiro-yado__quick { background: var(--sy-elevated); }
-}
 @media (prefers-reduced-motion: reduce) {
   .shiro-yado *, .shiro-yado *::before, .shiro-yado *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
@@ -1641,4 +1637,18 @@
   .shiro-yado__header { gap: .25rem; }
   .shiro-yado__lang { padding-inline: .25rem; gap: .1rem; }
   .shiro-yado__title-board { width: 100%; height: auto; }
+}
+
+/* Shiro Yado retains its white identity even when the device prefers dark mode. */
+body:has(.shiro-yado) {
+  --bg: #ffffff;
+  --text: #333333;
+  --text-h: #111111;
+  --border: #e0e0e0;
+  --accent: #646cff;
+  --accent-light: rgb(100 108 255 / 0.1);
+  --accent-foreground: #ffffff;
+  color-scheme: light;
+  background: var(--bg);
+  color: var(--text);
 }

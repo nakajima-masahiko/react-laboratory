@@ -32,7 +32,7 @@ export function NavProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const body = document.querySelector<HTMLElement>('.shiro-yado__body');
     body?.scrollTo(0, 0);
-    const heading = body?.querySelector<HTMLElement>('h2');
+    const heading = body?.querySelector<HTMLElement>('h2, h3');
     heading?.setAttribute('tabindex', '-1');
     heading?.focus({ preventScroll: true });
     document.querySelector('.shiro-yado')?.scrollIntoView({ block: 'start' });
