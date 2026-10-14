@@ -44,9 +44,9 @@ export function HomeView() {
 
   return (
     <div className="shiro-yado__stack shiro-yado__stack--home">
+      <div className="shiro-yado__concierge-anchor"><ConciergeGuide /></div>
       <WelcomeHome />
       <StayControls showRoom />
-      <div className="shiro-yado__concierge-anchor"><ConciergeGuide /></div>
       <section className="shiro-yado__section">
         <div className="shiro-yado__section-head">
           <h3>{ui.quickTitle}</h3>
