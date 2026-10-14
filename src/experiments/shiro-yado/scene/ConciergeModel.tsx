@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import type { ConciergePlayback } from '../concierge-playback';
 import { createConciergeRig } from './concierge-rig';
+import { useSceneActivity } from './use-scene-activity';
 import { CONCIERGE_LIGHT } from './palette';
 
 const MODEL_URL = `${import.meta.env.BASE_URL}models/shiro-yado/hotel-concierge.glb`;
@@ -79,13 +80,14 @@ export function ConciergeModel({ playback, mode = 'auto' }: {
   playback: ConciergePlayback;
   mode?: ConciergeMode;
 }) {
+  const { ref, visible, reduced } = useSceneActivity();
   const [asset, setAsset] = useState<GLTF | null>(null);
   const [failed, setFailed] = useState(false);
   const [ready, setReady] = useState(false);
   const [lightTarget] = useState(() => {
     const target = new Object3D(); target.position.set(0, 1.51, 0); return target;
   });
-  const photo = mode === 'photo' || !supportsWebGl() || failed;
+  const photo = mode === 'photo' || reduced || !supportsWebGl() || failed;
   const { phase, requestId } = playback.state;
   const unavailable = useCallback(() => setFailed(true), []);
   const loaded = useCallback(() => setReady(true), []);
@@ -93,17 +95,19 @@ export function ConciergeModel({ playback, mode = 'auto' }: {
   useEffect(() => {
     if (photo) return;
     let alive = true;
-    void loadAsset().then((result) => { if (alive) setAsset(result); }, () => { if (alive) setFailed(true); });
-    return () => { alive = false; };
+    const timeout = window.setTimeout(() => { if (alive) setFailed(true); }, 15000);
+    void loadAsset().then((result) => { clearTimeout(timeout); if (alive) setAsset(result); }, () => { clearTimeout(timeout); if (alive) setFailed(true); });
+    return () => { alive = false; clearTimeout(timeout); };
   }, [photo]);
   useEffect(() => {
     // A photo or unavailable GPU must not leave the spoken guide waiting for a bow.
     if (photo && phase === 'bowing') playback.completeBow(requestId);
   }, [photo, phase, requestId, playback]);
 
-  return <div className="shiro-yado__concierge-portrait" data-testid="concierge-model"
+  return <div ref={ref} className="shiro-yado__concierge-portrait" data-testid="concierge-model"
     data-phase={phase} data-model={photo ? 'photo' : ready && asset ? 'ready' : 'loading'}>
     {photo || !asset ? <ConciergePhoto /> : <Canvas
+      frameloop={visible ? 'always' : 'demand'}
       dpr={[1, 1.5]}
       camera={{ position: [0, 1.51, 0.85], fov: 34, near: 0.01, far: 20 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}

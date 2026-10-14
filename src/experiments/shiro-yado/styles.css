@@ -37,8 +37,9 @@
   font-weight: 600;
 }
 
-.shiro-yado button {
+.shiro-yado :where(button) {
   font-family: inherit;
+  padding: 0;
   background: none;
   border: 0;
   box-shadow: none;
@@ -48,7 +49,7 @@
   -webkit-appearance: none;
 }
 
-.shiro-yado button:hover {
+.shiro-yado :where(button:hover) {
   border-color: transparent;
 }
 
@@ -1070,7 +1071,7 @@
   line-height: 1.5;
 }
 
-/* Home: concierge sits at the top of the content and stays under the sticky header */
+/* Home keeps the welcome, stay controls and concierge in reading order. */
 .shiro-yado__stack--home {
   gap: 14px;
 }
@@ -1081,18 +1082,13 @@
   margin: 0;
 }
 
-.shiro-yado__stack--home > .shiro-yado__concierge-anchor {
-  order: -1;
-}
-
 .shiro-yado__body:has(.shiro-yado__stack--home) {
   padding-top: 8px;
 }
 
-/* Stick under the app header (min-height ~64px) while scrolling home content */
+/* The portrait and its controls remain one section. */
 .shiro-yado__stack--home .shiro-yado__concierge {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 12;
   background: var(--sy-elevated);
   box-shadow: var(--sy-shadow);
@@ -1587,4 +1583,62 @@
   height: 100%;
   pointer-events: none;
   touch-action: pan-y;
+}
+
+/* Welcome and wayfinding share the same semantic palette. */
+.shiro-yado {
+  --sy-space: 1rem;
+  --sy-radius: 1rem;
+  color-scheme: light;
+}
+.shiro-yado__welcome { display: grid; gap: var(--sy-space); }
+.shiro-yado__welcome-art { position: relative; overflow: hidden; border-radius: var(--sy-radius); }
+.shiro-yado__welcome-art img { display: block; width: 100%; height: clamp(170px, 29vw, 280px); object-fit: cover; object-position: center 60%; }
+.shiro-yado__welcome-art span { position: absolute; bottom: var(--sy-space); left: var(--sy-space); background: var(--sy-elevated); color: var(--sy-fg); padding: .35rem .75rem; border-radius: 2rem; font-size: .7rem; letter-spacing: .12em; }
+.shiro-yado__welcome-copy h2 { font-size: clamp(1.5rem, 3.2vw, 2.4rem); line-height: 1.5; margin: .5rem 0; text-wrap: balance; }
+.shiro-yado__welcome-copy p { margin: 0; color: var(--sy-muted); }
+.shiro-yado__welcome h3 { margin: .5rem 0 0; }
+.shiro-yado__experiences { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sy-space); }
+.shiro-yado__experiences button { display: grid; justify-items: start; gap: .7rem; text-align: left; padding: var(--sy-space); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-surface); color: var(--sy-fg); }
+.shiro-yado__experiences button:hover { background: var(--sy-soft); border-color: var(--sy-accent); }
+.shiro-yado__experiences svg { width: 26px; height: 26px; color: var(--sy-accent); }
+.shiro-yado__experiences button > svg:last-child { justify-self: end; }
+.shiro-yado__experiences span { font-size: .8rem; color: var(--sy-muted); }
+.shiro-yado__stay-controls { display: grid; gap: .65rem; background: var(--sy-elevated); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); padding: var(--sy-space); }
+.shiro-yado__stay-controls label { display: grid; gap: .4rem; font-size: .85rem; }
+.shiro-yado__stay-controls select { max-width: 100%; min-width: 0; width: 100%; min-height: 44px; font: inherit; background: var(--sy-surface); color: var(--sy-fg); border: 1px solid var(--sy-border); border-radius: .5rem; padding: .6rem; }
+.shiro-yado__stay-controls small { color: var(--sy-muted); }
+.shiro-yado__stay-room { display: flex; gap: var(--sy-space); align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.shiro-yado__map-surface { position: relative; width: 100%; }
+.shiro-yado__island-map .shiro-yado__map-surface img { width: 100%; height: auto; max-height: none; display: block; }
+.shiro-yado .shiro-yado__map-pin { position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 2px solid var(--sy-accent); border-radius: 50%; background: var(--sy-elevated); color: var(--sy-fg); font-weight: 700; box-shadow: var(--sy-shadow); }
+.shiro-yado .shiro-yado__map-pin[aria-pressed="true"] { background: var(--sy-accent); color: var(--sy-accent-fg); }
+.shiro-yado__quick { padding-bottom: max(.5rem, env(safe-area-inset-bottom)); }
+.shiro-yado__quick button { min-width: 0; flex: 1; padding-inline: .2rem; overflow-wrap: anywhere; }
+.shiro-yado__body h2, #tourism-detail-title { scroll-margin-top: 90px; }
+@media (max-width: 560px) {
+  .shiro-yado__experiences { grid-template-columns: 1fr; gap: .65rem; }
+  .shiro-yado__experiences button { grid-template-columns: 28px 1fr 24px; gap: .3rem .7rem; align-items: center; }
+  .shiro-yado__experiences button > svg:first-child { grid-row: 1 / 3; }
+  .shiro-yado__experiences button span { grid-column: 2; }
+  .shiro-yado__experiences button > svg:last-child { grid-column: 3; grid-row: 1 / 3; }
+  .shiro-yado__quick button { min-width: 0; font-size: .65rem; }
+}
+@media (prefers-color-scheme: dark) {
+  .shiro-yado { color-scheme: dark; --sy-bg: var(--bg); --sy-elevated: color-mix(in srgb, var(--bg) 92%, var(--text-h)); --sy-surface: color-mix(in srgb, var(--bg) 88%, var(--text-h)); --sy-fg: var(--text-h); --sy-muted: var(--text); --sy-subtle: var(--text); --sy-border: var(--border); --sy-soft: color-mix(in srgb, var(--bg) 80%, var(--text-h)); --sy-accent: #b9cec1; --sy-accent-fg: #17251e; }
+  .shiro-yado__header, .shiro-yado__quick { background: var(--sy-elevated); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shiro-yado *, .shiro-yado *::before, .shiro-yado *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+.shiro-yado__stage-fallback > .shiro-yado__plan { width: min(90%, 500px); padding: var(--sy-space); }
+
+.shiro-yado, .shiro-yado * { box-sizing: border-box; }
+.shiro-yado__brand { padding: 0; }
+.shiro-yado__title-board { max-width: 100%; }
+.shiro-yado__icon-btn, .shiro-yado__sound { padding: 0; }
+@media (max-width: 400px) {
+  .shiro-yado__header { gap: .25rem; }
+  .shiro-yado__lang { padding-inline: .25rem; gap: .1rem; }
+  .shiro-yado__title-board { width: 100%; height: auto; }
 }

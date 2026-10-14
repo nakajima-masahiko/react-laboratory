@@ -17,6 +17,8 @@ import {
   PlaceView,
 } from './views';
 import './styles.css';
+import { WELCOME } from './welcome-copy';
+import { localizePlace } from './place-i18n';
 
 const TITLE_SRC = `${import.meta.env.BASE_URL}shiro-yado/title.svg`;
 
@@ -51,12 +53,12 @@ function QuickNav({ current }: { current: View }) {
           item.key === 'home'
             ? current.v === 'home'
             : item.key === 'guide'
-              ? ['dest', 'guide', 'place'].includes(current.v) && !(current.v === 'guide' && current.p === myRoomId)
+              ? ['dest', 'guide', 'place'].includes(current.v) && !(['guide', 'place'].includes(current.v) && current.p === myRoomId)
               : item.key === 'room'
                 ? current.v === 'checkin' || (['guide', 'place'].includes(current.v) && current.p === myRoomId)
                 : item.key === 'tourism'
                   ? current.v === 'tourism' || current.v === 'nearby'
-                  : current.v === item.key;
+                  : current.v === 'floor' || current.v === 'floors';
         return (
           <button
             key={item.key}
@@ -82,8 +84,8 @@ function LangSwitcher() {
   return (
     <label className="shiro-yado__lang">
       <span aria-hidden>{current.flag}</span>
-      <span className="shiro-yado__sr-only">Language</span>
-      <select value={locale} aria-label="Language" onChange={(event) => setLocale(event.target.value as Locale)}>
+      <span className="shiro-yado__sr-only">{WELCOME[locale].language}</span>
+      <select value={locale} aria-label={WELCOME[locale].language} onChange={(event) => setLocale(event.target.value as Locale)}>
         {LOCALES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
       </select>
     </label>
@@ -122,10 +124,10 @@ function Shell() {
   else if (view.v === 'nearby') content = <NearbyGuide />;
 
   return (
-    <div className="shiro-yado">
+    <div className="shiro-yado" lang={locale}>
       <header className="shiro-yado__header">
         {back ? (
-          <button type="button" className="shiro-yado__icon-btn" aria-label="Back" onClick={() => go(back)}>
+          <button type="button" className="shiro-yado__icon-btn" aria-label={WELCOME[locale].parent} onClick={() => go(back)}>
             <IconBack />
           </button>
         ) : (
@@ -144,10 +146,10 @@ function Shell() {
         </button>
         <div className="shiro-yado__header-right">
           <LangSwitcher />
-          <button type="button" className="shiro-yado__sound" aria-pressed={!speechEnabled} aria-label={speechEnabled ? 'Mute speech' : 'Enable speech'} onClick={toggleSpeech}>
+          <button type="button" className="shiro-yado__sound" aria-pressed={!speechEnabled} aria-label={speechEnabled ? WELCOME[locale].mute : WELCOME[locale].unmute} onClick={toggleSpeech}>
             <IconVolume muted={!speechEnabled} />
           </button>
-          <span className="shiro-yado__here" title={here ? here.name : undefined}>{here ? `${locale === 'ja' ? '現在地 ' : ''}${here.floor}F` : ''}</span>
+          <span className="shiro-yado__here" title={here ? localizePlace(locale, here.id).name : undefined}>{here ? `${locale === 'ja' ? '現在地 ' : ''}${here.floor}F` : ''}</span>
         </div>
       </header>
       <div className="shiro-yado__body">{content}</div>

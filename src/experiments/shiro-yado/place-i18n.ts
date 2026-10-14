@@ -1,7 +1,7 @@
 import type { Locale } from './i18n';
 import type { Place, PlaceId } from './hotel-data';
 import { PLACES } from './hotel-data';
-import { PLACE_JA } from './place-data-ja';
+import { getRouteText } from './route-text';
 import { PLACE_EN } from './place-data-en';
 import { PLACE_FR } from './place-data-fr';
 import { PLACE_ES } from './place-data-es';
@@ -33,7 +33,7 @@ export type PlanLabels = {
 };
 
 const PLACE_TEXT: Record<Locale, Record<PlaceId, PlaceText>> = {
-  ja: PLACE_JA,
+  ja: PLACES,
   en: PLACE_EN,
   fr: PLACE_FR,
   es: PLACE_ES,
@@ -48,7 +48,7 @@ export function getPlaceText(locale: Locale, id: PlaceId): PlaceText {
 export function localizePlace(locale: Locale, id: PlaceId): Place {
   const base = PLACES[id];
   const t = getPlaceText(locale, id);
-  return { ...base, ...t };
+  return { ...base, ...t, ...getRouteText(locale, { ...base, ...t }) };
 }
 
 const FLOOR_TEXT: Record<Locale, Record<1 | 2 | 3, FloorText>> = {

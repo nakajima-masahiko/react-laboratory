@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   getConciergeCopy,
   getConciergeSpeech,
@@ -6,6 +6,8 @@ import {
   type ConciergeTopic,
 } from './i18n';
 import type { PlaceId } from './hotel-data';
+import { getUi } from './ui-extra';
+import { WELCOME } from './welcome-copy';
 import { useNav } from './nav-state';
 import { ConciergeModel, type ConciergeMode } from './scene/ConciergeModel';
 import { useHotelStore } from './store';
@@ -34,11 +36,6 @@ export function ConciergeGuide() {
   const copy = getConciergeCopy(locale);
   const { isSpeaking, isBusy, phase, isSupported, message, playback, speak, stop } = useConciergeSpeech(meta.speechLang);
 
-  useEffect(() => {
-    speak(copy.greeting);
-    return stop;
-  }, [speak, stop, locale, copy.greeting]);
-
   const selectTopic = (nextTopic: ConciergeTopic) => {
     setTopic(nextTopic);
     if (nextTopic === 'rooms') {
@@ -64,8 +61,7 @@ export function ConciergeGuide() {
     setMode((current) => current === 'photo' ? '3d' : 'photo');
   };
 
-  const modeLabel = mode === 'photo' ? '写真' : '3D';
-  const nextModeLabel = mode === 'photo' ? '3D' : '写真';
+  const nextModeLabel = mode === 'photo' ? '3D' : WELCOME[locale].photo;
 
   const topics = (Object.keys(copy.topics) as ConciergeTopic[]).map((id) => ({
     id,
@@ -97,10 +93,10 @@ export function ConciergeGuide() {
           type="button"
           className="shiro-yado__mode-toggle"
           onClick={toggleMode}
-          aria-label={`表示を${nextModeLabel}に切り替え`}
-          title={`現在: ${modeLabel} → ${nextModeLabel}に切り替え`}
+          aria-label={WELCOME[locale].mode(nextModeLabel)}
+          aria-pressed={mode === 'photo'}
         >
-          {mode === 'photo' ? '🖼 写真' : '🧊 3D'}
+          {mode === 'photo' ? WELCOME[locale].photo : '3D'}
         </button>
       </div>
 
@@ -149,6 +145,13 @@ export function ConciergeGuide() {
             {copy.bathAction}
           </button>
         ) : null}
+
+        {(topic === 'banquet' || topic === 'restroom' || (topic === 'rooms' && roomId)) && (
+          <button type="button" className="shiro-yado__btn shiro-yado__btn--accent"
+            onClick={() => { stop(); go({ v: 'guide', p: topic === 'rooms' ? roomId! : topic }); }}>
+            {getUi(locale).startGuide}
+          </button>
+        )}
 
         {topic === 'nearby' ? (
           <button

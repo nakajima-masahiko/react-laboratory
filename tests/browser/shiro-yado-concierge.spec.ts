@@ -30,7 +30,7 @@ declare global {
   }
 }
 
-test.use({ launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } });
+test.use({ launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } });
 
 for (const variant of [
   { name: 'desktop light', width: 1280, height: 960, colorScheme: 'light' as const },
@@ -44,6 +44,8 @@ for (const variant of [
     await page.goto('#/experiments/shiro-yado');
     const model = page.getByTestId('concierge-model');
     await expect(model).toHaveAttribute('data-model', 'ready');
+    await expect(model).toHaveAttribute('data-phase', 'idle');
+    await page.getByRole('button', { name: 'もう一度聞く', exact: true }).click();
     await expect(model).toHaveAttribute('data-phase', 'bowing');
     expect(await page.evaluate(() => window.conciergeTestVoice.calls.length)).toBe(0);
     await expect(model).toHaveAttribute('data-phase', 'speaking');
@@ -80,6 +82,8 @@ test('a failed model request falls back to the photo and releases the greeting',
   await page.goto('#/experiments/shiro-yado');
   const model = page.getByTestId('concierge-model');
   await expect(model).toHaveAttribute('data-model', 'photo');
+  await expect(model).toHaveAttribute('data-phase', 'idle');
+  await page.getByRole('button', { name: 'もう一度聞く', exact: true }).click();
   await expect(model).toHaveAttribute('data-phase', 'speaking');
   await expect(page.getByRole('img', { name: '白の宿のコンシェルジュ', exact: true })).toBeVisible();
   await page.getByRole('button', { name: '停止', exact: true }).click();

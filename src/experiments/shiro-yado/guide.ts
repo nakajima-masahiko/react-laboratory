@@ -39,13 +39,7 @@ type GuideCopy = {
   rideUp: (floor: number) => string;
   rideDown: (floor: number) => string;
   youAreHere: string;
-  walkHall2: string;
   toDest: (name: string) => string;
-  hallRight: string;
-  hallLeft: string;
-  hallCenter: string;
-  moveFrom: (floorWalk: string) => string;
-  floorWalk: Record<FloorId, string>;
 };
 
 const GUIDE: Record<Locale, GuideCopy> = {
@@ -62,13 +56,7 @@ const GUIDE: Record<Locale, GuideCopy> = {
     rideUp: (floor) => `${floor}階のボタンを押して上がります。`,
     rideDown: (floor) => `${floor}階のボタンを押して降ります。`,
     youAreHere: 'いまいる場所です',
-    walkHall2: '2階の廊下を進む',
     toDest: (name) => `${name}へ`,
-    hallRight: 'ホールから右手へ進みます。',
-    hallLeft: 'ホールから左手へ進みます。',
-    hallCenter: 'ホールの正面へ進みます。',
-    moveFrom: (fw) => `${fw}移動します。`,
-    floorWalk: { 1: '1階ロビーから', 2: '2階の廊下から', 3: '3階のホールから' },
   },
   en: {
     arrived: 'Arrived',
@@ -83,13 +71,7 @@ const GUIDE: Record<Locale, GuideCopy> = {
     rideUp: (floor) => `Press the button for floor ${floor} and go up.`,
     rideDown: (floor) => `Press the button for floor ${floor} and go down.`,
     youAreHere: 'You are already here',
-    walkHall2: 'Walk the 2nd-floor corridor',
     toDest: (name) => `To ${name}`,
-    hallRight: 'From the hall, go right.',
-    hallLeft: 'From the hall, go left.',
-    hallCenter: 'Head straight ahead in the hall.',
-    moveFrom: (fw) => `Move ${fw}.`,
-    floorWalk: { 1: 'from the 1st-floor lobby', 2: 'from the 2nd-floor corridor', 3: 'from the 3rd-floor hall' },
   },
   fr: {
     arrived: 'Arrivé',
@@ -104,13 +86,7 @@ const GUIDE: Record<Locale, GuideCopy> = {
     rideUp: (floor) => `Appuyez sur ${floor} et montez.`,
     rideDown: (floor) => `Appuyez sur ${floor} et descendez.`,
     youAreHere: 'Vous y êtes déjà',
-    walkHall2: 'Avancer dans le couloir du 2e',
     toDest: (name) => `Vers ${name}`,
-    hallRight: 'Depuis le hall, allez à droite.',
-    hallLeft: 'Depuis le hall, allez à gauche.',
-    hallCenter: 'Allez tout droit dans le hall.',
-    moveFrom: (fw) => `Déplacez-vous ${fw}.`,
-    floorWalk: { 1: 'depuis le lobby du 1er', 2: 'depuis le couloir du 2e', 3: 'depuis le hall du 3e' },
   },
   es: {
     arrived: 'Llegado',
@@ -125,13 +101,7 @@ const GUIDE: Record<Locale, GuideCopy> = {
     rideUp: (floor) => `Pulse el botón de la planta ${floor} y suba.`,
     rideDown: (floor) => `Pulse el botón de la planta ${floor} y baje.`,
     youAreHere: 'Ya está aquí',
-    walkHall2: 'Avance por el pasillo de la 2.ª',
     toDest: (name) => `Hacia ${name}`,
-    hallRight: 'Desde el hall, vaya a la derecha.',
-    hallLeft: 'Desde el hall, vaya a la izquierda.',
-    hallCenter: 'Siga recto en el hall.',
-    moveFrom: (fw) => `Muévase ${fw}.`,
-    floorWalk: { 1: 'desde el lobby de la 1.ª', 2: 'desde el pasillo de la 2.ª', 3: 'desde el hall de la 3.ª' },
   },
   zh: {
     arrived: '已到达',
@@ -146,13 +116,7 @@ const GUIDE: Record<Locale, GuideCopy> = {
     rideUp: (floor) => `按下${floor}楼按钮上行。`,
     rideDown: (floor) => `按下${floor}楼按钮下行。`,
     youAreHere: '您已在此处',
-    walkHall2: '沿二楼走廊前进',
     toDest: (name) => `前往${name}`,
-    hallRight: '从大厅向右走。',
-    hallLeft: '从大厅向左走。',
-    hallCenter: '沿大厅正前方走。',
-    moveFrom: (fw) => `从${fw}移动。`,
-    floorWalk: { 1: '一楼大堂', 2: '二楼走廊', 3: '三楼大厅' },
   },
   ko: {
     arrived: '도착함',
@@ -167,13 +131,7 @@ const GUIDE: Record<Locale, GuideCopy> = {
     rideUp: (floor) => `${floor}층 버튼을 누르고 올라갑니다.`,
     rideDown: (floor) => `${floor}층 버튼을 누르고 내려갑니다.`,
     youAreHere: '지금 있는 곳입니다',
-    walkHall2: '2층 복도를 따라가기',
     toDest: (name) => `${name}(으)로`,
-    hallRight: '홀에서 오른쪽으로 가세요.',
-    hallLeft: '홀에서 왼쪽으로 가세요.',
-    hallCenter: '홀 정면으로 가세요.',
-    moveFrom: (fw) => `${fw} 이동합니다.`,
-    floorWalk: { 1: '1층 로비에서', 2: '2층 복도에서', 3: '3층 홀에서' },
   },
 };
 
@@ -182,41 +140,6 @@ function minutesBetween(from: Here, dest: Place, c: GuideCopy): string {
   if (from.floor === dest.floor) return c.walk1;
   const hops = Math.abs(from.floor - dest.floor);
   return hops === 1 ? c.walk2 : c.walk3;
-}
-
-function walkOnSameFloor(from: Place, dest: Place, c: GuideCopy): GuideStep {
-  if (from.floor === 2 && dest.floor === 2) {
-    return {
-      title: c.walkHall2,
-      body: dest.fromElevator
-        .replace(/On 2F,?\s*/i, '')
-        .replace(/Au 2e,?\s*/i, '')
-        .replace(/En 2F,?\s*/i, '')
-        .replace(/在二楼/g, '')
-        .replace(/2층에서\s*/g, '')
-        .replace(/2階で降り、?/g, '')
-        .replace(/2階で降りて/g, ''),
-    };
-  }
-  if (from.floor === 3 && dest.floor === 3) {
-    const dir =
-      dest.mapSide === 'right' ? c.hallRight : dest.mapSide === 'left' ? c.hallLeft : c.hallCenter;
-    return {
-      title: c.toDest(dest.shortName),
-      body: `${dir}${dest.fromElevator
-        .replace(/On 3F,?\s*/i, '')
-        .replace(/Au 3e,?\s*/i, '')
-        .replace(/En 3F,?\s*/i, '')
-        .replace(/在三楼[，,]?/g, '')
-        .replace(/3층에서\s*/g, '')
-        .replace(/3階で降り、?/g, '')
-        .replace(/3階で降りて/g, '')}`,
-    };
-  }
-  return {
-    title: c.toDest(dest.shortName),
-    body: dest.fromElevator,
-  };
 }
 
 export function buildGuide(from: Here, destId: PlaceId, locale: Locale = 'ja'): Guide | null {
@@ -238,8 +161,6 @@ export function buildGuide(from: Here, destId: PlaceId, locale: Locale = 'ja'): 
   }
 
   if (from.floor === dest.floor) {
-    const elevHints = ['elevator', 'ascenseur', 'ascensor', 'エレベーター', '电梯', '엘리베이터'];
-    const hasElev = elevHints.some((w) => origin.toElevator.toLowerCase().includes(w.toLowerCase()));
     return {
       dest,
       from: origin,
@@ -249,12 +170,10 @@ export function buildGuide(from: Here, destId: PlaceId, locale: Locale = 'ja'): 
       steps: [
         {
           title: c.leave(origin.shortName),
-          body: hasElev
-            ? origin.toElevator
-            : `${c.leave(origin.name)}. ${c.moveFrom(c.floorWalk[from.floor])}`,
+          body: origin.toElevator,
         },
-        walkOnSameFloor(origin, dest, c),
-        { title: c.arrive, body: dest.fromElevator },
+        { title: c.toDest(dest.shortName), body: dest.fromElevator },
+        { title: c.arrive, body: dest.name },
       ],
     };
   }
@@ -271,6 +190,7 @@ export function buildGuide(from: Here, destId: PlaceId, locale: Locale = 'ja'): 
       { title: c.elevator, body: origin.toElevator },
       { title: c.goFloor(dest.floor), body: ride },
       { title: c.exitFloor(dest.floor), body: dest.fromElevator },
+      { title: c.arrive, body: dest.name },
     ],
   };
 }
