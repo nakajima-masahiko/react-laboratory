@@ -33,6 +33,11 @@ const { BathView } = await import(pathToFileURL(join(output, 'BathView.js')));
 const { BookingView } = await import(pathToFileURL(join(output, 'booking/BookingView.js')));
 const { ReservationsView } = await import(pathToFileURL(join(output, 'booking/ReservationsView.js')));
 const { GuideView } = await import(pathToFileURL(join(output, 'views.js')));
+const { RoomsView } = await import(pathToFileURL(join(output, 'booking/RoomsView.js')));
+const { BookingWelcome } = await import(pathToFileURL(join(output, 'booking/BookingWelcome.js')));
+const { CheckinView } = await import(pathToFileURL(join(output, 'views.js')));
+const { JOURNEY, stayDate } = await import(pathToFileURL(join(output, 'booking/ux-copy.js')));
+const { RoomSummary } = await import(pathToFileURL(join(output, 'booking/RoomSummary.js')));
 function render(component, props = {}) {
   return renderToStaticMarkup(createElement(NavContext.Provider, { value: { view: { v: 'guide' }, go() {} } }, createElement(component, props)));
 }
@@ -70,10 +75,6 @@ test('reservation management explains browser-local storage and offers search wh
   assert.match(html, /空室・料金を見る/);
 });
 
-const { RoomsView } = await import(pathToFileURL(join(output, 'booking/RoomsView.js')));
-const { BookingWelcome } = await import(pathToFileURL(join(output, 'booking/BookingWelcome.js')));
-const { CheckinView } = await import(pathToFileURL(join(output, 'views.js')));
-const { JOURNEY, stayDate } = await import(pathToFileURL(join(output, 'booking/ux-copy.js')));
 test('arrival guide and room catalogue have distinct purposes; room browsing never requires WebGL', () => {
   const html = render(RoomsView);
   assert.match(html, /客室・予約/);
@@ -96,4 +97,16 @@ test('welcome offers both a direct search and browsing path, with no payment not
     assert.ok(stayDate(locale, '2026-10-18').length > 0);
   }
   assert.match(stayDate('ja', '2026-10-18'), /10月18日.*日/);
+});
+
+test('only room 204 has the new interior concept, with accessible copy and known image dimensions', () => {
+  const html = render(RoomSummary, { roomId: 'room-204' });
+  assert.match(html, /src="\/react-laboratory\/shiro-yado\/room-204-morning.webp"/);
+  assert.match(html, /alt="朝の光が入る二面窓/);
+  assert.match(html, /width="1536" height="1024"/);
+  assert.match(html, /AI生成・イメージ/);
+  assert.match(html, /窓辺でお茶と読書/);
+  const standard = render(RoomSummary, { roomId: 'room-201' });
+  assert.doesNotMatch(standard, /room-204-morning.webp/);
+  assert.match(standard, /<svg/);
 });
