@@ -6,6 +6,7 @@ import { useHotelStore } from '../store';
 import { BOOKING_COPY, money } from './copy';
 import { NearbyDates } from './NearbyDates';
 import { JOURNEY, stayDate } from './ux-copy';
+import { RoomVisual } from './RoomVisual';
 import { BookingDetails } from './BookingDetails';
 import { addDays, bookingHorizon, isBookableRoom, japanToday, MAX_NIGHTS, nights, roomAvailability, ROOM_OFFERS, totalPrice, validateStay, type BookableRoomId, type BookingError, type Reservation, type Stay } from './model';
 import { createReservation, notifyBookingsChanged, withBookingLock } from './storage';
@@ -105,7 +106,9 @@ export function BookingView({ preferredRoom }: { preferredRoom?: PlaceId }) {
           {available.map((id) => {
             const place = localizePlace(locale, id);
             return <article key={id} className="shiro-yado__card" data-room={id}>
-              <h4>{place.name}</h4><p>{place.description}</p>
+              <h4>{place.name}</h4>
+              {id === 'room-204' && <RoomVisual roomId={id} />}
+              <p>{place.description}</p>
               <p className="shiro-yado__muted">{place.size} · {copy.capacity}: {ROOM_OFFERS[id].capacity}</p>
               <dl className="shiro-yado__booking-facts">
                 <div><dt>{copy.nightly}</dt><dd>{money(locale, ROOM_OFFERS[id].nightlyRate)}</dd></div>

@@ -1725,3 +1725,6 @@ body:has(.shiro-yado) {
 @media (max-width: 600px) {
   .shiro-yado__booking-actions { grid-template-columns: 1fr; }
 }
+
+/* One photorealistic room concept, shared by browsing, details and availability. */
+.shiro-yado__room-interior img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
