@@ -38,6 +38,9 @@ const { BookingWelcome } = await import(pathToFileURL(join(output, 'booking/Book
 const { CheckinView } = await import(pathToFileURL(join(output, 'views.js')));
 const { JOURNEY, stayDate } = await import(pathToFileURL(join(output, 'booking/ux-copy.js')));
 const { RoomSummary } = await import(pathToFileURL(join(output, 'booking/RoomSummary.js')));
+const { DiningView } = await import(pathToFileURL(join(output, 'dining/DiningView.js')));
+const { DiningEntry } = await import(pathToFileURL(join(output, 'dining/DiningEntry.js')));
+const { DINING } = await import(pathToFileURL(join(output, 'dining/copy.js')));
 function render(component, props = {}) {
   return renderToStaticMarkup(createElement(NavContext.Provider, { value: { view: { v: 'guide' }, go() {} } }, createElement(component, props)));
 }
@@ -111,5 +114,27 @@ test('every room has its own interior concept, while room 204 retains its approv
     assert.ok(room.includes(`room-${id}-interior.webp`));
     assert.match(room, /AI生成・イメージ/);
     assert.doesNotMatch(room, /<svg/);
+  }
+});
+
+test('dining clearly separates fictional meals from room reservations and connects to the hall', () => {
+  const html = render(DiningView);
+  assert.match(html, /現在の体験用客室予約に食事は含まれません/);
+  assert.match(html, /食事の予約・追加・お支払いは行いません/);
+  assert.match(html, /アレルギー対応を保証するものではありません/);
+  for (const text of ['7:00–9:00', '8:30', '18:00–20:00', '19:00', '1,800', '4,800', '白の間への行き方', 'だし巻き卵', '茶碗蒸し']) assert.ok(html.includes(text));
+  assert.match(html, /dining-breakfast.webp/);
+  assert.match(html, /dining-dinner.webp/);
+  assert.doesNotMatch(html, /<form|<canvas/);
+  assert.match(render(DiningEntry), /お食事を楽しむ/);
+});
+test('all six dining languages explain both meals, the demo boundary and allergy limits', () => {
+  for (const locale of ['ja', 'en', 'fr', 'es', 'zh', 'ko']) {
+    const copy = DINING[locale];
+    for (const key of ['notice', 'allergyBody', 'childrenBody', 'speech', 'venue', 'directions']) assert.ok(copy[key].trim().length > 0, `${locale}: ${key}`);
+    for (const meal of ['breakfast', 'dinner']) {
+      assert.equal(copy[meal].menu.length, 6);
+      assert.ok(copy[meal].alt.length > 10);
+    }
   }
 });

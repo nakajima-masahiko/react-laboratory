@@ -1,3 +1,4 @@
+import { DINING } from './dining/copy';
 import { useState } from 'react';
 import {
   getConciergeCopy,
@@ -29,15 +30,16 @@ export function ConciergeGuide() {
   const fromPlaceId = useHotelStore((state) => state.fromPlaceId);
   const myRoomId = useHotelStore((state) => state.myRoomId);
   const locale = useHotelStore((state) => state.locale);
-  const [topic, setTopic] = useState<ConciergeTopic | null>(null);
+  const [topic, setTopic] = useState<ConciergeTopic | 'dining' | null>(null);
   const [roomId, setRoomId] = useState<PlaceId | null>(myRoomId);
   const [mode, setMode] = useState<ConciergeMode>('3d');
   const meta = getLocaleMeta(locale);
   const copy = getConciergeCopy(locale);
   const { isSpeaking, isBusy, phase, isSupported, message, playback, speak, stop } = useConciergeSpeech(meta.speechLang);
 
-  const selectTopic = (nextTopic: ConciergeTopic) => {
+  const selectTopic = (nextTopic: ConciergeTopic | 'dining') => {
     setTopic(nextTopic);
+    if (nextTopic === 'dining') { speak(DINING[locale].speech); return; }
     if (nextTopic === 'rooms') {
       const nextRoom = roomId ?? myRoomId;
       if (nextRoom) {
@@ -63,10 +65,12 @@ export function ConciergeGuide() {
 
   const nextModeLabel = mode === 'photo' ? '3D' : WELCOME[locale].photo;
 
-  const topics = (Object.keys(copy.topics) as ConciergeTopic[]).map((id) => ({
+  const topics: { id: ConciergeTopic | 'dining'; label: string; description: string }[] = (Object.keys(copy.topics) as ConciergeTopic[]).map((id) => ({
     id,
     ...copy.topics[id],
   }));
+
+  topics.push({ id: 'dining', label: DINING[locale].title, description: DINING[locale].venue });
 
   return (
     <section
@@ -135,6 +139,8 @@ export function ConciergeGuide() {
             ))}
           </div>
         ) : null}
+
+        {topic === 'dining' && <button type="button" className="shiro-yado__btn shiro-yado__btn--accent" onClick={() => { stop(); go({ v: 'dining' }); }}>{DINING[locale].entry}</button>}
 
         {topic === 'bath' ? (
           <button

@@ -64,7 +64,7 @@ export const PLACE_EN = translatePlaces('en', {
     amenities: ['Long tables', 'Screen', 'Anteroom', 'Accessible'],
     description: 'A small banquet room of white walls and wood floors for meals, meetings, and celebrations.',
     summary: 'Right side of the 3rd floor',
-    hours: '10:00–22:00 (reservation required)',
+    hours: 'Breakfast 7:00–9:00 / Dinner 18:00–20:00 / Banquet 10:00–22:00 (reservation required)',
   },
   bath: {
     name: 'Bathhouse · Shiromiyu',

@@ -98,7 +98,7 @@ export const PLACE_ZH = translatePlaces('zh', {
     ],
     "description": "白墙与木地板的小宴会厅，适合聚餐、会议和庆祝活动。",
     "summary": "三楼右侧",
-    "hours": "10:00–22:00（需预约）"
+    "hours": "早餐7:00–9:00／晚餐18:00–20:00／宴会10:00–22:00（需预约）"
   },
   "bath": {
     "name": "浴场 白御汤",
