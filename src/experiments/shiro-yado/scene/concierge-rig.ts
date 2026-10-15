@@ -5,6 +5,9 @@ import type { ConciergePlaybackState } from '../concierge-playback';
 import { createFinishGesture } from './concierge-finish';
 import { installMouth } from './concierge-mouth';
 
+// Match the gentle, settled smile held after the spoken welcome.
+const WELCOME_SMILE = 0.85;
+
 /** Clone the rig, keeping immutable GLB textures shared across React mounts. */
 export function createConciergeRig(source: Object3D, clips: AnimationClip[], completeBow: (id: number) => void) {
   const model = clone(source);
@@ -25,7 +28,7 @@ export function createConciergeRig(source: Object3D, clips: AnimationClip[], com
   const headOrigin = head?.getWorldPosition(new Vector3()) ?? new Vector3();
   const headPosition = new Vector3();
   const cameraOffset = new Vector3();
-  mouth.set(0);
+  mouth.set(0, WELCOME_SMILE);
   idle.play();
   const onFinished = (event: { action: unknown }) => {
     if (event.action !== bow || phase !== 'bowing') return;
@@ -36,7 +39,7 @@ export function createConciergeRig(source: Object3D, clips: AnimationClip[], com
 
   return {
     model, cameraOffset,
-    get smile() { return finish.smile; },
+    get smile() { return phase === 'idle' ? WELCOME_SMILE : finish.smile; },
     update(state: ConciergePlaybackState, delta: number, now: number, boundaryAt: number) {
       if (state.phase !== phase || state.requestId !== requestId) {
         finish.reset(); mouthAmount = 0; talkTime = 0;
@@ -56,7 +59,7 @@ export function createConciergeRig(source: Object3D, clips: AnimationClip[], com
       const beat = Math.max(0, 1 - (now - boundaryAt) / 130) * 0.18;
       const target = phase === 'speaking' ? Math.min(0.95, pulse * envelope + beat) : 0;
       mouthAmount += (target - mouthAmount) * (1 - Math.exp(-dt * 28));
-      mouth.set(mouthAmount, finish.smile);
+      mouth.set(mouthAmount, phase === 'idle' ? WELCOME_SMILE : finish.smile);
       model.updateMatrixWorld(true);
       cameraOffset.set(0, 0, 0);
       if (phase === 'bowing' && head) {
