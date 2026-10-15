@@ -4,6 +4,8 @@ import { IconBack, IconBed, IconHome, IconIsland, IconMap, IconVolume } from './
 import { LOCALES, type Locale } from './i18n';
 import { NavProvider } from './nav';
 import { BathView } from './BathView';
+import { BookingView } from './booking/BookingView';
+import { ReservationsView } from './booking/ReservationsView';
 import { NearbyGuide } from './NearbyGuide';
 import { backView, useNav, type View } from './nav-state';
 import { useHotelStore } from './store';
@@ -56,7 +58,7 @@ function QuickNav({ current }: { current: View }) {
             : item.key === 'guide'
               ? ['dest', 'guide', 'place'].includes(current.v) && !(['guide', 'place'].includes(current.v) && current.p === myRoomId)
               : item.key === 'room'
-                ? current.v === 'checkin' || (['guide', 'place'].includes(current.v) && current.p === myRoomId)
+                ? ['checkin', 'booking', 'reservations'].includes(current.v) || (['guide', 'place'].includes(current.v) && current.p === myRoomId)
                 : item.key === 'tourism'
                   ? current.v === 'tourism' || current.v === 'nearby'
                   : current.v === 'floor' || current.v === 'floors';
@@ -112,7 +114,9 @@ function Shell() {
   }, []);
 
   let content = <HomeView />;
-  if (view.v === 'floors') content = <FloorsView />;
+  if (view.v === 'booking') content = <BookingView key={view.p ?? 'all'} preferredRoom={view.p} />;
+  else if (view.v === 'reservations') content = <ReservationsView />;
+  else if (view.v === 'floors') content = <FloorsView />;
   else if (view.v === 'floor') content = <FloorView floor={view.f ?? 1} />;
   else if (view.v === 'place') {
     const place = getPlace(view.p);

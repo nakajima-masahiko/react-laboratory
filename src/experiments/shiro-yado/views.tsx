@@ -30,6 +30,7 @@ import { StayControls } from './StayControls';
 import { WELCOME } from './welcome-copy';
 import { INSIDE } from './inside-copy';
 import { RouteSpeech } from './RouteSpeech';
+import { BookingEntry } from './booking/BookingEntry';
 import { SceneDisclosure } from './SceneDisclosure';
 
 const FLOOR_SCENES: Record<FloorId, SceneId> = {
@@ -193,6 +194,7 @@ export function FloorView({ floor }: { floor: FloorId }) {
         <h2>{ft.name}</h2>
         <p className="shiro-yado__muted">{ft.blurb}</p>
       </header>
+      {floor === 2 && <BookingEntry />}
       <HotelPreview scene={FLOOR_SCENES[floor]} />
       <section className="shiro-yado__section">
         <h3>{ui.layout}</h3>
@@ -245,6 +247,7 @@ export function PlaceView({ place }: { place: Place }) {
         <h2>{loc.name}</h2>
         <p className="shiro-yado__muted">{loc.description}</p>
       </header>
+      {place.kind === 'room' && <BookingEntry roomId={place.id} />}
       <HotelPreview scene={place.id} />
       <section className="shiro-yado__card">
         <dl className="shiro-yado__facts">
@@ -376,6 +379,7 @@ export function CheckinView() {
         <p className="shiro-yado__muted">{ui.checkinLead}</p>
         <p className="shiro-yado__muted">{WELCOME[locale].stayHint}</p>
       </header>
+      <BookingEntry />
       <ul className="shiro-yado__list">
         {ROOM_IDS.map((id) => {
           const room = localizePlace(locale, id);

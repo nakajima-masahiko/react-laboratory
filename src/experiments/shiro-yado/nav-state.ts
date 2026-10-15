@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import { getPlace, type FloorId, type PlaceId } from './hotel-data';
 
-export type ViewId = 'home' | 'floors' | 'floor' | 'place' | 'guide' | 'checkin' | 'dest' | 'tourism' | 'nearby';
+export type ViewId = 'booking' | 'reservations' | 'home' | 'floors' | 'floor' | 'place' | 'guide' | 'checkin' | 'dest' | 'tourism' | 'nearby';
 
 export type View = {
   v: ViewId;
@@ -26,6 +26,8 @@ export function useNav() {
 
 export function backView(current: View): View | null {
   if (current.v === 'home') return null;
+  if (current.v === 'booking') return current.p ? { v: 'place', p: current.p } : { v: 'floor', f: 2 };
+  if (current.v === 'reservations') return { v: 'booking' };
   if (current.v === 'guide' && current.p) return { v: 'place', p: current.p };
   if (current.v === 'place') {
     const place = getPlace(current.p);
