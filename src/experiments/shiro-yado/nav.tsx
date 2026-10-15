@@ -9,6 +9,7 @@ const BASE_PATH = '/experiments/shiro-yado';
 function viewFromPath(pathname: string): View {
   const parts = pathname.slice(BASE_PATH.length).split('/').filter(Boolean);
   const [view, value] = parts;
+  if (view === 'dining') return { v: 'dining' };
   if (view === 'rooms') return { v: 'rooms' };
   if (view === 'booking') return isBookableRoom(value) ? { v: 'booking', p: value } : { v: 'booking' };
   if (view === 'reservations') return { v: 'reservations' };

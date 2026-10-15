@@ -1728,3 +1728,28 @@ body:has(.shiro-yado) {
 
 /* One photorealistic room concept, shared by browsing, details and availability. */
 .shiro-yado__room-interior img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+
+/* Dining is part of the same white inn: appetizing images and plain practical information. */
+.shiro-yado__dining-entry { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--sy-space); padding: var(--sy-space); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-elevated); align-items: center; }
+.shiro-yado__dining-entry img { display: block; width: 100%; height: auto; border-radius: var(--sy-radius); }
+.shiro-yado__dining-entry h3 { margin: 0; }
+.shiro-yado__dining-entry p { color: var(--sy-muted); line-height: 1.8; }
+.shiro-yado__dining-notice { padding: var(--sy-space); border-inline-start: 3px solid var(--sy-accent); background: var(--sy-elevated); color: var(--sy-muted); font-size: .85rem; line-height: 1.8; }
+.shiro-yado__dining-venue { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--sy-space); }
+.shiro-yado__dining-meal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sy-space); padding: var(--sy-space); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-surface); }
+.shiro-yado__dining-meal figure { margin: 0; min-width: 0; }
+.shiro-yado__dining-meal img { display: block; width: 100%; height: auto; border-radius: var(--sy-radius); }
+.shiro-yado__dining-meal figcaption { color: var(--sy-muted); font-size: .75rem; padding-block: .5rem; }
+.shiro-yado__dining-meal-copy { min-width: 0; }
+.shiro-yado__dining-meal-copy h3 { margin: 0; font-size: 1.5rem; }
+.shiro-yado__dining-meal-copy p { line-height: 1.9; color: var(--sy-muted); }
+.shiro-yado__dining-meal-copy h4 { margin: var(--sy-space) 0 .5rem; }
+.shiro-yado__dining-meal-copy ul { margin: 0; padding-inline-start: 1.25rem; line-height: 2; }
+.shiro-yado__booking-facts .shiro-yado__dining-sub { color: var(--sy-muted); font-size: .8rem; font-weight: 400; }
+.shiro-yado__dining-info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sy-space); }
+.shiro-yado__dining-info h4 { margin: 0 0 .75rem; }
+.shiro-yado__dining-info p { margin: 0; color: var(--sy-muted); line-height: 1.9; }
+@media (max-width: 700px) {
+  .shiro-yado__dining-entry, .shiro-yado__dining-meal, .shiro-yado__dining-info { grid-template-columns: 1fr; }
+  .shiro-yado__dining-venue { align-items: stretch; flex-direction: column; }
+}

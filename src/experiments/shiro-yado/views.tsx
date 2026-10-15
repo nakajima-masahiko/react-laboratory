@@ -1,3 +1,4 @@
+import { DiningEntry } from './dining/DiningEntry';
 import { FloorPlan } from './floor-plan';
 import { buildGuide } from './guide';
 import {
@@ -55,6 +56,7 @@ export function HomeView() {
       <div className="shiro-yado__concierge-anchor"><ConciergeGuide /></div>
       <BookingWelcome />
       <WelcomeHome />
+      <DiningEntry />
       <StayControls showRoom />
       <section className="shiro-yado__section">
         <div className="shiro-yado__section-head">
@@ -253,6 +255,7 @@ export function PlaceView({ place }: { place: Place }) {
         <p className="shiro-yado__muted">{loc.description}</p>
       </header>
       {isBookableRoom(place.id) && <section className="shiro-yado__card"><RoomSummary roomId={place.id} /><BookingEntry roomId={place.id} /></section>}
+      {place.id === 'banquet' && <DiningEntry />}
       <HotelPreview scene={place.id} />
       <section className="shiro-yado__card">
         <dl className="shiro-yado__facts">

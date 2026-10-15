@@ -98,7 +98,7 @@ export const PLACE_KO = translatePlaces('ko', {
     ],
     "description": "하얀 벽과 나무 바닥의 작은 연회장으로 식사, 모임과 축하 행사에 이용합니다.",
     "summary": "3층 오른쪽",
-    "hours": "10:00–22:00 · 예약 필요"
+    "hours": "조식7:00–9:00 / 석식18:00–20:00 / 연회10:00–22:00 · 예약 필요"
   },
   "bath": {
     "name": "목욕탕 시로미유",

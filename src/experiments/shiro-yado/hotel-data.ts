@@ -149,7 +149,7 @@ const PLACE_DETAILS: Record<PlaceId, Omit<Place, 'fromElevator' | 'toElevator'>>
     description:
       '白い壁と木の床が続く、小さな宴会場。会食、会合、少人数の祝い事に使われます。',
     summary: '3階の右側です',
-    hours: '10:00–22:00（要予約）',
+    hours: '朝食7:00–9:00／夕食18:00–20:00／宴会10:00–22:00（要予約）',
     mapSide: 'right',
   },
   bath: {

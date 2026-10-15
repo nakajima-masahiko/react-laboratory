@@ -98,7 +98,7 @@ export const PLACE_FR = translatePlaces('fr', {
     ],
     "description": "Un lieu intime aux murs blancs et au sol en bois pour les repas et les fêtes.",
     "summary": "À droite au troisième étage",
-    "hours": "10:00–22:00 · sur réservation"
+    "hours": "Petit-déjeuner 7:00–9:00 / Dîner 18:00–20:00 / Banquet 10:00–22:00 · sur réservation"
   },
   "bath": {
     "name": "Bains · Shiromiyu",
