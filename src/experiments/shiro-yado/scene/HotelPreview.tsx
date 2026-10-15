@@ -6,6 +6,7 @@ import {
   type ErrorInfo,
   type ReactNode,
 } from 'react';
+import { INSIDE } from '../inside-copy';
 import { getUi } from '../ui-extra';
 import { useHotelStore } from '../store';
 import { FloorPlan } from '../floor-plan';
@@ -91,7 +92,7 @@ export function HotelPreview({
         <img src={BATH_FALLBACK_SRC} alt="" aria-hidden="true" />
       ) : <FloorPlan floor={floor} highlight={place?.id} />}
       <div className="shiro-yado__stage-fallback-copy">
-        <strong>{ui.sceneFailed}</strong>
+        <strong>{scene === 'bath' ? INSIDE[locale].imageMode : INSIDE[locale].mapMode}</strong>
         <button type="button" onClick={() => setAttempt((value) => value + 1)}>
           {ui.retryScene}
         </button>

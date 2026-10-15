@@ -49,3 +49,13 @@ test('all selected languages have their own facility and room descriptions', () 
   }
   assert.match(localizePlace('ja', 'bath').description, /富士山/);
 });
+
+test('lobby directions stay inside the hotel in every language', () => {
+  const phrases = { ja: 'ロビー奥', en: 'back of the lobby', fr: 'fond du hall', es: 'fondo del vestíbulo', zh: '大堂内侧', ko: '로비 안쪽' };
+  for (const [locale, phrase] of Object.entries(phrases)) {
+    const guide = buildGuide({ floor: 1, placeId: 'lobby' }, 'bath', locale);
+    assert.ok(guide.steps[0].body.includes(phrase));
+    assert.equal(guide.steps[0].body, localizePlace(locale, 'lobby').toElevator);
+  }
+  assert.doesNotMatch(buildGuide({ floor: 1, placeId: 'lobby' }, 'bath', 'ja').steps[0].body, /入口を出|戻/);
+});

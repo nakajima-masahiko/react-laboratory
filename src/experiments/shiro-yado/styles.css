@@ -1652,3 +1652,27 @@ body:has(.shiro-yado) {
   background: var(--bg);
   color: var(--text);
 }
+
+/* Inner pages: directions first, with a quiet, optional view of the destination. */
+.shiro-yado__route-summary { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; padding: var(--sy-space); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-elevated); }
+.shiro-yado__route-summary svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--sy-accent); }
+.shiro-yado__route-speech { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; }
+.shiro-yado__route-speech p { flex-basis: 100%; margin: 0; }
+.shiro-yado__route-speech p:empty { display: none; }
+.shiro-yado__scene-disclosure { border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-surface); overflow: hidden; }
+.shiro-yado__scene-disclosure > summary { padding: var(--sy-space); cursor: pointer; color: var(--sy-accent); font-weight: 600; min-height: 44px; }
+.shiro-yado__scene-disclosure > summary:focus-visible { outline: 3px solid var(--sy-accent); outline-offset: -4px; }
+.shiro-yado__scene-disclosure > .shiro-yado__stay-controls { border: 0; border-radius: 0; }
+.shiro-yado__scene-disclosure > .shiro-yado__stage { margin: var(--sy-space); }
+.shiro-yado__bath-essentials { display: grid; gap: var(--sy-space); }
+.shiro-yado__bath-essentials .shiro-yado__facts { margin: 0; }
+.shiro-yado__bath-mural { margin: 0; border: 1px solid var(--sy-border); border-radius: var(--sy-radius); overflow: hidden; background: var(--sy-elevated); }
+.shiro-yado__bath-mural img { display: block; width: 100%; height: auto; max-height: 340px; object-fit: cover; }
+.shiro-yado__bath-mural figcaption { padding: .7rem var(--sy-space); font-size: .8rem; color: var(--sy-muted); }
+.shiro-yado__bath-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sy-space); }
+.shiro-yado__bath-features h4 { margin: 0 0 .5rem; color: var(--sy-fg); }
+.shiro-yado__bath-features p { margin: 0; color: var(--sy-muted); font-size: .85rem; }
+@media (max-width: 600px) {
+  .shiro-yado__bath-features { grid-template-columns: 1fr; }
+  .shiro-yado__bath-essentials .shiro-yado__facts { grid-template-columns: 1fr; }
+}

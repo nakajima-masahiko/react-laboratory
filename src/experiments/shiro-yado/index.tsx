@@ -3,6 +3,7 @@ import { getPlace, HOTEL_NAME, HOTEL_NAME_EN } from './hotel-data';
 import { IconBack, IconBed, IconHome, IconIsland, IconMap, IconVolume } from './icons';
 import { LOCALES, type Locale } from './i18n';
 import { NavProvider } from './nav';
+import { BathView } from './BathView';
 import { NearbyGuide } from './NearbyGuide';
 import { backView, useNav, type View } from './nav-state';
 import { useHotelStore } from './store';
@@ -115,7 +116,7 @@ function Shell() {
   else if (view.v === 'floor') content = <FloorView floor={view.f ?? 1} />;
   else if (view.v === 'place') {
     const place = getPlace(view.p);
-    content = place ? <PlaceView place={place} /> : <DestView />;
+    content = place?.id === 'bath' ? <BathView /> : place ? <PlaceView place={place} /> : <DestView />;
   } else if (view.v === 'guide') {
     content = view.p ? <GuideView destId={view.p} /> : <DestView />;
   } else if (view.v === 'checkin') content = <CheckinView />;

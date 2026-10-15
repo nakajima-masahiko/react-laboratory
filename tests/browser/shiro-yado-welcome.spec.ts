@@ -24,6 +24,7 @@ for (const variant of [
       await start.click();
       await page.getByRole('combobox', { name: '案内の出発地点' }).selectOption('room-201');
       await page.getByRole('button', { name: 'お部屋', exact: true }).click();
+      await page.getByTestId('route-page').locator('summary').filter({ hasText: '案内の出発地点' }).click();
       await expect(page.getByRole('combobox', { name: '案内の出発地点' })).toHaveValue('room-201');
       const steps = page.getByRole('list').filter({ hasText: 'エレベーターホールから右手' });
       await expect(steps).toContainText('204 コーナーツイン');
@@ -50,7 +51,7 @@ for (const variant of [
       await page.getByRole('button', { name: 'Accueil', exact: true }).click();
       await page.getByRole('button', { name: /Se détendre aux bains/ }).click();
       await expect(page.getByRole('heading', { name: 'Bains · Shiromiyu', exact: true })).toBeVisible();
-      await expect(page.getByText(/Un bain de granit blanc/)).toBeVisible();
+      await expect(page.getByText(/Une pause face au mont Fuji/)).toBeVisible();
     });
   });
 }
