@@ -1676,3 +1676,31 @@ body:has(.shiro-yado) {
   .shiro-yado__bath-features { grid-template-columns: 1fr; }
   .shiro-yado__bath-essentials .shiro-yado__facts { grid-template-columns: 1fr; }
 }
+
+/* A small reservation book, kept within the inn's white and muted-green palette. */
+.shiro-yado__booking-badge { display: inline-flex; align-self: start; width: fit-content; max-width: 100%; margin: 0; padding: .35rem .75rem; border-radius: 2rem; background: var(--sy-soft); color: var(--sy-accent); font-size: .8rem; font-weight: 600; }
+.shiro-yado__booking-entry { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; padding: var(--sy-space); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-elevated); }
+.shiro-yado__booking-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sy-space); }
+.shiro-yado__booking-form label { display: grid; gap: .5rem; min-width: 0; color: var(--sy-fg); }
+.shiro-yado__booking-form input, .shiro-yado__booking-form select { min-width: 0; width: 100%; min-height: 44px; padding: .65rem; border: 1px solid var(--sy-border); border-radius: .5rem; background: var(--sy-surface); color: var(--sy-fg); font: inherit; }
+.shiro-yado__booking-form > p, .shiro-yado__booking-form > button { grid-column: 1 / -1; margin: 0; }
+.shiro-yado__booking-form input:focus-visible { outline: 3px solid var(--sy-accent); outline-offset: 2px; }
+.shiro-yado__booking-rooms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sy-space); }
+.shiro-yado__booking-rooms article { display: flex; flex-direction: column; gap: .75rem; min-width: 0; }
+.shiro-yado__booking-rooms h4, .shiro-yado__booking-rooms p { margin: 0; }
+.shiro-yado__booking-rooms h4 { color: var(--sy-fg); font-size: 1.1rem; }
+.shiro-yado__booking-rooms article > button { margin-top: auto; }
+.shiro-yado__booking-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sy-space); margin: var(--sy-space) 0; }
+.shiro-yado__booking-facts > div { min-width: 0; }
+.shiro-yado__booking-facts dt { font-size: .8rem; color: var(--sy-muted); }
+.shiro-yado__booking-facts dd { margin: .2rem 0 0; font-weight: 600; color: var(--sy-fg); overflow-wrap: anywhere; }
+.shiro-yado__booking-total { grid-column: 1 / -1; border-top: 1px solid var(--sy-border); padding-top: var(--sy-space); }
+.shiro-yado__booking-total dd { font-size: 1.4rem; }
+.shiro-yado__booking-confirm { display: grid; gap: .75rem; }
+.shiro-yado__booking-confirm p, .shiro-yado__booking-confirm h3 { margin: 0; overflow-wrap: anywhere; }
+.shiro-yado__booking-notice, .shiro-yado__booking-cancel { padding: var(--sy-space); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-elevated); color: var(--sy-fg); }
+.shiro-yado__booking-cancel { display: grid; gap: .65rem; }
+@media (max-width: 600px) {
+  .shiro-yado__booking-form, .shiro-yado__booking-rooms { grid-template-columns: 1fr; }
+  .shiro-yado__booking-entry { align-items: stretch; flex-direction: column; }
+}

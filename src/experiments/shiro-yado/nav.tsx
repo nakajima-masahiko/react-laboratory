@@ -1,5 +1,6 @@
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { isBookableRoom } from './booking/model';
 import { getPlace, type FloorId } from './hotel-data';
 import { NavContext, type View } from './nav-state';
 
@@ -8,6 +9,8 @@ const BASE_PATH = '/experiments/shiro-yado';
 function viewFromPath(pathname: string): View {
   const parts = pathname.slice(BASE_PATH.length).split('/').filter(Boolean);
   const [view, value] = parts;
+  if (view === 'booking') return isBookableRoom(value) ? { v: 'booking', p: value } : { v: 'booking' };
+  if (view === 'reservations') return { v: 'reservations' };
   if (view === 'tourism') return { v: 'tourism' };
   if (view === 'nearby') return { v: 'nearby' };
   if (view === 'floors') return { v: 'floors' };
@@ -20,6 +23,7 @@ function viewFromPath(pathname: string): View {
 
 function pathFromView(view: View) {
   if (view.v === 'home') return BASE_PATH;
+  if (view.v === 'booking' && isBookableRoom(view.p)) return `${BASE_PATH}/booking/${view.p}`;
   if (view.v === 'floor') return `${BASE_PATH}/floor/${view.f ?? 1}`;
   if ((view.v === 'place' || view.v === 'guide') && view.p) return `${BASE_PATH}/${view.v}/${view.p}`;
   return `${BASE_PATH}/${view.v}`;

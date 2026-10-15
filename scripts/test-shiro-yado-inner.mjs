@@ -30,6 +30,8 @@ compile('src/experiments/shiro-yado');
 after(() => rmSync(output, { recursive: true, force: true }));
 const { NavContext } = await import(pathToFileURL(join(output, 'nav-state.js')));
 const { BathView } = await import(pathToFileURL(join(output, 'BathView.js')));
+const { BookingView } = await import(pathToFileURL(join(output, 'booking/BookingView.js')));
+const { ReservationsView } = await import(pathToFileURL(join(output, 'booking/ReservationsView.js')));
 const { GuideView } = await import(pathToFileURL(join(output, 'views.js')));
 function render(component, props = {}) {
   return renderToStaticMarkup(createElement(NavContext.Provider, { value: { view: { v: 'guide' }, go() {} } }, createElement(component, props)));
@@ -51,4 +53,19 @@ test('route steps and arrival action precede the map and optional scene', () => 
   assert.ok(html.indexOf('3階の位置') < html.indexOf('到着する場所を3Dで見る'));
   assert.match(html, /この行き方を音声で聞く/);
   assert.doesNotMatch(html, /<canvas|3Dを表示できません/);
+});
+
+test('booking begins with a demo notice, date fields and a guest count, without personal or payment fields', () => {
+  const html = render(BookingView);
+  assert.match(html, /体験用の予約/);
+  assert.equal((html.match(/type="date"/g) ?? []).length, 2);
+  assert.match(html, /宿泊人数/);
+  assert.match(html, /空室・料金を見る/);
+  assert.doesNotMatch(html, /type="(?:email|tel|password)"|<canvas/);
+});
+test('reservation management explains browser-local storage and offers search when empty', () => {
+  const html = render(ReservationsView);
+  assert.match(html, /このブラウザに保存されたご予約はありません/);
+  assert.match(html, /別の端末とは共有されません/);
+  assert.match(html, /空室・料金を見る/);
 });
