@@ -81,7 +81,7 @@ test('arrival guide and room catalogue have distinct purposes; room browsing nev
   assert.equal((html.match(/<article/g) ?? []).length, 5);
   assert.match(html, /￥12,000/);
   assert.match(html, /￥22,000/);
-  assert.match(html, /客室イメージ/);
+  assert.match(html, /客室デザイン案/);
   assert.match(html, /お部屋への案内/);
   assert.doesNotMatch(html, /<canvas|読み込み中/);
   assert.match(render(CheckinView), /お部屋への案内/);
@@ -99,14 +99,17 @@ test('welcome offers both a direct search and browsing path, with no payment not
   assert.match(stayDate('ja', '2026-10-18'), /10月18日.*日/);
 });
 
-test('only room 204 has the new interior concept, with accessible copy and known image dimensions', () => {
+test('every room has its own interior concept, while room 204 retains its approved image', () => {
   const html = render(RoomSummary, { roomId: 'room-204' });
   assert.match(html, /src="\/react-laboratory\/shiro-yado\/room-204-morning.webp"/);
   assert.match(html, /alt="朝の光が入る二面窓/);
   assert.match(html, /width="1536" height="1024"/);
   assert.match(html, /AI生成・イメージ/);
   assert.match(html, /窓辺でお茶と読書/);
-  const standard = render(RoomSummary, { roomId: 'room-201' });
-  assert.doesNotMatch(standard, /room-204-morning.webp/);
-  assert.match(standard, /<svg/);
+  for (const id of ['201', '202', '203', '205']) {
+    const room = render(RoomSummary, { roomId: `room-${id}` });
+    assert.ok(room.includes(`room-${id}-interior.webp`));
+    assert.match(room, /AI生成・イメージ/);
+    assert.doesNotMatch(room, /<svg/);
+  }
 });
