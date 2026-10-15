@@ -34,7 +34,7 @@ function setup(t, options = {}) {
   return { playback, utterances, states };
 }
 
-test('real bow completes before speech; speech end smiles and tilts; replay resets the mouth', (t) => {
+test('first render smiles; real bow precedes speech; speech end smiles and tilts; replay resets the mouth', (t) => {
   const { playback, utterances } = setup(t);
   const rig = createConciergeRig(asset.scene, asset.animations, playback.completeBow);
   t.after(() => rig.dispose());
@@ -44,7 +44,13 @@ test('real bow completes before speech; speech end smiles and tilts; replay rese
     if (object instanceof Bone && /^Head(?:_\d+)?$/.test(object.name)) head = object;
   });
   assert.ok(face && head);
+  const welcome = new Float32Array(face.geometry.attributes.position.array);
+  assert.equal(rig.smile, 0.85, 'the rig is smiling before its first rendered frame');
+  rig.update(playback.state, 1 / 60, 0, 0);
+  assert.deepEqual(face.geometry.attributes.position.array, welcome, 'idle keeps the welcoming expression');
+  rig.update({ ...playback.state, phase: 'loading' }, 0, 0, 0);
   const neutral = new Float32Array(face.geometry.attributes.position.array);
+  assert.notDeepEqual(welcome, neutral, 'welcome smile actually deforms the face geometry');
   const advance = (frames) => {
     for (let i = 0; i < frames; i++) rig.update(playback.state, 1 / 60, i * 1000 / 60, playback.getBoundaryTime());
   };
@@ -70,6 +76,9 @@ test('real bow completes before speech; speech end smiles and tilts; replay rese
   assert.equal(utterances.length, 2, 'replay starts inside the click without another async bow');
   assert.deepEqual(face.geometry.attributes.position.array, neutral);
   assert.equal(rig.smile, 0);
+  playback.stop(); advance(1);
+  assert.equal(rig.smile, 0.85, 'stopping speech returns to a welcoming smile');
+  assert.deepEqual(face.geometry.attributes.position.array, welcome);
 });
 
 test('stop, replacement, failure, mute and disposal reject stale speech completion', (t) => {
