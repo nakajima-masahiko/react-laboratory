@@ -28,6 +28,9 @@ import { ConciergeGuide } from './ConciergeGuide';
 import { WelcomeHome } from './WelcomeHome';
 import { StayControls } from './StayControls';
 import { WELCOME } from './welcome-copy';
+import { INSIDE } from './inside-copy';
+import { RouteSpeech } from './RouteSpeech';
+import { SceneDisclosure } from './SceneDisclosure';
 
 const FLOOR_SCENES: Record<FloorId, SceneId> = {
   1: 'floor-1',
@@ -296,37 +299,42 @@ export function GuideView({ destId }: { destId: PlaceId }) {
   if (!guide) {
     return <p className="shiro-yado__muted">{ui.guideUnavailable}</p>;
   }
+  const copy = INSIDE[locale];
   const arrived = fromPlaceId === dest.id;
   return (
-    <div className="shiro-yado__stack">
+    <div className="shiro-yado__stack" data-testid="route-page">
       <header className="shiro-yado__hero">
         <p className="shiro-yado__eyebrow">{ui.guideEyebrow}</p>
         <h2>{ui.guideTo(dest.shortName)}</h2>
+        <p className="shiro-yado__route-summary">
+          <span>{guide.from.floor}F · {guide.from.shortName}</span>
+          <IconArrow />
+          <span>{dest.floor}F · {dest.shortName}</span>
+        </p>
         <p className="shiro-yado__lead">{guide.summary}</p>
         <p className="shiro-yado__muted">
           {origin ? ui.fromOrigin(origin.floor, origin.shortName, guide.minutes) : guide.minutes}
         </p>
       </header>
-      <StayControls />
-      <HotelPreview scene={dest.id} hint={ui.destSceneHint} />
-      <section className="shiro-yado__section">
-        <h3>{ui.floorPosition(dest.floor)}</h3>
-        <FloorPlan floor={dest.floor} highlight={dest.id} here={fromPlaceId} />
-        <p className="shiro-yado__muted">
-          {guide.viaElevator ? ui.nowOnFloor(fromFloor, dest.floor) : ui.sameFloorMove}
-        </p>
+      <details className="shiro-yado__scene-disclosure">
+        <summary>{WELCOME[locale].here}</summary>
+        <StayControls />
+      </details>
+      <section className="shiro-yado__section" aria-labelledby="route-steps-title">
+        <h3 id="route-steps-title">{arrived ? ui.arrived : copy.steps}</h3>
+        <ol className="shiro-yado__steps">
+          {guide.steps.map((step, index) => (
+            <li key={`${step.title}-${index}`}>
+              <span>{index + 1}</span>
+              <div>
+                <strong>{step.title}</strong>
+                <p>{step.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </section>
-      <ol className="shiro-yado__steps">
-        {guide.steps.map((step, index) => (
-          <li key={`${step.title}-${index}`}>
-            <span>{index + 1}</span>
-            <div>
-              <strong>{step.title}</strong>
-              <p>{step.body}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
+      {!arrived && <RouteSpeech guide={guide} />}
       {arrived ? (
         <div className="shiro-yado__arrived">
           <IconCheck />
@@ -338,6 +346,14 @@ export function GuideView({ destId }: { destId: PlaceId }) {
           {ui.updateHereOnArrive}
         </button>
       )}
+      <section className="shiro-yado__section">
+        <h3>{ui.floorPosition(dest.floor)}</h3>
+        <FloorPlan floor={dest.floor} highlight={dest.id} here={fromPlaceId} />
+        {!arrived && <p className="shiro-yado__muted">
+          {guide.viaElevator ? ui.nowOnFloor(fromFloor, dest.floor) : ui.sameFloorMove}
+        </p>}
+      </section>
+      <SceneDisclosure key={dest.id} scene={dest.id} label={copy.preview} />
       <button type="button" className="shiro-yado__btn shiro-yado__btn--outline" onClick={() => go({ v: 'place', p: dest.id })}>
         {ui.seeDetails}
         <IconArrow />
