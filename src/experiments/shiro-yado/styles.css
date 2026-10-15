@@ -1753,3 +1753,17 @@ body:has(.shiro-yado) {
   .shiro-yado__dining-entry, .shiro-yado__dining-meal, .shiro-yado__dining-info { grid-template-columns: 1fr; }
   .shiro-yado__dining-venue { align-items: stretch; flex-direction: column; }
 }
+
+/* Shared spaces begin with a welcoming image and useful choices; 3D is optional. */
+.shiro-yado__shared-image { margin: 0; overflow: hidden; border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-elevated); }
+.shiro-yado__shared-image img { display: block; width: 100%; height: auto; }
+.shiro-yado__shared-image figcaption { padding: .65rem var(--sy-space); color: var(--sy-muted); font-size: .8rem; }
+.shiro-yado__shared-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sy-space); }
+.shiro-yado__shared-cards h4 { margin: 0 0 .6rem; }
+.shiro-yado__shared-cards p { margin: 0; line-height: 1.8; color: var(--sy-muted); }
+.shiro-yado__shared-facility { display: flex; flex-direction: column; gap: .65rem; min-width: 0; }
+.shiro-yado__shared-facility > button:first-of-type { margin-top: auto; }
+.shiro-yado__shared-thumb { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--sy-radius); }
+.shiro-yado__shared-symbol { display: grid; place-items: center; aspect-ratio: 3 / 2; border-radius: var(--sy-radius); background: var(--sy-soft); color: var(--sy-accent); }
+.shiro-yado__shared-symbol svg { width: 56px; height: 56px; }
+@media (max-width: 700px) { .shiro-yado__shared-cards { grid-template-columns: 1fr; } }
