@@ -107,7 +107,7 @@ export function BookingView({ preferredRoom }: { preferredRoom?: PlaceId }) {
             const place = localizePlace(locale, id);
             return <article key={id} className="shiro-yado__card" data-room={id}>
               <h4>{place.name}</h4>
-              {id === 'room-204' && <RoomVisual roomId={id} />}
+              <RoomVisual roomId={id} />
               <p>{place.description}</p>
               <p className="shiro-yado__muted">{place.size} · {copy.capacity}: {ROOM_OFFERS[id].capacity}</p>
               <dl className="shiro-yado__booking-facts">
