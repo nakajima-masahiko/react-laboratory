@@ -69,3 +69,31 @@ test('reservation management explains browser-local storage and offers search wh
   assert.match(html, /別の端末とは共有されません/);
   assert.match(html, /空室・料金を見る/);
 });
+
+const { RoomsView } = await import(pathToFileURL(join(output, 'booking/RoomsView.js')));
+const { BookingWelcome } = await import(pathToFileURL(join(output, 'booking/BookingWelcome.js')));
+const { CheckinView } = await import(pathToFileURL(join(output, 'views.js')));
+const { JOURNEY, stayDate } = await import(pathToFileURL(join(output, 'booking/ux-copy.js')));
+test('arrival guide and room catalogue have distinct purposes; room browsing never requires WebGL', () => {
+  const html = render(RoomsView);
+  assert.match(html, /客室・予約/);
+  assert.equal((html.match(/<article/g) ?? []).length, 5);
+  assert.match(html, /￥12,000/);
+  assert.match(html, /￥22,000/);
+  assert.match(html, /客室イメージ/);
+  assert.match(html, /お部屋への案内/);
+  assert.doesNotMatch(html, /<canvas|読み込み中/);
+  assert.match(render(CheckinView), /お部屋への案内/);
+});
+test('welcome offers both a direct search and browsing path, with no payment notice, in every locale', () => {
+  const html = render(BookingWelcome);
+  assert.match(html, /空室・料金を見る/);
+  assert.match(html, /お部屋を見て選ぶ/);
+  assert.match(html, /お支払い不要/);
+  assert.match(html, /1か月先/);
+  for (const locale of ['ja', 'en', 'fr', 'es', 'zh', 'ko']) {
+    for (const text of Object.values(JOURNEY[locale])) assert.equal(typeof text, 'string');
+    assert.ok(stayDate(locale, '2026-10-18').length > 0);
+  }
+  assert.match(stayDate('ja', '2026-10-18'), /10月18日.*日/);
+});

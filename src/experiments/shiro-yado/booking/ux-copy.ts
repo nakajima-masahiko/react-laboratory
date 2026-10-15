@@ -1,0 +1,14 @@
+import type { Locale } from '../i18n';
+
+type JourneyCopy = { rooms: string; browse: string; guide: string; lead: string; demo: string; preview: string; illustration: string; nearby: string; bath: string; explore: string; window: string };
+export const JOURNEY: Record<Locale, JourneyCopy> = {
+  ja: { rooms: '客室・予約', browse: 'お部屋を見て選ぶ', guide: 'お部屋への案内', lead: 'ふたりでゆっくり、家族でにぎやかに。過ごし方に合う一室をお選びください。', demo: '予約体験・お支払い不要', preview: 'お部屋を3Dで見る', illustration: '客室イメージ（実際の配置とは異なります）', nearby: '同じ人数・泊数で泊まれる近い日程', bath: 'お風呂を見る', explore: '周辺を散策する', window: '今日から1か月先まで予約できます' },
+  en: { rooms: 'Rooms & booking', browse: 'Explore guest rooms', guide: 'Directions to your room', lead: 'A quiet stay for two or time together as a family. Find your room.', demo: 'Demo booking · no payment', preview: 'Explore this room in 3D', illustration: 'Room illustration (layout may differ)', nearby: 'Nearby dates for the same guests and nights', bath: 'Explore the bath', explore: 'Explore the island', window: 'Book from today up to one month ahead' },
+  fr: { rooms: 'Chambres et réservation', browse: 'Découvrir les chambres', guide: 'Chemin vers votre chambre', lead: 'À deux ou en famille, choisissez la chambre adaptée à votre séjour.', demo: 'Réservation fictive · sans paiement', preview: 'Voir la chambre en 3D', illustration: 'Illustration de chambre (plan indicatif)', nearby: 'Dates proches pour les mêmes voyageurs et nuits', bath: 'Découvrir les bains', explore: 'Explorer l’île', window: 'Réservez d’aujourd’hui à un mois à l’avance' },
+  es: { rooms: 'Habitaciones y reservas', browse: 'Explorar habitaciones', guide: 'Cómo llegar a tu habitación', lead: 'En pareja o en familia, elige tu habitación para descansar.', demo: 'Reserva de prueba · sin pago', preview: 'Ver habitación en 3D', illustration: 'Ilustración de habitación (distribución orientativa)', nearby: 'Fechas cercanas con los mismos huéspedes y noches', bath: 'Descubrir los baños', explore: 'Explorar la isla', window: 'Reserva desde hoy hasta un mes por adelantado' },
+  zh: { rooms: '客房与预订', browse: '浏览并选择客房', guide: '前往客房的路线', lead: '两人悠闲休憩，或与家人欢聚。请选择适合您的客房。', demo: '体验预订 · 无需付款', preview: '查看客房3D', illustration: '客房示意图（实际布局可能不同）', nearby: '相同人数与晚数的邻近可住日期', bath: '看看浴场', explore: '探索周边', window: '可预订今天起一个月内的入住日期' },
+  ko: { rooms: '객실·예약', browse: '객실 둘러보기', guide: '내 객실로 가는 길', lead: '둘이서 여유롭게, 가족과 함께 즐겁게. 머물 객실을 골라 보세요.', demo: '예약 체험 · 결제 없음', preview: '객실을 3D로 보기', illustration: '객실 이미지 (실제 배치와 다를 수 있습니다)', nearby: '같은 인원·숙박 일수로 가능한 가까운 날짜', bath: '욕장 둘러보기', explore: '주변 산책하기', window: '오늘부터 한 달 뒤까지 예약할 수 있습니다' },
+};
+export function stayDate(locale: Locale, date: string) {
+  return new Intl.DateTimeFormat(locale, { timeZone: 'Asia/Tokyo', month: 'long', day: 'numeric', weekday: 'short' }).format(new Date(`${date}T00:00:00+09:00`));
+}

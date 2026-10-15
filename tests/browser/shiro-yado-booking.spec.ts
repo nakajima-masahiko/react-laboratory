@@ -79,3 +79,26 @@ test('new booking UI follows the chosen language', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Séjourner à Shiro Yado' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Voir les chambres et tarifs' })).toBeVisible();
 });
+
+for (const width of [320, 1280]) {
+  test(`welcome search and room browsing remain reachable after selecting a guide room at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ colorScheme: width === 320 ? 'dark' : 'light' });
+    await page.goto('#/experiments/shiro-yado');
+    const welcome = page.getByRole('region', { name: '客室・予約', exact: true });
+    await expect(welcome.getByText('予約体験・お支払い不要')).toBeVisible();
+    await welcome.getByRole('button', { name: '空室・料金を見る', exact: true }).click();
+    await expect(page.getByTestId('booking-page')).toBeVisible();
+    await page.getByRole('navigation', { name: 'Quick navigation' }).getByRole('button', { name: '客室・予約', exact: true }).click();
+    const rooms = page.getByTestId('rooms-page');
+    await expect(rooms.getByRole('article')).toHaveCount(5);
+    await rooms.getByRole('button', { name: 'お部屋への案内', exact: true }).click();
+    await page.getByRole('button', { name: /201 スタンダードツイン/ }).click();
+    await page.getByRole('navigation', { name: 'Quick navigation' }).getByRole('button', { name: '客室・予約', exact: true }).click();
+    await expect(rooms).toBeVisible();
+    const family = rooms.getByRole('article', { name: '205 ファミリールーム', exact: true });
+    await family.getByRole('button', { name: '空室・料金を見る', exact: true }).click();
+    await expect(page).toHaveURL(/booking\/room-205$/);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
+}

@@ -30,6 +30,10 @@ import { StayControls } from './StayControls';
 import { WELCOME } from './welcome-copy';
 import { INSIDE } from './inside-copy';
 import { RouteSpeech } from './RouteSpeech';
+import { BookingWelcome } from './booking/BookingWelcome';
+import { RoomSummary } from './booking/RoomSummary';
+import { isBookableRoom } from './booking/model';
+import { JOURNEY } from './booking/ux-copy';
 import { BookingEntry } from './booking/BookingEntry';
 import { SceneDisclosure } from './SceneDisclosure';
 
@@ -49,6 +53,7 @@ export function HomeView() {
   return (
     <div className="shiro-yado__stack shiro-yado__stack--home">
       <div className="shiro-yado__concierge-anchor"><ConciergeGuide /></div>
+      <BookingWelcome />
       <WelcomeHome />
       <StayControls showRoom />
       <section className="shiro-yado__section">
@@ -247,7 +252,7 @@ export function PlaceView({ place }: { place: Place }) {
         <h2>{loc.name}</h2>
         <p className="shiro-yado__muted">{loc.description}</p>
       </header>
-      {place.kind === 'room' && <BookingEntry roomId={place.id} />}
+      {isBookableRoom(place.id) && <section className="shiro-yado__card"><RoomSummary roomId={place.id} /><BookingEntry roomId={place.id} /></section>}
       <HotelPreview scene={place.id} />
       <section className="shiro-yado__card">
         <dl className="shiro-yado__facts">
@@ -375,11 +380,11 @@ export function CheckinView() {
     <div className="shiro-yado__stack">
       <header className="shiro-yado__hero">
         <p className="shiro-yado__eyebrow">CHECK IN</p>
-        <h2>{ui.checkinTitle}</h2>
+        <h2>{JOURNEY[locale].guide}</h2>
         <p className="shiro-yado__muted">{ui.checkinLead}</p>
         <p className="shiro-yado__muted">{WELCOME[locale].stayHint}</p>
       </header>
-      <BookingEntry />
+      <button type="button" className="shiro-yado__btn shiro-yado__btn--outline" onClick={() => go({ v: 'rooms' })}>{JOURNEY[locale].rooms}</button>
       <ul className="shiro-yado__list">
         {ROOM_IDS.map((id) => {
           const room = localizePlace(locale, id);

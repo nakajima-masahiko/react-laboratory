@@ -1704,3 +1704,24 @@ body:has(.shiro-yado) {
   .shiro-yado__booking-form, .shiro-yado__booking-rooms { grid-template-columns: 1fr; }
   .shiro-yado__booking-entry { align-items: stretch; flex-direction: column; }
 }
+
+/* Clear paths for booking before arrival and directions during a stay. */
+.shiro-yado__booking-welcome { display: grid; gap: .75rem; padding: var(--sy-space); border: 1px solid var(--sy-border); border-radius: var(--sy-radius); background: var(--sy-elevated); }
+.shiro-yado__booking-welcome > p { margin: 0; }
+.shiro-yado__booking-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.shiro-yado__room-illustration { margin: 0; overflow: hidden; border: 1px solid var(--sy-border); border-radius: var(--sy-radius); }
+.shiro-yado__room-illustration svg { display: block; width: 100%; height: auto; }
+.shiro-yado__room-illustration figcaption { padding: .5rem; color: var(--sy-muted); font-size: .75rem; }
+.shiro-yado__room-illustration .room-wall { fill: var(--sy-surface); }
+.shiro-yado__room-illustration .room-floor { fill: var(--sy-soft); }
+.shiro-yado__room-illustration .room-window { fill: var(--sy-elevated); stroke: var(--sy-accent); }
+.shiro-yado__room-illustration .room-wood { fill: var(--sy-border); }
+.shiro-yado__room-illustration .room-bed { fill: var(--sy-bg); stroke: var(--sy-border); }
+.shiro-yado__room-illustration .room-pillow { fill: var(--sy-surface); stroke: var(--sy-border); }
+.shiro-yado__room-illustration .room-line { fill: none; stroke: var(--sy-accent); stroke-width: 2; }
+.shiro-yado :is(button, input, select, summary):focus-visible { outline: 3px solid var(--sy-accent); outline-offset: 3px; }
+.shiro-yado__body :is(h2, h3, h4) { scroll-margin-top: 90px; }
+.shiro-yado__booking-actions > button, .shiro-yado__booking-entry > button { min-height: 44px; white-space: normal; }
+@media (max-width: 600px) {
+  .shiro-yado__booking-actions { grid-template-columns: 1fr; }
+}
