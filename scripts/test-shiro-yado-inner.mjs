@@ -32,7 +32,7 @@ const { NavContext } = await import(pathToFileURL(join(output, 'nav-state.js')))
 const { BathView } = await import(pathToFileURL(join(output, 'BathView.js')));
 const { BookingView } = await import(pathToFileURL(join(output, 'booking/BookingView.js')));
 const { ReservationsView } = await import(pathToFileURL(join(output, 'booking/ReservationsView.js')));
-const { GuideView } = await import(pathToFileURL(join(output, 'views.js')));
+const { GuideView, FloorView, PlaceView } = await import(pathToFileURL(join(output, 'views.js')));
 const { RoomsView } = await import(pathToFileURL(join(output, 'booking/RoomsView.js')));
 const { BookingWelcome } = await import(pathToFileURL(join(output, 'booking/BookingWelcome.js')));
 const { CheckinView } = await import(pathToFileURL(join(output, 'views.js')));
@@ -41,6 +41,7 @@ const { RoomSummary } = await import(pathToFileURL(join(output, 'booking/RoomSum
 const { DiningView } = await import(pathToFileURL(join(output, 'dining/DiningView.js')));
 const { DiningEntry } = await import(pathToFileURL(join(output, 'dining/DiningEntry.js')));
 const { DINING } = await import(pathToFileURL(join(output, 'dining/copy.js')));
+const { getPlace } = await import(pathToFileURL(join(output, 'hotel-data.js')));
 function render(component, props = {}) {
   return renderToStaticMarkup(createElement(NavContext.Provider, { value: { view: { v: 'guide' }, go() {} } }, createElement(component, props)));
 }
@@ -137,4 +138,22 @@ test('all six dining languages explain both meals, the demo boundary and allergy
       assert.ok(copy[meal].alt.length > 10);
     }
   }
+});
+
+test('third floor begins with its shared-space image and useful destinations, without mounting 3D', () => {
+  const html = render(FloorView, { floor: 3 });
+  assert.match(html, /shared-floor-3.webp/);
+  assert.match(html, /今日は、どちらへ/);
+  assert.match(html, /bath-fuji-mural.svg/);
+  assert.match(html, /お手洗い/);
+  assert.match(html, /お食事を楽しむ/);
+  assert.match(html, /3階の空間を3Dで見る/);
+  assert.ok(html.indexOf('shared-floor-3.webp') < html.indexOf('今日は、どちらへ'));
+  assert.doesNotMatch(html, /data-scene=|<canvas|空間を読み込み中/);
+});
+test('White Hall uses an image, explains enjoyable uses and keeps 3D closed by default', () => {
+  const html = render(PlaceView, { place: getPlace('banquet') });
+  for (const text of ['banquet-white-hall.webp', '食卓を囲む', '小さなお祝いに', '集まって、話す', 'お食事を楽しむ', '白の間を3Dで見る', '正確な位置は館内図']) assert.ok(html.includes(text), text);
+  assert.ok(html.indexOf('banquet-white-hall.webp') < html.indexOf('お食事を楽しむ'));
+  assert.doesNotMatch(html, /data-scene=|<canvas|空間を読み込み中/);
 });

@@ -1,3 +1,7 @@
+import { ThirdFloorView } from './shared-spaces/ThirdFloorView';
+import { SharedImage } from './shared-spaces/SharedImage';
+import { BanquetFeatures } from './shared-spaces/BanquetFeatures';
+import { SHARED } from './shared-spaces/copy';
 import { DiningEntry } from './dining/DiningEntry';
 import { FloorPlan } from './floor-plan';
 import { buildGuide } from './guide';
@@ -194,6 +198,7 @@ export function FloorView({ floor }: { floor: FloorId }) {
   const ft = getFloorText(locale, floor);
   const here = useHotelStore((s) => s.fromPlaceId);
   const sectionTitle = floor === 2 ? ui.rooms : floor === 3 ? ui.facilities : ui.spaces;
+  if (floor === 3) return <ThirdFloorView />;
   return (
     <div className="shiro-yado__stack">
       <header className="shiro-yado__hero">
@@ -216,7 +221,7 @@ export function FloorView({ floor }: { floor: FloorId }) {
               <button
                 key={id}
                 type="button"
-                className={floor === 3 ? 'shiro-yado__row shiro-yado__row--tall' : 'shiro-yado__row'}
+                className="shiro-yado__row"
                 onClick={() => go({ v: 'place', p: id })}
               >
                 <span>
@@ -225,7 +230,6 @@ export function FloorView({ floor }: { floor: FloorId }) {
                     {place.size}
                     {place.hours ? ` · ${place.hours}` : ` · ${place.capacity}`}
                   </small>
-                  {floor === 3 ? <em className="shiro-yado__summary">{place.summary}</em> : null}
                 </span>
                 <IconArrow />
               </button>
@@ -255,8 +259,12 @@ export function PlaceView({ place }: { place: Place }) {
         <p className="shiro-yado__muted">{loc.description}</p>
       </header>
       {isBookableRoom(place.id) && <section className="shiro-yado__card"><RoomSummary roomId={place.id} /><BookingEntry roomId={place.id} /></section>}
-      {place.id === 'banquet' && <DiningEntry />}
-      <HotelPreview scene={place.id} />
+      {place.id === 'banquet' && <>
+        <SharedImage scene="banquet" />
+        <BanquetFeatures />
+        <DiningEntry />
+      </>}
+      {place.id !== 'banquet' && <HotelPreview scene={place.id} />}
       <section className="shiro-yado__card">
         <dl className="shiro-yado__facts">
           <div>
@@ -289,6 +297,7 @@ export function PlaceView({ place }: { place: Place }) {
         {ui.directionsHere}
         <IconArrow />
       </button>
+      {place.id === 'banquet' && <SceneDisclosure scene="banquet" label={SHARED[locale].hallScene} />}
       <button type="button" className="shiro-yado__btn shiro-yado__btn--outline" onClick={() => setHere(place.floor, place.id)} disabled={isHere}>
         <IconPin />
         {isHere ? ui.alreadyHere : ui.setHere}
