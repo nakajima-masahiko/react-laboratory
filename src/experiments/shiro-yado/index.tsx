@@ -4,6 +4,8 @@ import { IconBack, IconBed, IconHome, IconIsland, IconMap, IconVolume } from './
 import { LOCALES, type Locale } from './i18n';
 import { NavProvider } from './nav';
 import { BathView } from './BathView';
+import { RoomsView } from './booking/RoomsView';
+import { JOURNEY } from './booking/ux-copy';
 import { BookingView } from './booking/BookingView';
 import { ReservationsView } from './booking/ReservationsView';
 import { NearbyGuide } from './NearbyGuide';
@@ -42,8 +44,8 @@ function QuickNav({ current }: { current: View }) {
     { key: 'tourism', label: short.tourism[locale] ?? 'Explore', view: { v: 'tourism' as const }, icon: <IconIsland /> },
     {
       key: 'room',
-      label: short.room[locale] ?? 'Room',
-      view: myRoomId ? { v: 'guide' as const, p: myRoomId } : { v: 'checkin' as const },
+      label: JOURNEY[locale].rooms,
+      view: { v: 'rooms' as const },
       icon: <IconBed />,
     },
     { key: 'floors', label: short.floors[locale] ?? 'Map', view: { v: 'floors' as const }, icon: <IconMap /> },
@@ -58,7 +60,7 @@ function QuickNav({ current }: { current: View }) {
             : item.key === 'guide'
               ? ['dest', 'guide', 'place'].includes(current.v) && !(['guide', 'place'].includes(current.v) && current.p === myRoomId)
               : item.key === 'room'
-                ? ['checkin', 'booking', 'reservations'].includes(current.v) || (['guide', 'place'].includes(current.v) && current.p === myRoomId)
+                ? ['rooms', 'checkin', 'booking', 'reservations'].includes(current.v) || (['guide', 'place'].includes(current.v) && current.p === myRoomId)
                 : item.key === 'tourism'
                   ? current.v === 'tourism' || current.v === 'nearby'
                   : current.v === 'floor' || current.v === 'floors';
@@ -114,7 +116,8 @@ function Shell() {
   }, []);
 
   let content = <HomeView />;
-  if (view.v === 'booking') content = <BookingView key={view.p ?? 'all'} preferredRoom={view.p} />;
+  if (view.v === 'rooms') content = <RoomsView />;
+  else if (view.v === 'booking') content = <BookingView key={view.p ?? 'all'} preferredRoom={view.p} />;
   else if (view.v === 'reservations') content = <ReservationsView />;
   else if (view.v === 'floors') content = <FloorsView />;
   else if (view.v === 'floor') content = <FloorView floor={view.f ?? 1} />;

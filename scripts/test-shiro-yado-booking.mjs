@@ -125,3 +125,22 @@ test('every supported language includes reservation and error messages', () => {
     for (const key of ['dates', 'past', 'window', 'nights', 'guests', 'capacity', 'unavailable', 'storage']) assert.ok(copy.errors[key]);
   }
 });
+
+test('nearby dates preserve party size and duration, stay inside the month, and exclude unavailable stays', () => {
+  const booked = openStay('room-205');
+  const stay = { ...booked, guests: 4 };
+  const records = [{ ...stay, id: ID1, roomId: 'room-205', status: 'confirmed' }];
+  const options = m.nearbyStays(stay, records, today, 'room-205');
+  assert.equal(options.length, 3);
+  for (const candidate of options) {
+    assert.equal(candidate.guests, 4);
+    assert.equal(m.nights(candidate), m.nights(stay));
+    assert.notEqual(candidate.checkIn, stay.checkIn);
+    assert.equal(m.validateStay(candidate, today), null);
+    assert.equal(m.roomAvailability('room-205', candidate, records, today), null);
+  }
+  const distances = options.map(candidate => Math.abs(m.dateNumber(candidate.checkIn) - m.dateNumber(stay.checkIn)));
+  assert.deepEqual(distances, [...distances].sort((a, b) => a - b));
+  assert.deepEqual(m.nearbyStays({ ...stay, checkOut: '' }, records, today), []);
+  assert.deepEqual(m.nearbyStays(stay, records, today, 'room-201'), []);
+});

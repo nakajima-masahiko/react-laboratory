@@ -89,3 +89,16 @@ export function parseReservations(raw: string | null): Reservation[] {
   if (new Set(records.map((r) => r.id)).size !== records.length) throw new Error('Duplicate booking IDs');
   return records;
 }
+
+/** Keep guests and duration, offering at most three nearest bookable arrival dates. */
+export function nearbyStays(stay: Stay, reservations: Reservation[], today = japanToday(), preferred?: BookableRoomId): Stay[] {
+  if (validateStay(stay, today)) return [];
+  const offers = preferred ? [preferred] : Object.keys(ROOM_OFFERS) as BookableRoomId[];
+  const alternatives: Stay[] = [];
+  for (let day = today; day <= bookingHorizon(today); day = addDays(day, 1)) {
+    if (day === stay.checkIn) continue;
+    const candidate = { ...stay, checkIn: day, checkOut: addDays(day, nights(stay)) };
+    if (offers.some(id => !roomAvailability(id, candidate, reservations, today))) alternatives.push(candidate);
+  }
+  return alternatives.sort((a, b) => Math.abs(dateNumber(a.checkIn) - dateNumber(stay.checkIn)) - Math.abs(dateNumber(b.checkIn) - dateNumber(stay.checkIn)) || a.checkIn.localeCompare(b.checkIn)).slice(0, 3);
+}
