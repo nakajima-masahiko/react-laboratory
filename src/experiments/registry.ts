@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'html-in-canvas-lab',
+    title: 'HTML in Canvas Lab',
+    description: 'HTMLをCanvasに直接描画。EChartsのリアルタイムチャート、回転する入力カード、粒子とHTMLの前後合成を比較する3つの実験',
+    component: lazy(() => import('./html-in-canvas-lab')),
+  },
+  {
     id: 'kart-rush',
     title: 'ABYSS RUSH — 海底グランプリ',
     description: '透明な海中トンネルを6台で駆け抜ける3Dカートレース。AI対戦・ドリフト・アイテム・タッチ操作対応',

@@ -6,6 +6,7 @@ React のさまざまなパターンやライブラリを試す実験場です�
 
 | 実験 | 説明 |
 |------|------|
+| **[HTML in Canvas Lab](src/experiments/html-in-canvas-lab/README.md)** | EChartsのリアルタイムCanvasにHTML操作部品を合成。回転する入力カード、粒子とHTMLの前後関係を含む3つの描画実験。未対応環境はDOM重ね合わせに切替 |
 | **ABYSS RUSH — 海底グランプリ** | 透明な海中トンネルを走る6台対戦の3Dカートレース。AI・ドリフト・アイテム・タッチ操作対応 |
 | **Aquarium UX — 静かな生命世界** | PixiJS・Boids・スクロール深度を組み合わせ、水面・サンゴ礁・大水槽・クラゲ・深海を観察する没入型UX実験 |
 | **カウンター** | `useState` の基本的な使い方を確認するシンプルなカウンター |
@@ -28,6 +29,7 @@ React のさまざまなパターンやライブラリを試す実験場です�
 - **React Router v7** — クライアントサイドルーティング（HashRouter）
 - **Radix UI** — アクセシブルな UI プリミティブ（Dialog / Progress / Toast / Toggle Group）
 - **Recharts** — コンポーザブルなチャートライブラリ
+- **Apache ECharts / HTML-in-Canvas** — リアルタイムCanvasと操作可能なHTMLの合成実験
 - **CandleCore** — Canvas ベースの FX ローソク足チャート（GitHub 依存）
 
 ## クイックスタート
