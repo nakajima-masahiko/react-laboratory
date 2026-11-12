@@ -11,6 +11,9 @@ jobs:
     name: Scan frontend source (read-only)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Disable Modern Web Guidance CLI usage telemetry (including search queries).
+      DISABLE_TELEMETRY: '1'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
