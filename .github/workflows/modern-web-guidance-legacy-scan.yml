@@ -1,0 +1,54 @@
+name: Modern Web Guidance Legacy Scan
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-scan:
+    name: Scan frontend source (read-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run official Modern Web Guidance Legacy Scan
+        id: scan
+        shell: bash
+        run: |
+          mkdir -p validation-artifacts/modern-web-guidance
+          set +e
+          npx -y modern-web-guidance@latest legacy-scan src --json \
+            > validation-artifacts/modern-web-guidance/legacy-scan.json \
+            2> validation-artifacts/modern-web-guidance/legacy-scan.stderr.log
+          status=$?
+          set -e
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          printf 'repository=%s\ncommit=%s\nrun_id=%s\nscan_scope=src\nexit_code=%s\n' \
+            "$GITHUB_REPOSITORY" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$status" \
+            > validation-artifacts/modern-web-guidance/provenance.txt
+          if [ "$status" -ne 0 ]; then
+            echo "::error::Legacy Scan exited with code $status; inspect the artifact logs."
+          fi
+
+      - name: Upload scan results and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modern-web-guidance-legacy-scan-${{ github.run_id }}
+          path: validation-artifacts/modern-web-guidance/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Fail job if scan failed
+        if: steps.scan.outputs.exit_code != '0'
+        shell: bash
+        run: exit 1
