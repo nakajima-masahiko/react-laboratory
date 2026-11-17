@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { frameLabel, SCREENS } from './market';
 import { frameUrl } from './protocol';
 import { useScreenHost } from './useScreenHost';
@@ -30,7 +31,7 @@ export default function FxScreenSwitchLab() {
           const moving = selected || host.previous === id;
           return <div key={id} id={`fx-pane-${id}`} className="fx-screen-panel"
             role="tabpanel" aria-labelledby={`fx-tab-${id}`} aria-hidden={!selected} inert={!selected}
-            style={{ transform: `translateX(${Math.sign(index - activeIndex) * 100}%)`, visibility: moving ? 'visible' : 'hidden' }}>
+            style={{ '--fx-pane-direction': Math.sign(index - activeIndex), visibility: moving ? 'visible' : 'hidden' } as CSSProperties}>
             <iframe ref={element => { if (element) host.frames.current[id] = element; else delete host.frames.current[id]; }}
               src={frameUrl(id, host.session)} title={id === 'main' ? 'メイン画面' : `チャート${index}`}
               tabIndex={selected ? 0 : -1} />
@@ -38,6 +39,7 @@ export default function FxScreenSwitchLab() {
         })}
       </div>
       <nav className="fx-tabbar" role="tablist" aria-label="表示する画面">
+        <span className="fx-tab-indicator" aria-hidden="true" style={{ transform: `translateX(${activeIndex * 100}%)` }} />
         {SCREENS.map((id, index) => <button key={id} id={`fx-tab-${id}`} type="button" role="tab"
           aria-selected={host.active === id} aria-controls={`fx-pane-${id}`} tabIndex={host.active === id ? 0 : -1}
           onClick={() => host.setActive(id)} onKeyDown={event => {
@@ -53,7 +55,7 @@ export default function FxScreenSwitchLab() {
     </div>
     <div className="fx-explainer">
       <div><strong>01 / STATE</strong><p>4つのiframeは保持。画面IDとズーム位置は、切替で変わりません。</p></div>
-      <div><strong>02 / MOTION</strong><p>ボタンで横スライド。チャートのドラッグ操作とは競合しません。</p></div>
+      <div><strong>02 / MOTION</strong><p>24pxの横移動とフェードで軽快に切替。チャートのドラッグ操作とは競合しません。</p></div>
       <div><strong>03 / REALTIME</strong><p>同じ模擬レートから全時間足を集計。15倍速なら1分足が約4秒で進みます。</p></div>
     </div>
     <p className="fx-note" role="status">接続済み {host.ready.length}/4画面 · 実データ配信なし · 非表示タブではデモ時計を停止します。</p>

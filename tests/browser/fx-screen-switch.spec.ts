@@ -42,6 +42,8 @@ for (const viewport of [{ width: 1280, height: 1000 }, { width: 390, height: 844
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.getByRole('tab', { name: 'メイン画面', exact: false }).click();
     await expect(page.locator('#fx-pane-main')).toHaveCSS('transition-duration', '0s');
+    await expect(page.locator('#fx-pane-main')).toHaveCSS('transform', 'none');
+    await expect(page.locator('.fx-tab-indicator')).toHaveCSS('transition-duration', '0s');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(await main.locator('body').evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
     expect(errors).toEqual([]);
@@ -67,4 +69,48 @@ test('rapid switching, keyboard navigation and unrelated messages keep the host 
   await page.keyboard.press('Home');
   await expect(page.getByRole('tab', { name: 'メイン画面', exact: false })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('iframe')).toHaveCount(4);
+});
+
+test('short movement and fade stay bounded; selection indicator follows the destination', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto(route);
+  await expect(page.getByRole('status')).toContainText('接続済み 4/4');
+  // Pause browser animations at a known point instead of waiting on wall-clock timing.
+  const halfway = await page.evaluate(async () => {
+    const oldPane = document.getElementById('fx-pane-main')!;
+    const nextPane = document.getElementById('fx-pane-chart-1')!;
+    const indicator = document.querySelector<HTMLElement>('.fx-tab-indicator')!;
+    oldPane.getBoundingClientRect();
+    document.getElementById('fx-tab-chart-1')!.click();
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    const animations = [oldPane, nextPane, indicator].flatMap(element => element.getAnimations());
+    for (const animation of animations) { animation.pause(); animation.currentTime = 100; }
+    const inspect = (element: HTMLElement) => {
+      const style = getComputedStyle(element);
+      return { opacity: Number(style.opacity), x: new DOMMatrixReadOnly(style.transform).m41 };
+    };
+    return { count: animations.length, old: inspect(oldPane), next: inspect(nextPane) };
+  });
+  expect(halfway.count).toBeGreaterThanOrEqual(5);
+  expect(halfway.old.opacity).toBeGreaterThan(0);
+  expect(halfway.old.opacity).toBeLessThan(1);
+  expect(halfway.next.opacity).toBeGreaterThan(0);
+  expect(halfway.next.opacity).toBeLessThan(1);
+  expect(halfway.old.x).toBeLessThan(0);
+  expect(halfway.next.x).toBeGreaterThan(0);
+  expect(Math.abs(halfway.old.x)).toBeLessThanOrEqual(24);
+  expect(Math.abs(halfway.next.x)).toBeLessThanOrEqual(24);
+  await page.evaluate(() => {
+    for (const element of document.querySelectorAll('.fx-screen-panel, .fx-tab-indicator')) {
+      for (const animation of element.getAnimations()) animation.finish();
+    }
+  });
+  await expect(page.locator('#fx-pane-chart-1')).toHaveCSS('opacity', '1');
+  await expect(page.locator('#fx-pane-main')).toHaveCSS('opacity', '0');
+  await expect(page.locator('#fx-pane-main')).toHaveAttribute('inert', '');
+  const aligned = await page.locator('.fx-tab-indicator').evaluate(element => {
+    const tab = document.getElementById('fx-tab-chart-1')!;
+    return Math.abs(element.getBoundingClientRect().left - tab.getBoundingClientRect().left) < 1;
+  });
+  expect(aligned).toBe(true);
 });

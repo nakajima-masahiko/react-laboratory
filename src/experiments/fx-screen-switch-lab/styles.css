@@ -12,6 +12,9 @@
   --fx-down: #ca4257;
   --fx-space: 12px;
   --fx-radius: 14px;
+  --fx-switch-distance: 24px;
+  --fx-switch-duration: 200ms;
+  --fx-switch-easing: cubic-bezier(.22,.7,.25,1);
   color-scheme: light;
   color: var(--fx-text);
   background: var(--fx-bg);
@@ -64,12 +67,21 @@
 .fx-app-header strong { letter-spacing: .12em; font-size: 12px; }
 .fx-app-header span { color: var(--fx-muted); font-size: 11px; }
 .fx-viewport { position: relative; height: clamp(620px, 75dvh, 820px); overflow: hidden; isolation: isolate; }
-.fx-screen-panel { position: absolute; inset: 0; transition: transform 260ms cubic-bezier(.22,.7,.25,1); background: var(--fx-bg); }
+.fx-screen-panel {
+  position: absolute; inset: 0; z-index: 1;
+  transform: translateX(calc(var(--fx-pane-direction, 0) * var(--fx-switch-distance)));
+  opacity: 0;
+  transition: transform var(--fx-switch-duration) var(--fx-switch-easing), opacity var(--fx-switch-duration) var(--fx-switch-easing);
+  background: var(--fx-bg);
+}
+.fx-screen-panel[aria-hidden='false'] { transform: translateX(0); opacity: 1; z-index: 2; }
 .fx-screen-panel iframe { width: 100%; height: 100%; display: block; border: 0; background: var(--fx-bg); }
 .fx-screen-panel[aria-hidden='true'] { pointer-events: none; }
-.fx-tabbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--fx-surface); border-top: 1px solid var(--fx-border); padding-bottom: env(safe-area-inset-bottom); }
-.fx-tabbar button { min-width: 0; min-height: 66px; border: 0; border-top: 3px solid transparent; border-radius: 0; padding: 8px 4px; }
-.fx-tabbar button[aria-selected='true'] { border-top-color: var(--fx-accent); background: var(--fx-accent-soft); color: var(--fx-accent); }
+.fx-tabbar { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--fx-surface); border-top: 1px solid var(--fx-border); padding-bottom: env(safe-area-inset-bottom); }
+.fx-tab-indicator { position: absolute; top: 0; left: 0; width: 25%; height: 3px; background: var(--fx-accent); pointer-events: none; z-index: 1; transition: transform var(--fx-switch-duration) var(--fx-switch-easing); }
+.fx-tabbar button { min-width: 0; min-height: 66px; border: 0; border-top: 3px solid transparent; border-radius: 0; padding: 8px 4px; transition: background-color var(--fx-switch-duration) var(--fx-switch-easing), color var(--fx-switch-duration) var(--fx-switch-easing); }
+.fx-tabbar button[aria-selected='true'] { background: var(--fx-accent-soft); color: var(--fx-accent); }
+.fx-tabbar button:hover { border-color: transparent; }
 .fx-tabbar span, .fx-tabbar small { display: block; white-space: nowrap; }
 .fx-tabbar span { font-size: clamp(10px, 2.5vw, 14px); font-weight: 700; }
 .fx-tabbar small { font-size: 10px; color: var(--fx-muted); }
@@ -121,5 +133,6 @@ body:has(.fx-switch-frame) { background: var(--bg); }
   .fx-app-header { padding: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .fx-screen-panel { transition: none; }
+  .fx-screen-panel, .fx-screen-panel[aria-hidden='false'] { transition: none; transform: none; }
+  .fx-tab-indicator, .fx-tabbar button { transition: none; }
 }
