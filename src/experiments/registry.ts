@@ -9,6 +9,12 @@ export interface ExperimentEntry {
 
 export const experiments: ExperimentEntry[] = [
   {
+    id: 'fx-screen-switch-lab',
+    title: 'FX Screen Switch — 画面切替ラボ',
+    description: 'メイン＋子画面3つをiframeで保持して滑らかに切替。EChartsのリアルタイムFX模擬レート、通貨・時間足・表示本数の変更と画面間連携を体験',
+    component: lazy(() => import('./fx-screen-switch-lab')),
+  },
+  {
     id: 'html-in-canvas-lab',
     title: 'HTML in Canvas Lab',
     description: 'HTMLをCanvasに直接描画。EChartsのリアルタイムチャート、回転する入力カード、粒子とHTMLの前後合成を比較する3つの実験',
