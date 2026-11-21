@@ -1,0 +1,45 @@
+lockfile_version: '1'
+apm_version: 0.36.1
+dependencies:
+- repo_url: _local/playwright-testing
+  name: playwright-testing
+  version: 0.1.1
+  package_type: apm_package
+  deployed_files:
+  - .agents/skills/playwright-testing
+  - .agents/skills/playwright-testing/SKILL.md
+  - .agents/skills/playwright-testing/references/evidence-template.md
+  deployed_file_hashes:
+    .agents/skills/playwright-testing/SKILL.md: sha256:4b01378671658e6b594bfb90073099a8e179b363a313f83c74efd5bce8a84545
+    .agents/skills/playwright-testing/references/evidence-template.md: sha256:1dbb28cf5a04828bd3552d83333d7bf26e9fec6990417e15f1d12b67162f930e
+  source: local
+  local_path: ./vendor/agent-packages/playwright-testing
+  content_hash: sha256:0b930a329b98bbf0a132c2083e5c9e69d46804ff6fac4ebf2ecf81855172b832
+deployments:
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/playwright-testing
+  runtime: null
+  scope: project
+  owners:
+  - ./vendor/agent-packages/playwright-testing
+  active_owner: ./vendor/agent-packages/playwright-testing
+  content_hash: null
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/playwright-testing/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - ./vendor/agent-packages/playwright-testing
+  active_owner: ./vendor/agent-packages/playwright-testing
+  content_hash: sha256:4b01378671658e6b594bfb90073099a8e179b363a313f83c74efd5bce8a84545
+- kind: project-relative
+  target: copilot
+  value: .agents/skills/playwright-testing/references/evidence-template.md
+  runtime: null
+  scope: project
+  owners:
+  - ./vendor/agent-packages/playwright-testing
+  active_owner: ./vendor/agent-packages/playwright-testing
+  content_hash: sha256:1dbb28cf5a04828bd3552d83333d7bf26e9fec6990417e15f1d12b67162f930e

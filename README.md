@@ -175,3 +175,7 @@ react-laboratory/
 Vite の `base` は `/react-laboratory/` に設定されているため、GitHub Pages のサブパスで正しく動作します。
 
 > **Note:** CandleCore Lab は private な `candle-core` に依存します。GitHub Pages の CI でビルドする場合は、Actions に private リポジトリ読取権限（または deploy key / PAT）が必要です。
+
+## AI開発用の共通Skill
+
+- [APMによるPlaywright試験Skillの導入・更新](docs/apm-playwright-skill.md)
