@@ -29,3 +29,7 @@ vendor/candle-core/src/
 vendor/candle-core/dist/
 vendor/candle-core/node_modules/
 vendor/candle-core/tsconfig*.json
+
+
+# APM dependencies
+apm_modules/

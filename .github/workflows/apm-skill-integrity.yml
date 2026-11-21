@@ -1,0 +1,38 @@
+name: APM skill integrity
+on:
+  pull_request:
+    paths:
+      - apm.yml
+      - apm.lock.yaml
+      - vendor/agent-packages/**
+      - .agents/skills/playwright-testing/**
+      - .github/workflows/apm-skill-integrity.yml
+  push:
+    branches: [main]
+    paths:
+      - apm.yml
+      - apm.lock.yaml
+      - vendor/agent-packages/**
+      - .agents/skills/playwright-testing/**
+      - .github/workflows/apm-skill-integrity.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install verified APM version
+        run: python -m pip install apm-cli==0.36.1
+      - name: Check committed deployment before restoring
+        run: apm audit --ci
+      - name: Restore exact locked package
+        run: apm install --frozen
+      - name: Check reproduced deployment
+        run: apm audit --ci
+      - name: Reject changes to tracked context
+        run: git diff --exit-code -- apm.yml apm.lock.yaml vendor/agent-packages .agents/skills/playwright-testing .gitignore

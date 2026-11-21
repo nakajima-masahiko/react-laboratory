@@ -1,0 +1,7 @@
+name: react-laboratory-agent-context
+version: 1.0.0
+targets: [copilot]
+dependencies:
+  apm:
+    - path: ./vendor/agent-packages/playwright-testing
+  mcp: []
