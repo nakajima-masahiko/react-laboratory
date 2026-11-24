@@ -1964,3 +1964,67 @@ body:has(.shiro-yado) {
     transition: none;
   }
 }
+
+/* Room 204: immersive camera mode with restrained, accessible controls. */
+.shiro-yado__stage[data-scene="room-204"] {
+  background: #e9e3da;
+  border-radius: 12px;
+}
+
+.shiro-yado__stage[data-scene="room-204"] .shiro-yado__canvas {
+  height: clamp(310px, 49vw, 510px);
+}
+
+.shiro-yado__room-view-switch {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  top: 12px;
+  left: 12px;
+  max-width: calc(100% - 24px);
+  padding: 4px;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 8px;
+  background: rgb(248 246 241 / 94%);
+  box-shadow: 0 4px 18px rgb(34 40 38 / 13%);
+  backdrop-filter: blur(8px);
+}
+
+.shiro-yado__room-view-switch button {
+  flex: 1 1 auto;
+  min-height: 38px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: #324f4c;
+  white-space: normal;
+  line-height: 1.3;
+}
+
+.shiro-yado__room-view-switch button.is-active {
+  background: #324f4c;
+  color: #fff;
+}
+
+.shiro-yado__room-view-switch button:focus-visible {
+  outline: 3px solid #54747b;
+  outline-offset: 2px;
+}
+
+@media (max-width: 440px) {
+  .shiro-yado__stage[data-scene="room-204"] .shiro-yado__canvas {
+    height: 340px;
+  }
+  .shiro-yado__room-view-switch {
+    top: 8px;
+    left: 8px;
+    max-width: calc(100% - 16px);
+  }
+  .shiro-yado__room-view-switch button {
+    min-height: 44px;
+    padding: 7px 10px;
+  }
+}
