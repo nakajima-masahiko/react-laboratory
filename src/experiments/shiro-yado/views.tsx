@@ -57,9 +57,9 @@ export function HomeView() {
 
   return (
     <div className="shiro-yado__stack shiro-yado__stack--home">
-      <div className="shiro-yado__concierge-anchor"><ConciergeGuide /></div>
-      <BookingWelcome />
       <WelcomeHome />
+      <BookingWelcome />
+      <div className="shiro-yado__concierge-anchor"><ConciergeGuide /></div>
       <DiningEntry />
       <StayControls showRoom />
       <section className="shiro-yado__section">
