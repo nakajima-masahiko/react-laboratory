@@ -1071,7 +1071,7 @@
   line-height: 1.5;
 }
 
-/* The concierge welcomes guests first, followed by ways to enjoy the stay. */
+/* Island welcome precedes booking choices and concierge guidance. */
 .shiro-yado__stack--home {
   gap: 14px;
 }
@@ -1767,3 +1767,200 @@ body:has(.shiro-yado) {
 .shiro-yado__shared-symbol { display: grid; place-items: center; aspect-ratio: 3 / 2; border-radius: var(--sy-radius); background: var(--sy-soft); color: var(--sy-accent); }
 .shiro-yado__shared-symbol svg { width: 56px; height: 56px; }
 @media (max-width: 700px) { .shiro-yado__shared-cards { grid-template-columns: 1fr; } }
+
+/* Island-first homepage: purposeful hierarchy, restrained motion, calm coastal accents.
+   Keep the 3D concierge and existing navigation functional; avoid global regressions. */
+.shiro-yado__stack--home {
+  --sy-island-ocean: #54747b;
+  --sy-island-pine: #324f4c;
+  --sy-island-sand: #e8ded0;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+.shiro-yado__stack--home > .shiro-yado__welcome {
+  gap: 0;
+}
+
+.shiro-yado__stack--home .shiro-yado__welcome-art {
+  border-radius: 14px 14px 0 0;
+  background: #e8ded0;
+}
+
+.shiro-yado__stack--home .shiro-yado__welcome-art img {
+  height: clamp(190px, 33vw, 390px);
+  object-position: center 57%;
+}
+
+.shiro-yado__stack--home .shiro-yado__welcome-art span {
+  bottom: .85rem;
+  left: 1rem;
+  background: rgb(247 245 239 / .94);
+  color: #324f4c;
+  border-radius: 3px;
+  font-size: .68rem;
+  letter-spacing: .09em;
+}
+
+.shiro-yado__stack--home .shiro-yado__welcome-copy {
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.25rem) 1.25rem;
+  background: var(--sy-elevated);
+}
+
+.shiro-yado__stack--home .shiro-yado__welcome-copy h2 {
+  margin: 0 0 .75rem;
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.55;
+  letter-spacing: .035em;
+}
+
+.shiro-yado__stack--home .shiro-yado__welcome-copy p {
+  max-width: 39rem;
+  line-height: 1.85;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__welcome-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .75rem;
+  padding: 0 clamp(1rem, 3vw, 2.25rem) clamp(1.25rem, 3vw, 2rem);
+  background: var(--sy-elevated);
+  border-radius: 0 0 14px 14px;
+}
+
+.shiro-yado__welcome-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .8rem;
+  min-width: 0;
+  min-height: 78px;
+  padding: 1rem 1.15rem !important;
+  text-align: start;
+  border: 1px solid var(--sy-island-pine) !important;
+  border-radius: 6px;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+
+.shiro-yado__welcome-action--primary {
+  background: var(--sy-island-pine) !important;
+  color: #fff !important;
+}
+
+.shiro-yado__welcome-action--primary:hover {
+  background: #42645e !important;
+}
+
+.shiro-yado__welcome-action--secondary {
+  background: transparent !important;
+  color: var(--sy-fg) !important;
+}
+
+.shiro-yado__welcome-action--secondary:hover {
+  background: var(--sy-soft) !important;
+}
+
+.shiro-yado__welcome-action-copy {
+  display: grid;
+  min-width: 0;
+  gap: .35rem;
+}
+
+.shiro-yado__welcome-action-copy small {
+  font-size: .74rem;
+  font-weight: 400;
+  opacity: .85;
+}
+
+.shiro-yado__welcome-action-copy strong {
+  font-size: 1rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.shiro-yado__welcome-action > svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.shiro-yado__welcome-experience-header {
+  padding-top: clamp(1.4rem, 3vw, 2.5rem);
+  display: grid;
+  gap: .25rem;
+}
+
+.shiro-yado__welcome-experience-header h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+  font-weight: 600;
+}
+
+.shiro-yado__welcome-experience-header p {
+  margin: 0;
+  font-size: .89rem;
+  line-height: 1.6;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__stack--home .shiro-yado__experiences {
+  margin-top: .9rem;
+  gap: .7rem;
+}
+
+.shiro-yado__stack--home .shiro-yado__experiences button {
+  background: transparent;
+  border-radius: 7px;
+  border-color: var(--sy-border);
+  min-height: 125px;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+
+.shiro-yado__stack--home .shiro-yado__experiences button:hover {
+  background: var(--sy-elevated);
+  border-color: var(--sy-island-ocean);
+}
+
+.shiro-yado__welcome-concierge-hint {
+  margin: 1.15rem 0 0;
+  padding-left: .9rem;
+  border-left: 2px solid var(--sy-island-ocean);
+  line-height: 1.7;
+  font-size: .86rem;
+  color: var(--sy-muted);
+}
+
+.shiro-yado__stack--home > .shiro-yado__booking-welcome {
+  border-radius: 7px;
+  border-color: var(--sy-border);
+  background: var(--sy-elevated);
+}
+
+.shiro-yado__stack--home .shiro-yado__concierge-anchor {
+  isolation: isolate;
+}
+
+.shiro-yado__stack--home .shiro-yado__concierge-content {
+  background: var(--sy-elevated);
+}
+
+@media (max-width: 560px) {
+  .shiro-yado__welcome-actions {
+    grid-template-columns: 1fr;
+    gap: .6rem;
+  }
+  .shiro-yado__welcome-action {
+    min-height: 66px;
+    padding: .85rem 1rem !important;
+  }
+  .shiro-yado__stack--home .shiro-yado__experiences button {
+    min-height: 84px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shiro-yado__welcome-action,
+  .shiro-yado__stack--home .shiro-yado__experiences button {
+    transition: none;
+  }
+}

@@ -2,6 +2,29 @@ import { expect, test } from '@playwright/test';
 
 test.use({ launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } });
 
+
+test('island-first home offers distinct pre-stay and during-stay journeys', async ({ page }) => {
+  await page.goto('#/experiments/shiro-yado');
+  const welcome = page.locator('.shiro-yado__welcome');
+  await expect(welcome.getByRole('heading', { name: 'ようこそ、島のひと休みへ。' })).toBeVisible();
+  await expect(welcome.getByRole('button', { name: /お部屋と宿泊案内/ })).toBeVisible();
+  await expect(welcome.getByRole('button', { name: /館内の道案内/ })).toBeVisible();
+  await expect(page.getByTestId('concierge-model')).toBeAttached();
+
+  await welcome.getByRole('button', { name: /お部屋と宿泊案内/ }).click();
+  await expect(page).toHaveURL(/\/experiments\/shiro-yado\/rooms$/);
+  await page.getByRole('button', { name: 'ホーム', exact: true }).click();
+
+  await page.locator('.shiro-yado__welcome').getByRole('button', { name: /館内の道案内/ }).click();
+  await expect(page).toHaveURL(/\/experiments\/shiro-yado\/dest$/);
+  await page.getByRole('button', { name: 'ホーム', exact: true }).click();
+
+  await page.getByRole('combobox', { name: '言語', exact: true }).selectOption('en');
+  await expect(page.locator('.shiro-yado__welcome').getByRole('button', { name: /Rooms and stays/ })).toBeVisible();
+  await expect(page.locator('.shiro-yado__welcome').getByRole('button', { name: /Find your way inside/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 for (const variant of [
   { width: 1280, height: 960, colorScheme: 'light' as const },
   { width: 320, height: 740, colorScheme: 'dark' as const },
