@@ -45,21 +45,6 @@ function DoubleRoom() {
   );
 }
 
-function CornerTwin() {
-  return (
-    <group>
-      <RoomShell width={6.6} depth={5.4} windows="back-right" />
-      <Rug position={[0, 0, 0.3]} args={[3.6, 2.4]} />
-      <Bed position={[-1.45, 0, -0.55]} twin />
-      <Bed position={[0.7, 0, -0.55]} twin />
-      <Sofa position={[-2.1, 0, 1.7]} />
-      <Chair position={[2.3, 0, 0.6]} rotation={[0, -0.6, 0]} />
-      <Plant position={[2.7, 0, -2.0]} />
-      <Plant position={[-2.7, 0, -2.0]} />
-    </group>
-  );
-}
-
 function FamilyRoom() {
   return (
     <group>
