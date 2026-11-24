@@ -14,6 +14,7 @@ import {
 
 import type { PlaceId } from '../hotel-data';
 import { ImmersiveBathInterior } from './BathInterior';
+import { Room204Interior } from './Room204Interior';
 
 function TwinRoom({ deluxe = false }: { deluxe?: boolean }) {
   return (
@@ -177,7 +178,7 @@ export function PlaceInterior({ id }: { id: PlaceId }) {
     case 'room-203':
       return <TwinRoom deluxe />;
     case 'room-204':
-      return <CornerTwin />;
+      return <Room204Interior />;
     case 'room-205':
       return <FamilyRoom />;
     case 'banquet':
