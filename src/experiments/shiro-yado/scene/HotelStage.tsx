@@ -48,13 +48,14 @@ function getCamera(scene: SceneId, view: RoomView): Cam {
     : CAM[scene] ?? CAM.lobby;
 }
 
-function Lights() {
+function Lights({ scene }: { scene: SceneId }) {
+  const detailedRoom = scene === 'room-204';
   return (
     <>
-      <ambientLight intensity={0.78} />
-      <hemisphereLight args={['#ffffff', '#d9d1c4', 0.55]} />
-      <directionalLight position={[7, 12, 6]} intensity={1.15} castShadow />
-      <directionalLight position={[-6, 6, -4]} intensity={0.25} />
+      <ambientLight intensity={detailedRoom ? 0.36 : 0.78} />
+      <hemisphereLight args={['#ffffff', '#d9d1c4', detailedRoom ? 0.42 : 0.55]} />
+      <directionalLight position={[7, 12, 6]} intensity={detailedRoom ? 0.56 : 1.15} castShadow />
+      <directionalLight position={[-6, 6, -4]} intensity={detailedRoom ? 0.15 : 0.25} />
     </>
   );
 }
@@ -135,7 +136,7 @@ export function HotelStage({
     >
       <color attach="background" args={[background]} />
       {scene === 'bath' ? <fog attach="fog" args={['#dce7e2', 10, 22]} /> : null}
-      <Lights />
+      <Lights scene={scene} />
       <CameraRig scene={scene} view={view} />
       <Suspense fallback={null}><SceneBody scene={scene} /></Suspense>
       <ContactShadows
