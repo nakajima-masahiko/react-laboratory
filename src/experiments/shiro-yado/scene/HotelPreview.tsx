@@ -24,13 +24,15 @@ type StageProps = {
 };
 
 const ROOM_VIEW_LABELS = {
-  ja: { inside: '室内から見る', overview: '全体を見る', label: '204号室の視点' },
-  en: { inside: 'Inside view', overview: 'Overview', label: 'Room 204 camera view' },
-  fr: { inside: 'Vue intérieure', overview: 'Vue générale', label: 'Vue de la chambre 204' },
-  es: { inside: 'Vista interior', overview: 'Vista general', label: 'Vista de la habitación 204' },
-  zh: { inside: '室内视角', overview: '全景视角', label: '204号房视角' },
-  ko: { inside: '실내 시점', overview: '전체 보기', label: '204호 객실 시점' },
+  ja: { inside: '室内から見る', overview: '全体を見る', label: '客室の視点' },
+  en: { inside: 'Inside view', overview: 'Overview', label: 'Guest room camera view' },
+  fr: { inside: 'Vue intérieure', overview: 'Vue générale', label: 'Vue de la chambre' },
+  es: { inside: 'Vista interior', overview: 'Vista general', label: 'Vista de la habitación' },
+  zh: { inside: '室内视角', overview: '全景视角', label: '客房视角' },
+  ko: { inside: '실내 시점', overview: '전체 보기', label: '객실 시점' },
 } as const;
+
+const IMMERSIVE_ROOMS = new Set<SceneId>(['room-204', 'room-205']);
 
 const BATH_FALLBACK_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.svg`;
 
@@ -120,7 +122,7 @@ export function HotelPreview({
           <SceneErrorBoundary key={`${scene}-${attempt}`} fallback={fallback}>
             <Stage
               scene={scene}
-              view={scene === 'room-204' ? roomView : 'overview'}
+              view={IMMERSIVE_ROOMS.has(scene) ? roomView : 'overview'}
               autoRotate={autoRotate && !reduced && visible}
               animate={!reduced && visible}
               fallback={fallback}
@@ -133,7 +135,7 @@ export function HotelPreview({
           </div>
         )}
       </div>
-      {scene === 'room-204' && (
+      {IMMERSIVE_ROOMS.has(scene) && (
         <div className="shiro-yado__room-view-switch" role="group" aria-label={ROOM_VIEW_LABELS[locale].label}>
           {(['inside', 'overview'] as const).map((view) => (
             <button key={view} type="button" aria-pressed={roomView === view}
@@ -144,7 +146,7 @@ export function HotelPreview({
           ))}
         </div>
       )}
-      {resolvedHint && !(scene === 'room-204' && roomView === 'inside') ? <p className="shiro-yado__hint">{resolvedHint}</p> : null}
+      {resolvedHint && !(IMMERSIVE_ROOMS.has(scene) && roomView === 'inside') ? <p className="shiro-yado__hint">{resolvedHint}</p> : null}
     </div>
   );
 }
