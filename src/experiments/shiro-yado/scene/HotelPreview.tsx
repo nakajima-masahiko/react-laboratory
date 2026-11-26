@@ -32,6 +32,8 @@ const ROOM_VIEW_LABELS = {
   ko: { inside: '실내 시점', overview: '전체 보기', label: '204호 객실 시점' },
 } as const;
 
+const IMMERSIVE_ROOMS = new Set<SceneId>(['room-204', 'room-205']);
+
 const BATH_FALLBACK_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.svg`;
 
 class SceneErrorBoundary extends Component<
@@ -120,7 +122,7 @@ export function HotelPreview({
           <SceneErrorBoundary key={`${scene}-${attempt}`} fallback={fallback}>
             <Stage
               scene={scene}
-              view={scene === 'room-204' ? roomView : 'overview'}
+              view={IMMERSIVE_ROOMS.has(scene) ? roomView : 'overview'}
               autoRotate={autoRotate && !reduced && visible}
               animate={!reduced && visible}
               fallback={fallback}
@@ -133,8 +135,8 @@ export function HotelPreview({
           </div>
         )}
       </div>
-      {scene === 'room-204' && (
-        <div className="shiro-yado__room-view-switch" role="group" aria-label={ROOM_VIEW_LABELS[locale].label}>
+      {IMMERSIVE_ROOMS.has(scene) && (
+        <div className="shiro-yado__room-view-switch" role="group" aria-label={scene === 'room-205' ? ROOM_VIEW_LABELS[locale].label.replace('204', '205') : ROOM_VIEW_LABELS[locale].label}>
           {(['inside', 'overview'] as const).map((view) => (
             <button key={view} type="button" aria-pressed={roomView === view}
               className={roomView === view ? 'is-active' : undefined}
@@ -144,7 +146,7 @@ export function HotelPreview({
           ))}
         </div>
       )}
-      {resolvedHint && !(scene === 'room-204' && roomView === 'inside') ? <p className="shiro-yado__hint">{resolvedHint}</p> : null}
+      {resolvedHint && !(IMMERSIVE_ROOMS.has(scene) && roomView === 'inside') ? <p className="shiro-yado__hint">{resolvedHint}</p> : null}
     </div>
   );
 }

@@ -35,6 +35,13 @@ const CAM: Record<string, Cam> = {
   restroom: { position: [4.0, 2.8, 4.6], target: [0, 0.5, 0], min: 3.2, max: 8 },
 };
 
+const ROOM_205_INSIDE: Cam = {
+  position: [0.15, 1.62, 3.65],
+  target: [0.15, 1.15, -0.5],
+  min: 2.1,
+  max: 9.2,
+};
+
 const ROOM_204_INSIDE: Cam = {
   position: [0.05, 1.65, 3.3],
   target: [0, 1.22, -0.65],
@@ -43,13 +50,13 @@ const ROOM_204_INSIDE: Cam = {
 };
 
 function getCamera(scene: SceneId, view: RoomView): Cam {
-  return scene === 'room-204' && view === 'inside'
-    ? ROOM_204_INSIDE
-    : CAM[scene] ?? CAM.lobby;
+  if (view === 'inside' && scene === 'room-204') return ROOM_204_INSIDE;
+  if (view === 'inside' && scene === 'room-205') return ROOM_205_INSIDE;
+  return CAM[scene] ?? CAM.lobby;
 }
 
 function Lights({ scene }: { scene: SceneId }) {
-  const detailedRoom = scene === 'room-204';
+  const detailedRoom = scene === 'room-204' || scene === 'room-205';
   return (
     <>
       <ambientLight intensity={detailedRoom ? 0.36 : 0.78} />
