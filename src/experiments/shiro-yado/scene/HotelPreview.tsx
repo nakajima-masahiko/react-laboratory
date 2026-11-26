@@ -16,11 +16,21 @@ import type { SceneId } from './types';
 
 type StageProps = {
   scene: SceneId;
+  view?: 'inside' | 'overview';
   autoRotate?: boolean;
   animate?: boolean;
   fallback?: ReactNode;
   onUnavailable?: () => void;
 };
+
+const ROOM_VIEW_LABELS = {
+  ja: { inside: '室内から見る', overview: '全体を見る', label: '204号室の視点' },
+  en: { inside: 'Inside view', overview: 'Overview', label: 'Room 204 camera view' },
+  fr: { inside: 'Vue intérieure', overview: 'Vue générale', label: 'Vue de la chambre 204' },
+  es: { inside: 'Vista interior', overview: 'Vista general', label: 'Vista de la habitación 204' },
+  zh: { inside: '室内视角', overview: '全景视角', label: '204号房视角' },
+  ko: { inside: '실내 시점', overview: '전체 보기', label: '204호 객실 시점' },
+} as const;
 
 const BATH_FALLBACK_SRC = `${import.meta.env.BASE_URL}shiro-yado/bath-fuji-mural.svg`;
 
@@ -59,6 +69,7 @@ export function HotelPreview({
   const { ref, visible, reduced } = useSceneActivity();
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [roomView, setRoomView] = useState<'inside' | 'overview'>('inside');
 
   useEffect(() => {
     let live = true;
@@ -109,6 +120,7 @@ export function HotelPreview({
           <SceneErrorBoundary key={`${scene}-${attempt}`} fallback={fallback}>
             <Stage
               scene={scene}
+              view={scene === 'room-204' ? roomView : 'overview'}
               autoRotate={autoRotate && !reduced && visible}
               animate={!reduced && visible}
               fallback={fallback}
@@ -121,7 +133,18 @@ export function HotelPreview({
           </div>
         )}
       </div>
-      {resolvedHint ? <p className="shiro-yado__hint">{resolvedHint}</p> : null}
+      {scene === 'room-204' && (
+        <div className="shiro-yado__room-view-switch" role="group" aria-label={ROOM_VIEW_LABELS[locale].label}>
+          {(['inside', 'overview'] as const).map((view) => (
+            <button key={view} type="button" aria-pressed={roomView === view}
+              className={roomView === view ? 'is-active' : undefined}
+              onClick={() => setRoomView(view)}>
+              {ROOM_VIEW_LABELS[locale][view]}
+            </button>
+          ))}
+        </div>
+      )}
+      {resolvedHint && !(scene === 'room-204' && roomView === 'inside') ? <p className="shiro-yado__hint">{resolvedHint}</p> : null}
     </div>
   );
 }

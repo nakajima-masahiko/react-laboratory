@@ -14,6 +14,7 @@ import {
 
 import type { PlaceId } from '../hotel-data';
 import { ImmersiveBathInterior } from './BathInterior';
+import { Room204Interior } from './Room204Interior';
 
 function TwinRoom({ deluxe = false }: { deluxe?: boolean }) {
   return (
@@ -40,21 +41,6 @@ function DoubleRoom() {
       <Desk position={[1.9, 0, 1.35]} rotation={[0, -Math.PI / 2, 0]} />
       <Chair position={[1.35, 0, 1.35]} rotation={[0, Math.PI / 2, 0]} />
       <Plant position={[-2.1, 0, -1.7]} />
-    </group>
-  );
-}
-
-function CornerTwin() {
-  return (
-    <group>
-      <RoomShell width={6.6} depth={5.4} windows="back-right" />
-      <Rug position={[0, 0, 0.3]} args={[3.6, 2.4]} />
-      <Bed position={[-1.45, 0, -0.55]} twin />
-      <Bed position={[0.7, 0, -0.55]} twin />
-      <Sofa position={[-2.1, 0, 1.7]} />
-      <Chair position={[2.3, 0, 0.6]} rotation={[0, -0.6, 0]} />
-      <Plant position={[2.7, 0, -2.0]} />
-      <Plant position={[-2.7, 0, -2.0]} />
     </group>
   );
 }
@@ -177,7 +163,7 @@ export function PlaceInterior({ id }: { id: PlaceId }) {
     case 'room-203':
       return <TwinRoom deluxe />;
     case 'room-204':
-      return <CornerTwin />;
+      return <Room204Interior />;
     case 'room-205':
       return <FamilyRoom />;
     case 'banquet':

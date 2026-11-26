@@ -11,6 +11,8 @@ import {
 import type { SceneId } from './types';
 import { isPlaceId } from '../hotel-data';
 
+export type RoomView = 'inside' | 'overview';
+
 type Cam = {
   position: [number, number, number];
   target: [number, number, number];
@@ -33,19 +35,33 @@ const CAM: Record<string, Cam> = {
   restroom: { position: [4.0, 2.8, 4.6], target: [0, 0.5, 0], min: 3.2, max: 8 },
 };
 
-function Lights() {
+const ROOM_204_INSIDE: Cam = {
+  position: [0.05, 1.65, 3.3],
+  target: [0, 1.22, -0.65],
+  min: 1.8,
+  max: 8.5,
+};
+
+function getCamera(scene: SceneId, view: RoomView): Cam {
+  return scene === 'room-204' && view === 'inside'
+    ? ROOM_204_INSIDE
+    : CAM[scene] ?? CAM.lobby;
+}
+
+function Lights({ scene }: { scene: SceneId }) {
+  const detailedRoom = scene === 'room-204';
   return (
     <>
-      <ambientLight intensity={0.78} />
-      <hemisphereLight args={['#ffffff', '#d9d1c4', 0.55]} />
-      <directionalLight position={[7, 12, 6]} intensity={1.15} castShadow />
-      <directionalLight position={[-6, 6, -4]} intensity={0.25} />
+      <ambientLight intensity={detailedRoom ? 0.36 : 0.78} />
+      <hemisphereLight args={['#ffffff', '#d9d1c4', detailedRoom ? 0.42 : 0.55]} />
+      <directionalLight position={[7, 12, 6]} intensity={detailedRoom ? 0.56 : 1.15} castShadow />
+      <directionalLight position={[-6, 6, -4]} intensity={detailedRoom ? 0.15 : 0.25} />
     </>
   );
 }
 
-function CameraRig({ scene }: { scene: SceneId }) {
-  const cam = CAM[scene] ?? CAM.lobby;
+function CameraRig({ scene, view }: { scene: SceneId; view: RoomView }) {
+  const cam = getCamera(scene, view);
   const camera = useThree((s) => s.camera);
   const invalidate = useThree((s) => s.invalidate);
   const controls = useThree((s) => s.controls);
@@ -61,7 +77,7 @@ function CameraRig({ scene }: { scene: SceneId }) {
       c.update();
     }
     invalidate();
-  }, [camera, cam, controls, invalidate, scene]);
+  }, [camera, cam, controls, invalidate, scene, view]);
 
   return null;
 }
@@ -76,18 +92,20 @@ function SceneBody({ scene }: { scene: SceneId }) {
 
 export function HotelStage({
   scene,
+  view = 'overview',
   autoRotate = false,
   animate = true,
   fallback,
   onUnavailable,
 }: {
   scene: SceneId;
+  view?: RoomView;
   autoRotate?: boolean;
   animate?: boolean;
   fallback?: ReactNode;
   onUnavailable?: () => void;
 }) {
-  const cam = CAM[scene] ?? CAM.lobby;
+  const cam = getCamera(scene, view);
   const background = scene === 'bath' ? '#172321' : '#f3f0ea';
 
   return (
@@ -118,8 +136,8 @@ export function HotelStage({
     >
       <color attach="background" args={[background]} />
       {scene === 'bath' ? <fog attach="fog" args={['#dce7e2', 10, 22]} /> : null}
-      <Lights />
-      <CameraRig scene={scene} />
+      <Lights scene={scene} />
+      <CameraRig scene={scene} view={view} />
       <Suspense fallback={null}><SceneBody scene={scene} /></Suspense>
       <ContactShadows
         position={[0, 0.02, 0]}
