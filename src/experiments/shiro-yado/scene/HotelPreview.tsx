@@ -24,12 +24,12 @@ type StageProps = {
 };
 
 const ROOM_VIEW_LABELS = {
-  ja: { inside: '室内から見る', overview: '全体を見る', label: '客室の視点' },
-  en: { inside: 'Inside view', overview: 'Overview', label: 'Guest room camera view' },
-  fr: { inside: 'Vue intérieure', overview: 'Vue générale', label: 'Vue de la chambre' },
-  es: { inside: 'Vista interior', overview: 'Vista general', label: 'Vista de la habitación' },
-  zh: { inside: '室内视角', overview: '全景视角', label: '客房视角' },
-  ko: { inside: '실내 시점', overview: '전체 보기', label: '객실 시점' },
+  ja: { inside: '室内から見る', overview: '全体を見る', label: '204号室の視点' },
+  en: { inside: 'Inside view', overview: 'Overview', label: 'Room 204 camera view' },
+  fr: { inside: 'Vue intérieure', overview: 'Vue générale', label: 'Vue de la chambre 204' },
+  es: { inside: 'Vista interior', overview: 'Vista general', label: 'Vista de la habitación 204' },
+  zh: { inside: '室内视角', overview: '全景视角', label: '204号房视角' },
+  ko: { inside: '실내 시점', overview: '전체 보기', label: '204호 객실 시점' },
 } as const;
 
 const IMMERSIVE_ROOMS = new Set<SceneId>(['room-204', 'room-205']);
@@ -136,7 +136,7 @@ export function HotelPreview({
         )}
       </div>
       {IMMERSIVE_ROOMS.has(scene) && (
-        <div className="shiro-yado__room-view-switch" role="group" aria-label={ROOM_VIEW_LABELS[locale].label}>
+        <div className="shiro-yado__room-view-switch" role="group" aria-label={scene === 'room-205' ? ROOM_VIEW_LABELS[locale].label.replace('204', '205') : ROOM_VIEW_LABELS[locale].label}>
           {(['inside', 'overview'] as const).map((view) => (
             <button key={view} type="button" aria-pressed={roomView === view}
               className={roomView === view ? 'is-active' : undefined}
