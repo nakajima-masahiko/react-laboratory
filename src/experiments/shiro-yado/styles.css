@@ -1966,12 +1966,12 @@ body:has(.shiro-yado) {
 }
 
 /* Room 204: immersive camera mode with restrained, accessible controls. */
-.shiro-yado__stage[data-scene="room-204"] {
+:is(.shiro-yado__stage[data-scene="room-204"], .shiro-yado__stage[data-scene="room-205"]) {
   background: #e9e3da;
   border-radius: 12px;
 }
 
-.shiro-yado__stage[data-scene="room-204"] .shiro-yado__canvas {
+:is(.shiro-yado__stage[data-scene="room-204"], .shiro-yado__stage[data-scene="room-205"]) .shiro-yado__canvas {
   height: clamp(310px, 49vw, 510px);
 }
 
@@ -2015,7 +2015,7 @@ body:has(.shiro-yado) {
 }
 
 @media (max-width: 440px) {
-  .shiro-yado__stage[data-scene="room-204"] .shiro-yado__canvas {
+  :is(.shiro-yado__stage[data-scene="room-204"], .shiro-yado__stage[data-scene="room-205"]) .shiro-yado__canvas {
     height: 340px;
   }
   .shiro-yado__room-view-switch {
